@@ -24,7 +24,7 @@
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@300;400&family=Hanken+Grotesk:wght@400;500&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600&family=Playfair+Display:ital,wght@0,400;0,500;1,400&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@300&family=Hanken+Grotesk:wght@400;500&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600&family=Playfair+Display:ital,wght@0,400;0,500;1,400&display=swap" rel="stylesheet">
   <link rel="preload" as="image" href="../assets/video/scrolltide/hero-aethera-poster.jpg" fetchpriority="high">
   <link rel="stylesheet" href="style.css">
 
@@ -116,7 +116,7 @@
     <!-- HERO (Aethera) -->
     <section class="hero" id="top" aria-labelledby="hero-titulo">
       <div class="hero__media" aria-hidden="true">
-        <video class="hero__video" autoplay muted loop playsinline preload="metadata" poster="../assets/video/scrolltide/hero-aethera-poster.jpg" data-src-720="../assets/video/scrolltide/hero-aethera-720.mp4" data-src-1280="../assets/video/scrolltide/hero-aethera.mp4">
+        <video class="hero__video" muted loop playsinline preload="none" poster="../assets/video/scrolltide/hero-aethera-poster.jpg" data-src-720="../assets/video/scrolltide/hero-aethera-720.mp4" data-src-1280="../assets/video/scrolltide/hero-aethera.mp4">
           <source src="../assets/video/scrolltide/hero-aethera.mp4" type="video/mp4">
         </video>
         <div class="hero__scrim"></div>
@@ -125,16 +125,12 @@
       <div class="hero__body shell">
         <h1 id="hero-titulo" class="hero__title">Um espaço seguro para<br> olhar para o que importa.</h1>
         <p class="hero__sub">Psicoterapia com base na Terapia de Aceitação e Compromisso (ACT), para você lidar com a ansiedade, as cobranças e as decisões difíceis sem se perder de quem você é.</p>
-        <a class="btn hero__cta" href="https://wa.me/5551992597638?text=Oi%20L%C3%ADvia!%20Gostaria%20de%20saber%20sobre%20o%20atendimento%20psicol%C3%B3gico" target="_blank" rel="noopener">Quero agendar uma conversa</a>
+        <a class="btn hero__cta" href="https://wa.me/5551992597638?text=Oi%20L%C3%ADvia!%20Gostaria%20de%20saber%20sobre%20o%20atendimento%20psicol%C3%B3gico" target="_blank" rel="noopener"><svg aria-hidden="true"><use href="#i-whats"/></svg>Quero agendar uma conversa</a>
       </div>
 
       <div class="rating shell">
         <span class="rating__count">Lívia Oliveira · Psicóloga clínica · CRP 07/18713</span>
-        <ul class="rating__stars" aria-hidden="true">
-          <li><svg width="13" height="13" viewBox="0 0 16 16" fill="none"><path d="m4.2 8.3 2.5 2.5 5.1-5.4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></li>
-          <li><svg width="13" height="13" viewBox="0 0 16 16" fill="none"><rect x="2" y="3" width="12" height="8" rx="1.4" stroke="currentColor" stroke-width="1.5"/><path d="M6 13.6h4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></li>
-          <li><svg width="13" height="13" viewBox="0 0 16 16" fill="currentColor"><path d="M13.6 2.4C8 2.2 3.4 4.6 3.4 9.4c0 1.5.6 2.8 1.6 3.7.9-2.6 2.8-4.7 5.4-5.9-2.2 1.6-3.7 3.7-4.4 6.3.6.2 1.2.3 1.8.3 4.2 0 6-4.4 5.8-11.4Z"/></svg></li>
-        </ul>
+        <span class="rating__sep" aria-hidden="true">·</span>
         <span class="rating__score">Atendimento online para adultos · Abordagem ACT</span>
       </div>
     </section>
@@ -229,20 +225,24 @@
             <p class="step__texto">Sessões online semanais, com sigilo garantido pelo Código de Ética.</p>
           </li>
         </ol>
+        <div class="trilho-cta reveal">
+          <a class="btn" href="https://wa.me/5551992597638?text=Oi%20L%C3%ADvia!%20Gostaria%20de%20saber%20sobre%20o%20atendimento%20psicol%C3%B3gico" target="_blank" rel="noopener"><svg aria-hidden="true"><use href="#i-whats"/></svg> Quero agendar uma conversa</a>
+        </div>
       </div>
     </section>
 
     <!-- SOBRE MIM -->
     <section class="secao sobre" id="sobre" aria-labelledby="sobre-titulo">
       <div class="wrap sobre-grid">
-        <div class="foto reveal">
-          <img src="assets/livia-consultorio.jpg" alt="Lívia Oliveira em sua poltrona no consultório" width="1050" height="1400" loading="lazy" decoding="async">
+        <div class="foto">
+          <img src="assets/livia-consultorio.jpg" alt="Lívia Oliveira em sua poltrona no consultório" width="1050" height="1400" loading="eager" decoding="async">
         </div>
         <div>
           <span class="sobretitulo reveal">Sobre mim</span>
           <h2 id="sobre-titulo" class="reveal">Prazer, sou <em>Lívia.</em></h2>
           <p class="lead reveal">Sou Lívia Oliveira, psicóloga clínica (CRP 07/18713) há mais de 15 anos, com formação e prática em ACT. Atendo adultos online, com escuta cuidadosa e um trabalho que respeita o seu tempo.</p>
           <p class="nota reveal">Atendimentos sujeitos à disponibilidade de agenda. Se não houver horário no momento, você entra na lista de espera e é avisada assim que abrir uma vaga.</p>
+          <a class="btn reveal" href="https://wa.me/5551992597638?text=Oi%20L%C3%ADvia!%20Gostaria%20de%20saber%20sobre%20o%20atendimento%20psicol%C3%B3gico" target="_blank" rel="noopener"><svg aria-hidden="true"><use href="#i-whats"/></svg> Quero agendar uma conversa</a>
         </div>
       </div>
     </section>
