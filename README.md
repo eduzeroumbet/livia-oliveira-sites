@@ -11,6 +11,7 @@ redireciona automaticamente para o domínio. `robots.txt` aponta para o `sitemap
 |---|---|---|
 | `index.html` | Bio do Instagram | Página de links: curso, consultoria, terapia, WhatsApp da Thaís e Instagram |
 | `curso/index.html` | Psicólogas | Página de vendas do Carreira com Sentido (checkout Hotmart) |
+| `curso/versao-b/index.html` | Psicólogas | Versão B do curso para teste (https://liviaoliveira.me/curso/versao-b/): mesma página, com o hero "Fios que se organizam" (canvas em `curso/versao-b/hero-fios.js` e `hero-fios.css`) no lugar do vídeo da árvore. `noindex`, canonical para `/curso/` e fora do sitemap |
 | `consultoria/index.html` | Psicólogas | Inscrição na Consultoria 1:1 (formulário que envia ao Google Forms) |
 | `terapia/index.html` | Pacientes adultos | Atendimento psicológico, lista de interesse (Google Forms) e indicação pelo WhatsApp |
 

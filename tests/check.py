@@ -9,7 +9,7 @@ from pathlib import Path
 from urllib.parse import unquote, urlsplit
 
 ROOT = Path(__file__).resolve().parent.parent
-PAGES = ["index.html", "curso/index.html", "curso/b/index.html", "consultoria/index.html", "terapia/index.html", "terapia/b/index.html"]
+PAGES = ["index.html", "curso/index.html", "curso/b/index.html", "curso/versao-b/index.html", "consultoria/index.html", "terapia/index.html", "terapia/b/index.html"]
 EXTERNAL = ("http://", "https://", "mailto:", "tel:", "data:", "javascript:", "#")
 
 ENTRIES = {
@@ -31,6 +31,8 @@ EXTRAS = (
     "assets/js/site.js",
     "curso/style.css",
     "curso/script.js",
+    "curso/versao-b/hero-fios.css",
+    "curso/versao-b/hero-fios.js",
     "terapia/style.css",
     "terapia/script.js",
 )
@@ -98,8 +100,15 @@ def check_page(rel):
     if rel == "curso/b/index.html" and parser.checkouts == 0:
         erros.append(f"{rel}: nenhum botão class=\"checkout\" apontando para o Hotmart")
 
-    if rel == "curso/index.html" and CHECKOUT not in html:
+    if rel in ("curso/index.html", "curso/versao-b/index.html") and CHECKOUT not in html:
         erros.append(f"{rel}: sem link para o checkout Hotmart")
+    if rel == "curso/versao-b/index.html":
+        if '<meta name="robots" content="noindex, follow">' not in html:
+            erros.append(f"{rel}: sem noindex (é variação de teste)")
+        if '<link rel="canonical" href="https://liviaoliveira.me/curso/">' not in html:
+            erros.append(f"{rel}: canonical deve apontar para https://{DOMINIO}/curso/")
+        if "versao-b" in (ROOT / "sitemap.xml").read_text(encoding="utf-8"):
+            erros.append(f"{rel}: não deve estar no sitemap.xml")
     if rel.startswith("terapia/") and "R$" in html:
         erros.append(f"{rel}: contém preço (R$)")
     if rel == "terapia/b/index.html":
