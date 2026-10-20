@@ -465,7 +465,7 @@ body.tem-barra .whats { bottom: calc(var(--barra-h) + 16px); }
   .hero-sub { font-size: 1.125rem; margin: 22px 0 28px; }
   .hero-preco { font-size: 1rem; }
   .hero-media img { object-position: 50% 82%; }
-  .hero-tinta { background: linear-gradient(90deg, rgba(59, 31, 43, .68) 0%, rgba(59, 31, 43, .6) 32%, rgba(59, 31, 43, .25) 52%, rgba(59, 31, 43, 0) 66%); }
+  .hero-tinta { background: linear-gradient(90deg, rgba(59, 31, 43, .74) 0%, rgba(59, 31, 43, .68) 44%, rgba(59, 31, 43, .42) 62%, rgba(59, 31, 43, .12) 76%, rgba(59, 31, 43, 0) 86%); }
   .trilho li { padding: 14px 18px; font-size: .92rem; }
   .video-grid { grid-template-columns: 380px 1fr; gap: 72px; }
   .diag-grid { grid-template-columns: 1.1fr .9fr; gap: 72px; }
