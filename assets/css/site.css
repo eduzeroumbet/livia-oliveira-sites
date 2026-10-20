@@ -444,7 +444,7 @@ body.has-sticky .wa-float { bottom: calc(var(--sticky-h, 72px) + 12px); }
 .link.primary small { color: #f6dbe3; }
 .link.primary .ic { background: rgba(255, 255, 255, .15); color: var(--white); }
 .link .arrow { margin-left: auto; color: currentColor; opacity: .6; }
-.bio-footer { margin-top: 34px; font-size: 13px; color: var(--muted); }
+.bio-footer { margin-top: 34px; font-size: 14px; color: var(--muted); }
 
 /* ========== Página de terapia (tom suave) ========== */
 .page-terapia { background: var(--cream); }
@@ -487,6 +487,8 @@ body.has-sticky .wa-float { bottom: calc(var(--sticky-h, 72px) + 12px); }
 @media (min-width: 640px) {
   .brand { font-size: 19px; }
   .brand span { font-size: 11px; letter-spacing: .12em; }
+  /* consultoria: rótulo da marca e microcópias com no mínimo 12-13px (curso/b e terapia/b ficam como estão) */
+  .page-consultoria .brand span { font-size: 12px; }
   .site-header .btn { padding: 9px 18px; font-size: 15px; }
   .proofbar ul { grid-template-columns: repeat(4, 1fr); }
   .cards, .tests, .mods { grid-template-columns: repeat(2, 1fr); }

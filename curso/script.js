@@ -149,64 +149,25 @@
     contadores.forEach(function (el) { ioc.observe(el); });
   }
 
-  /* Depoimentos: carrossel com swipe e scroll-snap (CSS), setas anterior/próximo e pontinhos indicadores */
-  var marquee = document.querySelector(".marquee");
-  if (marquee) {
-    var originais = Array.prototype.slice.call(marquee.querySelectorAll(".depo"));
-    var passoDepo = function () {
-      return originais.length > 1 ? originais[1].offsetLeft - originais[0].offsetLeft : 1;
+  /* Vídeo da história: com JS, poster limpo e botão de play central; o clique esconde o botão,
+     liga os controles e toca com som. Sem JS o botão fica hidden e valem os controles nativos */
+  var historia = document.querySelector(".video-tela video");
+  var play = document.querySelector(".video-play");
+  if (historia && play) {
+    historia.controls = false;
+    play.hidden = false;
+    var assiste = function () {
+      play.hidden = true;
+      historia.controls = true;
     };
-    /* As setas andam um card a partir da posição atual (no desktop o fim chega antes do último card
-       encostar na margem, então ir pelo índice do pontinho travaria a seta anterior) */
-    var seta = function (classe, rotulo, delta) {
-      var b = document.createElement("button");
-      b.type = "button";
-      b.className = "depo-seta " + classe;
-      b.setAttribute("aria-label", rotulo);
-      b.innerHTML = '<svg aria-hidden="true"><use href="#i-seta"/></svg>';
-      b.addEventListener("click", function () {
-        var passo = passoDepo();
-        var alvo = (Math.round(marquee.scrollLeft / passo) + delta) * passo;
-        marquee.scrollTo({ left: Math.max(0, alvo), behavior: reduz ? "auto" : "smooth" });
-      });
-      return b;
-    };
-    var anterior = seta("depo-seta--anterior", "Depoimento anterior", -1);
-    var proximo = seta("depo-seta--proximo", "Próximo depoimento", 1);
-    var controles = document.createElement("div");
-    controles.className = "depo-controles";
-    var pontos = document.createElement("div");
-    pontos.className = "depo-pontos";
-    originais.forEach(function (card, n) {
-      var b = document.createElement("button");
-      b.type = "button";
-      b.setAttribute("aria-label", "Depoimento " + (n + 1) + " de " + originais.length);
-      if (n === 0) b.setAttribute("aria-current", "true");
-      b.addEventListener("click", function () {
-        marquee.scrollTo({ left: card.offsetLeft - originais[0].offsetLeft, behavior: reduz ? "auto" : "smooth" });
-      });
-      pontos.appendChild(b);
+    play.addEventListener("click", function () {
+      assiste();
+      historia.muted = false;
+      var toca = historia.play();
+      if (toca && toca.catch) toca.catch(function () {});
+      historia.focus();
     });
-    controles.appendChild(anterior);
-    controles.appendChild(pontos);
-    controles.appendChild(proximo);
-    marquee.parentNode.insertBefore(controles, marquee.nextSibling);
-    var botoesPontos = pontos.querySelectorAll("button");
-    /* aria-disabled em vez de disabled: a seta continua focável e o foco não some ao chegar na ponta */
-    var marcaDepo = function () {
-      var atual = Math.min(originais.length - 1, Math.max(0, Math.round(marquee.scrollLeft / passoDepo())));
-      var noFimDepo = marquee.scrollLeft + marquee.clientWidth >= marquee.scrollWidth - 4;
-      if (noFimDepo) atual = originais.length - 1;
-      botoesPontos.forEach(function (b, n) {
-        if (n === atual) b.setAttribute("aria-current", "true");
-        else b.removeAttribute("aria-current");
-      });
-      anterior.setAttribute("aria-disabled", marquee.scrollLeft <= 4 ? "true" : "false");
-      proximo.setAttribute("aria-disabled", noFimDepo ? "true" : "false");
-    };
-    marquee.addEventListener("scroll", marcaDepo, { passive: true });
-    window.addEventListener("resize", marcaDepo);
-    marcaDepo();
+    historia.addEventListener("play", assiste);
   }
 
   /* FAQ: abre e fecha com altura suave */

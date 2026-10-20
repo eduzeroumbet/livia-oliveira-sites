@@ -224,9 +224,14 @@
     <section class="secao video-secao" aria-labelledby="video-titulo">
       <div class="wrap video-grid">
         <div class="video-moldura reveal">
-          <video controls playsinline preload="none" poster="assets/livia-historia-poster.jpg" width="540" height="960" aria-describedby="video-transcricao">
-            <source src="assets/livia-historia.mp4" type="video/mp4">
-          </video>
+          <div class="video-tela">
+            <video controls playsinline preload="none" poster="assets/livia-historia-poster.jpg" width="540" height="960" aria-describedby="video-transcricao">
+              <source src="assets/livia-historia.mp4" type="video/mp4">
+            </video>
+            <button class="video-play" type="button" aria-label="Assistir ao vídeo da Lívia" hidden>
+              <svg width="30" height="30" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M8 5.4v13.2a.8.8 0 0 0 1.2.7l10.4-6.6a.8.8 0 0 0 0-1.4L9.2 4.7A.8.8 0 0 0 8 5.4Z" fill="currentColor"/></svg>
+            </button>
+          </div>
         </div>
         <div class="reveal reveal-d1">
           <span class="sobretitulo">Em 1 minuto</span>
@@ -375,8 +380,8 @@
           <h2 id="alunas-titulo" class="reveal">O que elas estão <em>construindo.</em></h2>
         </div>
       </div>
-      <div class="marquee" tabindex="0" aria-label="Depoimentos de alunas">
-        <div class="marquee-trilha">
+      <div class="wrap">
+        <div class="depo-grade">
           <figure class="depo"><blockquote>Se eu pudesse investir em apenas uma coisa ao sair da faculdade, sem dúvidas, seria no seu curso.</blockquote><figcaption><span class="depo-avatar" aria-hidden="true">CS</span>Aluna do Carreira com Sentido</figcaption></figure>
           <figure class="depo"><blockquote>Saí do CLT para investir full na clínica e, nesse começo com poucos pacientes, está sendo ótimo. Tudo que passa na cabeça de dúvida nesse começo, o curso aborda.</blockquote><figcaption><span class="depo-avatar" aria-hidden="true">CS</span>Aluna do Carreira com Sentido</figcaption></figure>
           <figure class="depo"><blockquote>Senti que fui pega pela mão do início ao fim. Recomendei às minhas amigas e colegas da psi.</blockquote><figcaption><span class="depo-avatar" aria-hidden="true">CS</span>Aluna do Carreira com Sentido</figcaption></figure>
@@ -455,10 +460,10 @@
     </div>
   </footer>
 
-  <div class="barra-mobile" aria-label="Inscrição">
+  <aside class="barra-mobile" aria-label="Inscrição">
     <span class="preco"><small>Inscrição</small>12x R$ 88,94</span>
     <a class="btn btn-sm" href="https://pay.hotmart.com/M100028858P?checkoutMode=10">Quero me inscrever</a>
-  </div>
+  </aside>
 
   <a class="whats" href="https://wa.me/5551992597638?text=Oi!%20Tenho%20uma%20d%C3%BAvida%20sobre%20o%20Carreira%20com%20Sentido" target="_blank" rel="noopener" aria-label="Tirar dúvidas pelo WhatsApp">
     <svg aria-hidden="true"><use href="#i-whats"/></svg>

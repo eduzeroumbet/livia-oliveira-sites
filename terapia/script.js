@@ -13,37 +13,7 @@
     if (img.loading !== "lazy" && img.complete && img.naturalWidth === 0) esconde();
   });
 
-  /* Vídeo do hero (Aethera): 720 até 699px, 1280 no resto; fade-in no canplay;
-     pausado com prefers-reduced-motion; se falhar, fica o poster.
-     No celular o poster é o LCP: o vídeo (preload="none") só começa a baixar e tocar depois do load */
-  var video = document.querySelector(".hero__video");
-  if (video) {
-    var celular = window.innerWidth <= 699;
-    var pronto = function () { video.classList.add("is-ready"); };
-    var inicia = function () {
-      var src = celular ? video.getAttribute("data-src-720") : video.getAttribute("data-src-1280");
-      var fonte = video.querySelector("source");
-      if (src && fonte && fonte.getAttribute("src") !== src) {
-        fonte.setAttribute("src", src);
-        video.load();
-      }
-      video.muted = true;
-      var toca = video.play();
-      if (toca && toca.catch) toca.catch(function () {});
-    };
-    video.addEventListener("canplay", pronto);
-    video.addEventListener("error", pronto, true);
-    if (video.readyState >= 3) pronto();
-    if (reduz) {
-      pronto();
-    } else if (celular && document.readyState !== "complete") {
-      window.addEventListener("load", inicia);
-    } else {
-      inicia();
-    }
-  }
-
-  /* Navbar Aethera: transparente no hero; fora dele ganha fundo sólido (IntersectionObserver no hero) */
+  /* Navbar: transparente no hero; fora dele ganha fundo papel (IntersectionObserver no hero) */
   var nav = document.querySelector(".nav");
   var heroNav = document.querySelector(".hero");
   if (nav && heroNav) {

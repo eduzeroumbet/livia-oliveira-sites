@@ -35,8 +35,6 @@
   --linha: rgba(59, 31, 43, .10);
   --mono: ui-monospace, 'SF Mono', Menlo, Consolas, monospace;
   --barra-h: 64px;
-  /* margem lateral do .wrap (o % resolve na largura de quem usa), para alinhar o carrossel ao conteúdo */
-  --margem: max(16px, (100% - 1216px) / 2);
 
   /* Verge: entrada motion (opacity 0, y 15, 0.6s) */
   --motion-ease: cubic-bezier(0, 0, 0.58, 1);
@@ -103,13 +101,14 @@ p { margin: 0 0 1em; }
 
 .btn--xs { padding: 10px 20px; font-size: 13px; }
 
-/* Botões do corpo da página: mesma pílula, no acento da Lívia */
+/* Botões do corpo da página: mesma pílula, no acento da Lívia.
+   Fundo no coral escuro: o coral claro com texto branco dá 4,36:1 (abaixo de 4,5) */
 main .btn:not(.btn--light):not(.btn--ink), .barra-mobile .btn {
-  background: var(--coral); color: #fff;
+  background: var(--coral-escuro); color: #fff;
   padding: 15px 30px; font-size: 15px;
   box-shadow: 0 10px 24px -12px rgba(209, 73, 91, .7);
 }
-main .btn:not(.btn--light):not(.btn--ink):hover, .barra-mobile .btn:hover { background: var(--coral-escuro); }
+main .btn:not(.btn--light):not(.btn--ink):hover, .barra-mobile .btn:hover { background: #9F3242; }
 .barra-mobile .btn { padding: 11px 20px; font-size: 14px; }
 .btn-bloco { width: 100%; }
 
@@ -186,8 +185,18 @@ main .btn:not(.btn--light):not(.btn--ink):hover, .barra-mobile .btn:hover { back
 }
 
 .hero__body {
+  position: relative; isolation: isolate;
   display: flex; flex-direction: column; align-items: center; text-align: center;
   padding-top: calc(var(--nav-h) + clamp(28px, 6vh, 62px) * var(--scale));
+  padding-bottom: 28px;
+}
+/* Véu claro só atrás do bloco de texto: garante a leitura nos quadros mais escuros do vídeo
+   (montanha azul e campo dourado), sem apagar a paisagem no resto do hero */
+.hero__body::before {
+  content: ""; position: absolute; z-index: -1; left: 50%; top: calc(var(--nav-h) - 10px); bottom: -10px;
+  width: min(900px, 112%); transform: translateX(-50%);
+  background: radial-gradient(closest-side, rgba(250, 250, 247, 0.88) 0%, rgba(250, 250, 247, 0.74) 58%, rgba(250, 250, 247, 0) 100%);
+  pointer-events: none;
 }
 
 .feats {
@@ -197,11 +206,10 @@ main .btn:not(.btn--light):not(.btn--ink):hover, .barra-mobile .btn:hover { back
 }
 .feats__item {
   display: inline-flex; align-items: center; gap: 6px;
-  font-size: calc(13px * var(--ui-scale)); font-weight: 400; letter-spacing: 0.005em;
-  /* ink-soft: >= 6,5:1 sobre o véu (90% de papel) mesmo com o vídeo preto por baixo */
-  color: var(--ink-soft);
+  font-size: calc(14px * var(--ui-scale)); font-weight: 500; letter-spacing: 0.005em;
+  color: var(--ink);
 }
-.feats__item svg { flex: none; color: var(--ink-soft); }
+.feats__item svg { flex: none; color: var(--vinho); }
 
 .hero__title {
   margin-top: calc(clamp(20px, 3.4vh, 34px) * var(--scale));
@@ -216,8 +224,8 @@ main .btn:not(.btn--light):not(.btn--ink):hover, .barra-mobile .btn:hover { back
 
 .hero__sub {
   margin-top: calc(clamp(14px, 2.2vh, 24px) * var(--scale)); margin-bottom: 0; max-width: 54ch;
-  font-size: calc(clamp(0.86rem, 1.32vw, 0.97rem) * var(--ui-scale)); font-weight: 400;
-  line-height: 1.55; color: var(--ink-soft);
+  font-size: calc(17px * var(--ui-scale)); font-weight: 400;
+  line-height: 1.55; color: #2a2824;
   animation: fade-up .8s var(--ease-out) 0.14s both;
 }
 
@@ -226,11 +234,11 @@ main .btn:not(.btn--light):not(.btn--ink):hover, .barra-mobile .btn:hover { back
   margin-top: calc(clamp(20px, 3vh, 30px) * var(--scale));
   animation: fade-up .8s var(--ease-out) 0.21s both;
 }
-.hero__cta .btn { padding: calc(13px * var(--ui-scale)) calc(27px * var(--ui-scale)); font-size: calc(13.5px * var(--ui-scale)); }
+.hero__cta .btn { padding: calc(14px * var(--ui-scale)) calc(28px * var(--ui-scale)); font-size: calc(15px * var(--ui-scale)); }
 
 .hero__preco {
   margin: 12px 0 0;
-  font-size: calc(11.5px * var(--ui-scale)); letter-spacing: 0.005em; color: var(--ink-faint);
+  font-size: calc(14px * var(--ui-scale)); letter-spacing: 0.005em; color: var(--ink-soft);
   animation: fade-up .8s var(--ease-out) 0.28s both;
 }
 
@@ -260,7 +268,7 @@ main .btn:not(.btn--light):not(.btn--ink):hover, .barra-mobile .btn:hover { back
   display: inline-flex; align-items: center;
   padding: 2px 10px; margin-bottom: 18px;
   border-radius: 999px;
-  font-family: var(--font-body); font-size: 11px; font-weight: 600;
+  font-family: var(--font-body); font-size: 13px; font-weight: 600;
   letter-spacing: .05em; text-transform: uppercase; line-height: 1.6;
   color: var(--vinho); background: var(--rosa-claro);
   border: 1px solid rgba(181, 131, 141, .45);
@@ -275,7 +283,8 @@ main .btn:not(.btn--light):not(.btn--ink):hover, .barra-mobile .btn:hover { back
   --ui-scale: 1;
   position: relative;
   padding: clamp(56px, 8vw, 104px) 0;
-  background: linear-gradient(180deg, var(--sage-deep) 0%, #637064 100%);
+  /* verde um tom abaixo do sage-deep: texto branco pequeno passa de 4,5:1 para mais de 5,9:1 */
+  background: linear-gradient(180deg, #5f6c61 0%, #56625a 100%);
   color: #fff;
 }
 .trilho-grid { display: grid; gap: clamp(32px, 4vw, 56px); }
@@ -286,7 +295,7 @@ main .btn:not(.btn--light):not(.btn--ink):hover, .barra-mobile .btn:hover { back
 .step { display: flex; flex-direction: column; flex: 1 1 0; min-width: 0; max-width: 260px; }
 .step__card {
   display: flex; flex-direction: column; justify-content: space-between;
-  height: clamp(64px, 6.5vw, 94px);
+  min-height: clamp(64px, 6.5vw, 94px); gap: 8px;
   padding: clamp(8px, 0.95vw, 14px);
   border: 1px solid var(--line-soft);
   border-radius: clamp(5px, 0.5vw, 7px);
@@ -294,10 +303,10 @@ main .btn:not(.btn--light):not(.btn--ink):hover, .barra-mobile .btn:hover { back
 }
 .step:hover .step__card { border-color: rgba(255, 255, 255, 0.6); background: rgba(255, 255, 255, 0.07); }
 .step__card svg { width: clamp(18px, 1.8vw, 26px); height: clamp(18px, 1.8vw, 26px); color: rgba(255, 255, 255, 0.92); }
-.step__label { font-size: calc(clamp(11px, 0.9vw, 13px) * var(--ui-scale)); color: #fff; line-height: 1.25; }
+.step__label { font-size: calc(clamp(13px, 1vw, 14px) * var(--ui-scale)); font-weight: 500; color: #fff; line-height: 1.25; }
 .step__dash { width: clamp(9px, 1vw, 14px); height: 1px; background: rgba(255, 255, 255, 0.55); margin-top: clamp(7px, 0.9vw, 13px); }
-.step__num { margin-top: clamp(5px, 0.6vw, 9px); font-size: calc(clamp(9px, 0.9vw, 13px) * var(--ui-scale)); color: #fff; }
-.step__texto { margin: 10px 0 0; font-size: 14px; line-height: 1.5; color: #fff; }
+.step__num { margin-top: clamp(5px, 0.6vw, 9px); font-size: calc(13px * var(--ui-scale)); color: #fff; }
+.step__texto { margin: 10px 0 0; font-size: 15px; line-height: 1.5; color: #fff; }
 
 @media (max-width: 620px) {
   .steps { display: grid; grid-template-columns: 1fr 1fr; gap: 24px 12px; }
@@ -316,13 +325,13 @@ main .btn:not(.btn--light):not(.btn--ink):hover, .barra-mobile .btn:hover { back
   line-height: 1.12; letter-spacing: -0.025em;
   margin-bottom: 22px; max-width: 22ch;
 }
-.lead { font-size: 1.06rem; color: rgba(42, 31, 36, .78); }
+.lead { font-size: 1.06rem; color: rgba(42, 31, 36, .86); }
 .centro { text-align: center; }
 .centro .btn { margin-top: 8px; }
 
-.garantia-linha { display: block; margin: 10px 0 0; font-size: .85rem; color: rgba(42, 31, 36, .76); }
-.card-oferta .garantia-linha { color: rgba(250, 245, 242, .82); }
-.programa-caixa .garantia-linha { color: rgba(250, 245, 242, .72); }
+.garantia-linha { display: block; margin: 10px 0 0; font-size: .875rem; font-weight: 500; color: rgba(42, 31, 36, .84); }
+.card-oferta .garantia-linha { color: rgba(250, 245, 242, .94); }
+.programa-caixa .garantia-linha { color: rgba(250, 245, 242, .9); }
 
 /* Números: bento */
 .numeros { padding: 56px 0 8px; background: var(--papel); }
@@ -360,7 +369,25 @@ main .btn:not(.btn--light):not(.btn--ink):hover, .barra-mobile .btn:hover { back
   background: #fff; border: 1px solid var(--linha);
   box-shadow: 0 24px 60px -32px rgba(59, 31, 43, .45);
 }
-.video-moldura video { width: 100%; aspect-ratio: 9 / 16; object-fit: cover; border-radius: 28px; background: var(--vinho); }
+/* A tela tem a proporção exata do arquivo (9:16) e o vídeo usa contain: nada é cortado em nenhuma
+   largura; se um dia vier um arquivo de outra proporção, sobra faixa vinho em vez de cortar a legenda */
+.video-tela {
+  position: relative; aspect-ratio: 9 / 16; overflow: hidden;
+  border-radius: 28px; background: var(--vinho);
+}
+.video-tela video { width: 100%; height: 100%; object-fit: contain; background: var(--vinho); }
+.video-play {
+  position: absolute; left: 50%; top: 50%; z-index: 1;
+  display: grid; place-items: center;
+  width: 88px; height: 88px; margin: -44px 0 0 -44px; padding: 0 0 0 5px; border-radius: 50%;
+  background: rgba(255, 255, 255, .94); color: var(--vinho);
+  box-shadow: 0 0 0 10px rgba(255, 255, 255, .28), 0 18px 40px -12px rgba(30, 16, 22, .6);
+  transition: transform .3s var(--ease-out), background-color .3s var(--ease-out);
+}
+.video-play[hidden] { display: none; }
+.video-play:hover { transform: scale(1.06); background: #fff; }
+.video-play:focus-visible { outline: 3px solid var(--dourado); outline-offset: 6px; border-radius: 50%; }
+.video-play svg { width: 34px; height: 34px; }
 .citacao {
   font-family: var(--font-display); font-style: italic; font-size: 1.4rem; line-height: 1.35; letter-spacing: -0.01em;
   color: var(--vinho); margin: 24px 0; padding: 20px 22px;
@@ -407,7 +434,7 @@ main .btn:not(.btn--light):not(.btn--ink):hover, .barra-mobile .btn:hover { back
 .frente .n::after { content: ""; width: 10px; height: 10px; border-radius: 50%; background: var(--rosa-claro); border: 1px solid var(--rosa); transition: background .3s ease; }
 .frente:hover .n::after { background: var(--dourado); border-color: var(--dourado); }
 .frente h3 { margin-top: auto; font-size: 1.45rem; letter-spacing: -0.02em; }
-.frente p { margin: 0; font-size: .95rem; color: rgba(42, 31, 36, .75); }
+.frente p { margin: 0; font-size: 1rem; color: rgba(42, 31, 36, .86); }
 .metodo-foto { margin-top: 16px; aspect-ratio: 16 / 11; border-radius: 36px; }
 
 /* Para quem é */
@@ -439,16 +466,16 @@ main .btn:not(.btn--light):not(.btn--ink):hover, .barra-mobile .btn:hover { back
 .programa-cabeca { display: flex; flex-direction: column; gap: 10px; padding-bottom: 32px; border-bottom: 1px solid rgba(255, 255, 255, .1); }
 .programa-caixa .sobretitulo { background: rgba(255, 255, 255, .06); color: var(--dourado); border-color: rgba(201, 164, 106, .4); }
 .programa-caixa h2 { color: #fff; margin-bottom: 0; }
-.programa-caixa .lead { color: rgba(250, 245, 242, .72); max-width: 28rem; margin: 0; font-size: .98rem; }
+.programa-caixa .lead { color: rgba(250, 245, 242, .92); max-width: 28rem; margin: 0; font-size: 1.02rem; }
 .modulos-lista { margin: 0; padding: 0; }
 .modulo {
   display: grid; grid-template-columns: 44px 1fr; gap: 12px; align-items: baseline;
   padding: 22px 0; border-bottom: 1px solid rgba(255, 255, 255, .1);
 }
-.modulo .n { font-family: var(--mono); font-size: .8rem; letter-spacing: .06em; color: rgba(255, 255, 255, .64); }
+.modulo .n { font-family: var(--mono); font-size: .8125rem; letter-spacing: .06em; color: rgba(255, 255, 255, .84); }
 .modulo h3 { color: #fff; font-size: clamp(1.3rem, 3vw, 1.9rem); letter-spacing: -0.02em; margin-bottom: 6px; transition: color .3s ease; }
 .modulo:hover h3 { color: #EBD3A6; }
-.modulo p { margin: 0; font-size: .95rem; color: rgba(250, 245, 242, .7); }
+.modulo p { margin: 0; font-size: 1rem; color: rgba(250, 245, 242, .92); }
 .programa-cta { padding-top: 32px; }
 
 /* Quem te guia */
@@ -461,43 +488,24 @@ main .btn:not(.btn--light):not(.btn--ink):hover, .barra-mobile .btn:hover { back
   letter-spacing: -0.02em; line-height: 1.2; color: var(--vinho); margin: 26px 0;
 }
 
-/* Alunas: depoimentos em cards Verge, carrossel com swipe que começa na margem do conteúdo */
-.alunas { background: var(--papel); overflow-x: clip; }
+/* Alunas: depoimentos em cards Verge; lista no celular, 2 colunas no tablet e grade de 3 no desktop
+   (todos os cards inteiros, sem carrossel cortando card na borda) */
+.alunas { background: var(--papel); }
 .alunas-cabeca { padding-bottom: 8px; }
-.marquee {
-  margin-top: 24px;
-  overflow-x: auto; scroll-snap-type: x mandatory; scrollbar-width: none; overscroll-behavior-x: contain;
-  padding-inline: var(--margem); scroll-padding-inline: var(--margem);
-}
-.marquee::-webkit-scrollbar { display: none; }
-.marquee-trilha { display: flex; gap: 16px; width: max-content; padding: 6px 0 12px; }
+.depo-grade { display: grid; gap: 14px; margin-top: 24px; }
 .depo {
-  width: 340px; flex: none; margin: 0; padding: 26px 24px; scroll-snap-align: start;
+  margin: 0; padding: 26px 24px;
   background: var(--creme); border: 1px solid var(--linha); border-radius: 24px;
   display: flex; flex-direction: column; justify-content: space-between; gap: 20px;
 }
-.depo blockquote { margin: 0; font-family: var(--font-display); font-size: 16px; line-height: 1.5; letter-spacing: -0.01em; color: var(--vinho); }
+.depo blockquote { margin: 0; font-family: var(--font-display); font-size: 18px; line-height: 1.5; letter-spacing: -0.01em; color: var(--tinta); }
 .depo blockquote::before { content: "\201C"; display: block; font-size: 2.8rem; line-height: .7; color: var(--rosa); margin-bottom: 6px; }
-.depo figcaption { display: flex; align-items: center; gap: 12px; padding-top: 14px; border-top: 1px solid rgba(59, 31, 43, .1); font-size: .78rem; font-weight: 600; letter-spacing: .04em; text-transform: uppercase; color: rgba(59, 31, 43, .82); }
+.depo figcaption { display: flex; align-items: center; gap: 12px; padding-top: 14px; border-top: 1px solid rgba(59, 31, 43, .1); font-size: .8125rem; font-weight: 600; letter-spacing: .04em; text-transform: uppercase; color: var(--vinho); }
 .depo-avatar {
   flex: none; display: grid; place-items: center; width: 38px; height: 38px; border-radius: 50%;
   background: var(--rosa-claro); border: 1px solid rgba(181, 131, 141, .5);
   font-family: var(--font-display); font-size: .95rem; font-weight: 500; letter-spacing: 0; color: var(--vinho);
 }
-.depo-controles { display: flex; justify-content: center; align-items: center; gap: 10px; margin-top: 8px; }
-.depo-pontos { display: flex; justify-content: center; gap: 4px; }
-.depo-seta {
-  flex: none; display: grid; place-items: center; width: 40px; height: 40px; padding: 0; border-radius: 50%;
-  border: 1px solid rgba(59, 31, 43, .18); background: rgba(255, 255, 255, .6); color: var(--vinho);
-  transition: background .25s ease, border-color .25s ease, color .25s ease, opacity .25s ease;
-}
-.depo-seta svg { width: 18px; height: 18px; }
-.depo-seta--anterior svg { transform: rotate(180deg); }
-.depo-seta:hover { background: var(--vinho); border-color: var(--vinho); color: #fff; }
-.depo-seta[aria-disabled="true"] { opacity: .35; cursor: default; pointer-events: none; }
-.depo-pontos button { width: 28px; height: 28px; padding: 0; display: grid; place-items: center; }
-.depo-pontos button::before { content: ""; width: 8px; height: 8px; border-radius: 50%; background: rgba(181, 131, 141, .4); transition: background .25s ease, transform .25s ease; }
-.depo-pontos button[aria-current="true"]::before { background: var(--vinho); transform: scale(1.25); }
 
 /* Oferta */
 .oferta { background: var(--creme); }
@@ -513,17 +521,17 @@ main .btn:not(.btn--light):not(.btn--ink):hover, .barra-mobile .btn:hover { back
 .card-oferta .sobretitulo { background: rgba(255, 255, 255, .06); color: var(--dourado); border-color: rgba(201, 164, 106, .4); }
 .card-oferta h2 { color: var(--papel); font-size: clamp(1.9rem, 5.6vw, 2.8rem); letter-spacing: -0.025em; margin: 0 auto 26px; }
 .incluso { margin: 0 auto 28px; padding: 22px 0; text-align: left; display: grid; gap: 10px; max-width: 420px; border-block: 1px solid rgba(255, 255, 255, .1); }
-.incluso li { position: relative; padding-left: 30px; color: rgba(250, 245, 242, .92); }
+.incluso li { position: relative; padding-left: 30px; font-size: 1.02rem; color: #fff; }
 .incluso li svg { position: absolute; left: 0; top: 4px; width: 18px; height: 18px; color: var(--dourado); }
-.preco-de { color: rgba(250, 245, 242, .6); font-size: .95rem; }
+.preco-de { color: rgba(250, 245, 242, .86); font-size: 1rem; }
 .preco-de s { text-decoration-thickness: 1px; }
 .preco-parcela { font-family: var(--font-display); font-size: clamp(2.8rem, 11vw, 4rem); line-height: 1.05; letter-spacing: -0.03em; margin: 6px 0; color: #fff; }
 .preco-parcela small { font-size: .42em; font-family: var(--font-body); letter-spacing: 0; vertical-align: .4em; margin-right: 4px; }
-.preco-avista { color: rgba(250, 245, 242, .85); margin-bottom: 24px; }
+.preco-avista { font-size: 1.15rem; color: #fff; margin-bottom: 24px; }
 .preco-avista strong { color: #fff; font-weight: 600; }
-.preco-economia { display: block; margin-top: 4px; font-size: .9rem; color: var(--dourado); }
-.pagamentos { font-size: .82rem; color: rgba(250, 245, 242, .7); margin: 16px 0 4px; }
-.acesso { font-size: .82rem; color: var(--dourado); margin: 0; }
+.preco-economia { display: block; margin-top: 6px; font-size: .9375rem; line-height: 1.45; color: #E3C899; }
+.pagamentos { font-size: .875rem; color: rgba(250, 245, 242, .9); margin: 16px 0 4px; }
+.acesso { font-size: .875rem; color: #E3C899; margin: 0; }
 
 /* Garantia */
 .garantia { background: var(--creme); padding-top: 0; }
@@ -567,10 +575,10 @@ main .btn:not(.btn--light):not(.btn--ink):hover, .barra-mobile .btn:hover { back
 .faq details[open] summary::before { background: var(--vinho); border-color: var(--vinho); }
 .faq details[open] summary::after { color: #fff; transform: rotate(45deg); }
 .faq-resposta { overflow: hidden; }
-.faq-resposta p { margin: 0; padding: 0 0 22px; color: rgba(42, 31, 36, .78); }
+.faq-resposta p { margin: 0; padding: 0 0 22px; color: rgba(42, 31, 36, .86); }
 
 /* Rodapé */
-.rodape { background: var(--vinho); color: rgba(250, 245, 242, .78); padding: 40px 0 120px; font-size: .86rem; text-align: center; }
+.rodape { background: var(--vinho); color: rgba(250, 245, 242, .9); padding: 40px 0 120px; font-size: .9375rem; text-align: center; }
 .rodape p { margin: 0 0 6px; }
 
 /* Barra fixa mobile */
@@ -587,7 +595,7 @@ main .btn:not(.btn--light):not(.btn--ink):hover, .barra-mobile .btn:hover { back
 .barra-mobile.is-visivel { transform: none; }
 body.tem-barra { padding-bottom: var(--barra-h); }
 .barra-mobile .preco { font-family: var(--font-display); color: var(--vinho); font-size: 1.15rem; line-height: 1.1; }
-.barra-mobile .preco small { display: block; font-family: var(--font-body); font-size: .7rem; color: rgba(42, 31, 36, .76); }
+.barra-mobile .preco small { display: block; font-family: var(--font-body); font-size: .8125rem; color: rgba(42, 31, 36, .84); }
 
 /* WhatsApp flutuante: no celular fica acima da barra fixa; o JS esconde no hero e perto de CTAs */
 .whats {
@@ -615,17 +623,8 @@ body.tem-barra .whats { bottom: calc(var(--barra-h) + 16px); }
 @keyframes revelaFalha { to { opacity: 1; transform: none; } }
 .reveal.is-visivel { opacity: 1; transform: none; }
 
-/* Celular: um card inteiro por vez, da largura do conteúdo (tela menos as duas margens) */
-@media (max-width: 699px) {
-  .marquee-trilha { gap: 12px; }
-  .depo { width: calc(100vw - 32px); scroll-snap-stop: always; }
-}
-@media (min-width: 640px) and (max-width: 699px) {
-  .depo { width: calc(100vw - 48px); }
-}
-
 @media (min-width: 640px) {
-  :root { --margem: max(24px, (100% - 1232px) / 2); }
+  .depo-grade { grid-template-columns: 1fr 1fr; gap: 16px; }
   .wrap { width: min(1232px, 100% - 48px); }
   .wrap-estreito { width: min(800px, 100% - 48px); }
   .secao { padding: 96px 0; }
@@ -642,6 +641,9 @@ body.tem-barra .whats { bottom: calc(var(--barra-h) + 16px); }
 }
 
 @media (min-width: 900px) {
+  body { font-size: 17px; }
+  .hero__sub { font-size: calc(18px * var(--ui-scale)); }
+  .depo-grade { grid-template-columns: repeat(3, 1fr); gap: 20px; }
   .numeros-grid { grid-template-columns: repeat(4, 1fr); }
   .video-grid { grid-template-columns: 380px 1fr; gap: 72px; }
   .diag-grid { grid-template-columns: 1.1fr .9fr; gap: 72px; }
@@ -656,16 +658,7 @@ body.tem-barra .whats { bottom: calc(var(--barra-h) + 16px); }
 }
 
 @media (min-width: 1024px) {
-  :root { --margem: max(32px, (100% - 1280px) / 2); }
   .wrap { width: min(1280px, 100% - 64px); }
-  /* Depoimentos: 3 cards inteiros a partir da margem do conteúdo e o 4º espiando 12% da largura.
-     Área visível = tela menos a margem esquerda = 3 cards + 3 gaps + 0,12 card. cqw mede a seção
-     sem a barra de rolagem; vw fica de reserva para navegador sem container query */
-  .alunas { container-type: inline-size; }
-  .depo {
-    width: calc((100vw - max(32px, (100vw - 1280px) / 2) - 48px) / 3.12);
-    width: calc((100cqw - max(32px, (100cqw - 1280px) / 2) - 48px) / 3.12);
-  }
   .programa-caixa { padding: 56px; }
   .programa-cabeca { flex-direction: row; align-items: flex-end; justify-content: space-between; gap: 24px; padding-bottom: 48px; }
   .programa-cabeca .lead { text-align: right; }
