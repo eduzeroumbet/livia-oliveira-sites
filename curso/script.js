@@ -209,7 +209,17 @@
   var hero = document.querySelector(".hero");
   var retrato = document.querySelector(".guia-foto img");
   var barra = document.querySelector(".barra-mobile");
-  var oferta = document.getElementById("oferta");
+  var valor = document.querySelector(".hero__valor");
+  /* Barra mobile: só depois que o bloco de preço do hero saiu da tela por cima.
+     Sem IntersectionObserver cai na conta pela posição do bloco a cada rolagem */
+  var valorPassou = false;
+  if (valor && "IntersectionObserver" in window) {
+    new IntersectionObserver(function (entradas) {
+      var e = entradas[0];
+      valorPassou = !e.isIntersecting && e.boundingClientRect.bottom <= 0;
+      agenda();
+    }, { threshold: 0 }).observe(valor);
+  }
   var whats = document.querySelector(".whats");
   var evitaveis = Array.prototype.slice.call(document.querySelectorAll("main .btn, .step"));
   var pendente = false;
@@ -230,10 +240,8 @@
     var hh = hero ? hero.offsetHeight : vh;
 
     var depoisHero = y > hh * 0.85;
-    var ofertaRect = oferta ? oferta.getBoundingClientRect() : null;
-    var naOferta = ofertaRect && ofertaRect.top < vh && ofertaRect.bottom > 0;
     if (barra) {
-      var mostra = depoisHero && !naOferta;
+      var mostra = valor && "IntersectionObserver" in window ? valorPassou : (valor ? valor.getBoundingClientRect().bottom <= 0 : depoisHero);
       barra.classList.toggle("is-visivel", mostra);
       doc.style.setProperty("--barra-h", barra.offsetHeight + "px");
       document.body.classList.toggle("tem-barra", mostra && window.innerWidth < 900);

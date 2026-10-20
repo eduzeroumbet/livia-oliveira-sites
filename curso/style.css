@@ -402,6 +402,12 @@ main .btn:not(.btn--light):not(.btn--ink):not(.btn--contorno):not(.btn--papel):h
 }
 .numero:nth-child(2) strong { color: #fff; }
 .numero:nth-child(2) span { color: var(--dourado); }
+/* Celular: cada número numa linha só ("Desde 2018" cabe em 360px) e os cartões com a mesma altura */
+@media (max-width: 639px) {
+  .numeros-grid { grid-auto-rows: 1fr; }
+  .numero { gap: 20px; padding: 20px 16px; }
+  .numero strong { font-size: clamp(1.5rem, 6.6vw, 2.1rem); white-space: nowrap; }
+}
 
 /* Vídeo */
 .video-secao { background: var(--papel); }
@@ -594,9 +600,19 @@ main .btn:not(.btn--light):not(.btn--ink):not(.btn--contorno):not(.btn--papel):h
 .preco-de s { text-decoration-thickness: 1px; }
 .preco-parcela { font-family: var(--font-display); font-size: clamp(2.8rem, 11vw, 4rem); line-height: 1.05; letter-spacing: -0.03em; margin: 6px 0; color: #fff; }
 .preco-parcela small { font-size: .42em; font-family: var(--font-body); letter-spacing: 0; vertical-align: .4em; margin-right: 4px; }
-.preco-avista { font-size: 1.35rem; line-height: 1.35; color: #fff; margin-bottom: 24px; }
-.preco-avista strong { color: #fff; font-weight: 700; }
-.preco-economia { display: block; margin-top: 6px; font-size: .9375rem; line-height: 1.45; color: #E3C899; }
+/* Duas opções de preço equilibradas: parcelado (com o total) e à vista no Pix (com a economia).
+   Linhas pequenas a 15px: papel a .9 sobre o vinho dá mais de 11:1; dourado claro #E3C899 dá cerca de 9:1 */
+.preco-opcao { margin: 0 auto; }
+.preco-opcao p { margin: 0; }
+.preco-opcao--avista { margin: 18px auto 26px; padding-top: 18px; max-width: 360px; border-top: 1px solid rgba(255, 255, 255, .12); }
+.preco-total { font-size: .9375rem; line-height: 1.45; color: rgba(250, 245, 242, .9); }
+.preco-avista { font-size: 1.15rem; line-height: 1.2; color: #fff; }
+.preco-avista strong {
+  display: inline-block; margin: 0 .12em;
+  font-family: var(--font-display); font-size: clamp(1.9rem, 6.5vw, 2.5rem); font-weight: 600; line-height: 1.05; letter-spacing: -0.02em;
+  color: #fff; vertical-align: -0.12em;
+}
+.preco-economia { margin-top: 6px; font-size: .9375rem; font-weight: 600; line-height: 1.45; color: #E3C899; }
 .pagamentos { font-size: .875rem; color: rgba(250, 245, 242, .9); margin: 16px 0 4px; }
 .acesso { font-size: .875rem; color: #E3C899; margin: 0; }
 
@@ -645,8 +661,12 @@ main .btn:not(.btn--light):not(.btn--ink):not(.btn--contorno):not(.btn--papel):h
 .faq-resposta p { margin: 0; padding: 0 0 22px; color: rgba(42, 31, 36, .86); }
 
 /* Rodapé */
-.rodape { background: var(--vinho); color: rgba(250, 245, 242, .9); padding: 40px 0 120px; font-size: .9375rem; text-align: center; }
+.rodape { background: var(--vinho); color: rgba(250, 245, 242, .9); padding: 40px 0; font-size: .9375rem; text-align: center; }
 .rodape p { margin: 0 0 6px; }
+/* Links para as outras páginas (como na consultoria): branco sobre o vinho, mais de 13:1 */
+.rodape__links { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px 18px; margin: 12px 0 14px; }
+.rodape__links a { font-size: .9375rem; color: #fff; text-decoration: underline; text-decoration-color: rgba(255, 255, 255, .35); text-underline-offset: 3px; }
+.rodape__links a:hover { text-decoration-color: currentColor; }
 
 /* Barra fixa mobile */
 .barra-mobile {

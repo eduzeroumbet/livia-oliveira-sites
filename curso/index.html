@@ -31,7 +31,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;1,400;1,500&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600;9..40,700&display=swap" rel="stylesheet">
   <link rel="preload" as="image" href="../assets/video/scrolltide/hero-arbor-poster.webp" fetchpriority="high">
-  <link rel="stylesheet" href="style.css?v=6">
+  <link rel="stylesheet" href="style.css?v=7">
 
   <script type="application/ld+json">
   {
@@ -144,7 +144,7 @@
         <p class="hero__sub">Você é boa na clínica. O que falta é estrutura: cobrar o valor justo, montar uma agenda que se sustenta e aparecer para os pacientes certos, sem virar outra pessoa no Instagram.</p>
         <div class="hero__cta">
           <a class="btn btn--light" href="#programa">Ver o conteúdo</a>
-          <a class="btn btn--ink" href="https://pay.hotmart.com/M100028858P?checkoutMode=10">Quero me inscrever</a>
+          <a class="btn btn--ink" href="https://pay.hotmart.com/M100028858P?checkoutMode=10">Quero minha vaga</a>
         </div>
         <div class="hero__valor">
           <p class="hero__valor-de">De <s>R$ 1.497</s></p>
@@ -263,7 +263,7 @@
           </ul>
           <p class="fecho reveal">Sua agenda ainda não reflete o quanto você vale. <em>Isso tem solução.</em></p>
           <div class="reveal">
-            <a class="btn" href="#oferta">Quero transformar isso em estrutura</a>
+            <a class="btn" href="#oferta">Quero minha vaga</a>
             <p class="garantia-linha">7 dias de garantia</p>
           </div>
         </div>
@@ -352,7 +352,7 @@
             <li class="modulo reveal"><span class="n">10</span><div><h3>Conselhos finais</h3><p>O que aprendi em 15 anos para você construir a sua carreira.</p></div></li>
           </ol>
           <div class="programa-cta reveal">
-            <a class="btn" href="#oferta">Quero começar agora</a>
+            <a class="btn" href="#oferta">Quero minha vaga</a>
             <p class="garantia-linha">7 dias de garantia</p>
           </div>
         </div>
@@ -402,7 +402,7 @@
           <button type="button" class="btn btn--contorno depo-mais" aria-controls="depo-grade" aria-expanded="false" hidden>Ver mais relatos</button>
         </div>
         <div class="alunas-cta reveal">
-          <a class="btn btn-bloco" href="#oferta">Quero começar agora <svg aria-hidden="true"><use href="#i-seta"/></svg></a>
+          <a class="btn btn-bloco" href="#oferta">Quero minha vaga <svg aria-hidden="true"><use href="#i-seta"/></svg></a>
           <p class="garantia-linha">7 dias de garantia</p>
         </div>
       </div>
@@ -422,9 +422,15 @@
             <li><svg aria-hidden="true"><use href="#i-check"/></svg>Certificado de conclusão</li>
           </ul>
           <p class="preco-de">De <s>R$ 1.497</s></p>
-          <p class="preco-parcela"><small>12x</small>R$ 88,94</p>
-          <p class="preco-avista">ou <strong>R$ 860</strong> à vista<span class="preco-economia">economize R$ 207 em relação ao parcelado (12x de R$ 88,94, total de R$ 1.067,28)</span></p>
-          <a class="btn btn-bloco btn--papel" href="https://pay.hotmart.com/M100028858P?checkoutMode=10">Quero me inscrever <svg aria-hidden="true"><use href="#i-seta"/></svg></a>
+          <div class="preco-opcao">
+            <p class="preco-parcela"><small>12x de</small>R$ 88,94</p>
+            <p class="preco-total">total de R$ 1.067,28 no cartão</p>
+          </div>
+          <div class="preco-opcao preco-opcao--avista">
+            <p class="preco-avista">ou <strong>R$ 860</strong> à vista no Pix</p>
+            <p class="preco-economia">economize R$ 207</p>
+          </div>
+          <a class="btn btn-bloco btn--papel" href="https://pay.hotmart.com/M100028858P?checkoutMode=10">Quero minha vaga <svg aria-hidden="true"><use href="#i-seta"/></svg></a>
           <p class="garantia-linha">7 dias de garantia</p>
           <p class="pagamentos">Pix · Cartão em até 12x · Boleto · Checkout seguro Hotmart</p>
           <p class="acesso">Acesso liberado na hora, por e-mail</p>
@@ -461,7 +467,7 @@
           <details><summary>E se eu não gostar?</summary><div class="faq-resposta"><p>Você tem 7 dias de garantia. Pede o reembolso e recebe 100% de volta.</p></div></details>
         </div>
         <div class="centro reveal">
-          <a class="btn" href="https://pay.hotmart.com/M100028858P?checkoutMode=10">Quero garantir minha vaga <svg aria-hidden="true"><use href="#i-seta"/></svg></a>
+          <a class="btn" href="https://pay.hotmart.com/M100028858P?checkoutMode=10">Quero minha vaga <svg aria-hidden="true"><use href="#i-seta"/></svg></a>
           <p class="preco-linha">12x de R$ 88,94 ou R$ 860 à vista</p>
           <p class="garantia-linha">7 dias de garantia</p>
         </div>
@@ -473,19 +479,20 @@
   <footer class="rodape">
     <div class="wrap">
       <p>Lívia Oliveira · Psicóloga clínica · CRP 07/18713 · Criadora do programa Carreira com Sentido</p>
+      <nav class="rodape__links" aria-label="Outras páginas"><a href="../">Início</a><a href="../curso/" aria-current="page">Curso</a><a href="../consultoria/">Consultoria</a><a href="../terapia/">Terapia</a><a href="https://wa.me/5551992597638" target="_blank" rel="noopener">WhatsApp</a></nav>
       <p>© 2026 Lívia Oliveira. Todos os direitos reservados.</p>
     </div>
   </footer>
 
   <aside class="barra-mobile" aria-label="Inscrição">
     <span class="preco">12x R$ 88,94<small>ou R$ 860 à vista</small></span>
-    <a class="btn btn-sm" href="https://pay.hotmart.com/M100028858P?checkoutMode=10">Quero me inscrever</a>
+    <a class="btn btn-sm" href="https://pay.hotmart.com/M100028858P?checkoutMode=10">Quero minha vaga</a>
   </aside>
 
   <a class="whats" href="https://wa.me/5551992597638?text=Oi!%20Tenho%20uma%20d%C3%BAvida%20sobre%20o%20Carreira%20com%20Sentido" target="_blank" rel="noopener" aria-label="Tirar dúvidas pelo WhatsApp">
     <svg aria-hidden="true"><use href="#i-whats"/></svg>
   </a>
 
-  <script src="script.js?v=6" defer></script>
+  <script src="script.js?v=7" defer></script>
 </body>
 </html>
