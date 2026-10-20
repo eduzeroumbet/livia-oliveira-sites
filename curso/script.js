@@ -26,22 +26,33 @@
   }
 
   /* Vídeo do hero (Arbor): 720 até 699px, 1280 no resto; fade-in no canplay;
-     pausado com prefers-reduced-motion; se falhar, fica o poster */
+     pausado com prefers-reduced-motion; se falhar, fica o poster.
+     No celular o poster é o LCP: o vídeo (preload="none") só começa a baixar e tocar depois do load */
   var video = document.querySelector(".hero__video");
   if (video) {
+    var celular = window.innerWidth <= 699;
     var pronto = function () { video.classList.add("is-ready"); };
-    var src = window.innerWidth <= 699 ? video.getAttribute("data-src-720") : video.getAttribute("data-src-1280");
-    var fonte = video.querySelector("source");
-    if (src && fonte && fonte.getAttribute("src") !== src) {
-      fonte.setAttribute("src", src);
-      video.load();
-    }
+    var inicia = function () {
+      var src = celular ? video.getAttribute("data-src-720") : video.getAttribute("data-src-1280");
+      var fonte = video.querySelector("source");
+      if (src && fonte && fonte.getAttribute("src") !== src) {
+        fonte.setAttribute("src", src);
+        video.load();
+      }
+      video.muted = true;
+      var toca = video.play();
+      if (toca && toca.catch) toca.catch(function () {});
+    };
     video.addEventListener("canplay", pronto);
     video.addEventListener("error", pronto, true);
     if (video.readyState >= 3) pronto();
-    var toca = video.play();
-    if (toca && toca.catch) toca.catch(function () {});
-    if (reduz) { video.pause(); pronto(); }
+    if (reduz) {
+      pronto();
+    } else if (celular && document.readyState !== "complete") {
+      window.addEventListener("load", inicia);
+    } else {
+      inicia();
+    }
   }
 
   /* Navbar Arbor: papel com blur depois de 16px; sheet no celular trava a rolagem */
@@ -138,10 +149,32 @@
     contadores.forEach(function (el) { ioc.observe(el); });
   }
 
-  /* Depoimentos: carrossel com swipe e scroll-snap (CSS) e pontinhos indicadores */
+  /* Depoimentos: carrossel com swipe e scroll-snap (CSS), setas anterior/próximo e pontinhos indicadores */
   var marquee = document.querySelector(".marquee");
   if (marquee) {
     var originais = Array.prototype.slice.call(marquee.querySelectorAll(".depo"));
+    var passoDepo = function () {
+      return originais.length > 1 ? originais[1].offsetLeft - originais[0].offsetLeft : 1;
+    };
+    /* As setas andam um card a partir da posição atual (no desktop o fim chega antes do último card
+       encostar na margem, então ir pelo índice do pontinho travaria a seta anterior) */
+    var seta = function (classe, rotulo, delta) {
+      var b = document.createElement("button");
+      b.type = "button";
+      b.className = "depo-seta " + classe;
+      b.setAttribute("aria-label", rotulo);
+      b.innerHTML = '<svg aria-hidden="true"><use href="#i-seta"/></svg>';
+      b.addEventListener("click", function () {
+        var passo = passoDepo();
+        var alvo = (Math.round(marquee.scrollLeft / passo) + delta) * passo;
+        marquee.scrollTo({ left: Math.max(0, alvo), behavior: reduz ? "auto" : "smooth" });
+      });
+      return b;
+    };
+    var anterior = seta("depo-seta--anterior", "Depoimento anterior", -1);
+    var proximo = seta("depo-seta--proximo", "Próximo depoimento", 1);
+    var controles = document.createElement("div");
+    controles.className = "depo-controles";
     var pontos = document.createElement("div");
     pontos.className = "depo-pontos";
     originais.forEach(function (card, n) {
@@ -154,17 +187,26 @@
       });
       pontos.appendChild(b);
     });
-    marquee.parentNode.insertBefore(pontos, marquee.nextSibling);
+    controles.appendChild(anterior);
+    controles.appendChild(pontos);
+    controles.appendChild(proximo);
+    marquee.parentNode.insertBefore(controles, marquee.nextSibling);
     var botoesPontos = pontos.querySelectorAll("button");
-    marquee.addEventListener("scroll", function () {
-      var passo = originais.length > 1 ? originais[1].offsetLeft - originais[0].offsetLeft : 1;
-      var atual = Math.min(originais.length - 1, Math.max(0, Math.round(marquee.scrollLeft / passo)));
-      if (marquee.scrollLeft + marquee.clientWidth >= marquee.scrollWidth - 4) atual = originais.length - 1;
+    /* aria-disabled em vez de disabled: a seta continua focável e o foco não some ao chegar na ponta */
+    var marcaDepo = function () {
+      var atual = Math.min(originais.length - 1, Math.max(0, Math.round(marquee.scrollLeft / passoDepo())));
+      var noFimDepo = marquee.scrollLeft + marquee.clientWidth >= marquee.scrollWidth - 4;
+      if (noFimDepo) atual = originais.length - 1;
       botoesPontos.forEach(function (b, n) {
         if (n === atual) b.setAttribute("aria-current", "true");
         else b.removeAttribute("aria-current");
       });
-    }, { passive: true });
+      anterior.setAttribute("aria-disabled", marquee.scrollLeft <= 4 ? "true" : "false");
+      proximo.setAttribute("aria-disabled", noFimDepo ? "true" : "false");
+    };
+    marquee.addEventListener("scroll", marcaDepo, { passive: true });
+    window.addEventListener("resize", marcaDepo);
+    marcaDepo();
   }
 
   /* FAQ: abre e fecha com altura suave */

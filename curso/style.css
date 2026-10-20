@@ -197,10 +197,11 @@ main .btn:not(.btn--light):not(.btn--ink):hover, .barra-mobile .btn:hover { back
 }
 .feats__item {
   display: inline-flex; align-items: center; gap: 6px;
-  font-size: calc(11.5px * var(--ui-scale)); font-weight: 400; letter-spacing: 0.005em;
-  color: var(--ink-faint);
+  font-size: calc(13px * var(--ui-scale)); font-weight: 400; letter-spacing: 0.005em;
+  /* ink-soft: >= 6,5:1 sobre o véu (90% de papel) mesmo com o vídeo preto por baixo */
+  color: var(--ink-soft);
 }
-.feats__item svg { flex: none; color: var(--ink-faint); }
+.feats__item svg { flex: none; color: var(--ink-soft); }
 
 .hero__title {
   margin-top: calc(clamp(20px, 3.4vh, 34px) * var(--scale));
@@ -234,6 +235,11 @@ main .btn:not(.btn--light):not(.btn--ink):hover, .barra-mobile .btn:hover { back
 }
 
 @keyframes fade-up { from { opacity: 0; transform: translateY(12px); } }
+
+/* Celular: o poster aparece de imediato (é o LCP) e o vídeo 720 entra por cima depois do load */
+@media (max-width: 699px) {
+  .js .hero__video { opacity: 1; }
+}
 
 @media (max-width: 640px) {
   .feats { gap: 10px 18px; }
@@ -470,7 +476,7 @@ main .btn:not(.btn--light):not(.btn--ink):hover, .barra-mobile .btn:hover { back
   background: var(--creme); border: 1px solid var(--linha); border-radius: 24px;
   display: flex; flex-direction: column; justify-content: space-between; gap: 20px;
 }
-.depo blockquote { margin: 0; font-family: var(--font-display); font-size: 1.12rem; line-height: 1.45; letter-spacing: -0.01em; color: var(--vinho); }
+.depo blockquote { margin: 0; font-family: var(--font-display); font-size: 16px; line-height: 1.5; letter-spacing: -0.01em; color: var(--vinho); }
 .depo blockquote::before { content: "\201C"; display: block; font-size: 2.8rem; line-height: .7; color: var(--rosa); margin-bottom: 6px; }
 .depo figcaption { display: flex; align-items: center; gap: 12px; padding-top: 14px; border-top: 1px solid rgba(59, 31, 43, .1); font-size: .78rem; font-weight: 600; letter-spacing: .04em; text-transform: uppercase; color: rgba(59, 31, 43, .82); }
 .depo-avatar {
@@ -478,7 +484,17 @@ main .btn:not(.btn--light):not(.btn--ink):hover, .barra-mobile .btn:hover { back
   background: var(--rosa-claro); border: 1px solid rgba(181, 131, 141, .5);
   font-family: var(--font-display); font-size: .95rem; font-weight: 500; letter-spacing: 0; color: var(--vinho);
 }
-.depo-pontos { display: flex; justify-content: center; gap: 4px; margin-top: 8px; }
+.depo-controles { display: flex; justify-content: center; align-items: center; gap: 10px; margin-top: 8px; }
+.depo-pontos { display: flex; justify-content: center; gap: 4px; }
+.depo-seta {
+  flex: none; display: grid; place-items: center; width: 40px; height: 40px; padding: 0; border-radius: 50%;
+  border: 1px solid rgba(59, 31, 43, .18); background: rgba(255, 255, 255, .6); color: var(--vinho);
+  transition: background .25s ease, border-color .25s ease, color .25s ease, opacity .25s ease;
+}
+.depo-seta svg { width: 18px; height: 18px; }
+.depo-seta--anterior svg { transform: rotate(180deg); }
+.depo-seta:hover { background: var(--vinho); border-color: var(--vinho); color: #fff; }
+.depo-seta[aria-disabled="true"] { opacity: .35; cursor: default; pointer-events: none; }
 .depo-pontos button { width: 28px; height: 28px; padding: 0; display: grid; place-items: center; }
 .depo-pontos button::before { content: ""; width: 8px; height: 8px; border-radius: 50%; background: rgba(181, 131, 141, .4); transition: background .25s ease, transform .25s ease; }
 .depo-pontos button[aria-current="true"]::before { background: var(--vinho); transform: scale(1.25); }
@@ -642,6 +658,14 @@ body.tem-barra .whats { bottom: calc(var(--barra-h) + 16px); }
 @media (min-width: 1024px) {
   :root { --margem: max(32px, (100% - 1280px) / 2); }
   .wrap { width: min(1280px, 100% - 64px); }
+  /* Depoimentos: 3 cards inteiros a partir da margem do conteúdo e o 4º espiando 12% da largura.
+     Área visível = tela menos a margem esquerda = 3 cards + 3 gaps + 0,12 card. cqw mede a seção
+     sem a barra de rolagem; vw fica de reserva para navegador sem container query */
+  .alunas { container-type: inline-size; }
+  .depo {
+    width: calc((100vw - max(32px, (100vw - 1280px) / 2) - 48px) / 3.12);
+    width: calc((100cqw - max(32px, (100cqw - 1280px) / 2) - 48px) / 3.12);
+  }
   .programa-caixa { padding: 56px; }
   .programa-cabeca { flex-direction: row; align-items: flex-end; justify-content: space-between; gap: 24px; padding-bottom: 48px; }
   .programa-cabeca .lead { text-align: right; }

@@ -175,7 +175,8 @@ p { margin: 0 0 1em; }
 .hero__sub {
   margin: calc(clamp(18px, 2.8vh, 30px) * var(--scale)) 0 0; max-width: 60ch;
   font-size: calc(clamp(0.92rem, 1.06vw, 1.02rem) * var(--ui-scale)); font-weight: 400; line-height: 1.62;
-  color: var(--ink-soft); text-shadow: 0 1px 20px rgba(6, 5, 4, 0.65);
+  /* um pouco mais claro que o --ink-soft (0.82) e sombra mais firme, sem mexer no scrim */
+  color: rgba(244, 242, 238, 0.94); text-shadow: 0 1px 3px rgba(6, 5, 4, 0.45), 0 1px 20px rgba(6, 5, 4, 0.7);
   animation: settle 1.1s var(--ease-out) 0.1s both;
 }
 /* A única pílula do hero: branca, redonda, generosa */
@@ -257,14 +258,24 @@ p { margin: 0 0 1em; }
   transition: border-color 0.3s cubic-bezier(0.22, 0.68, 0.32, 1), background 0.3s cubic-bezier(0.22, 0.68, 0.32, 1);
 }
 .step:hover .step__card { border-color: rgba(255, 255, 255, 0.6); background: rgba(255, 255, 255, 0.07); }
-.step__card svg { display: block; width: clamp(18px, 1.8vw, 26px); height: clamp(18px, 1.8vw, 26px); color: rgba(255, 255, 255, 0.92); }
+.step__card svg { display: block; width: clamp(18px, 1.8vw, 26px); height: clamp(18px, 1.8vw, 26px); color: #fff; }
 .step__label { font-size: calc(clamp(11px, 0.9vw, 13px) * var(--ui-scale)); color: #fff; line-height: 1.25; }
 .step__dash { width: clamp(9px, 1vw, 14px); height: 1px; background: rgba(255, 255, 255, 0.55); margin-top: clamp(7px, 0.9vw, 13px); }
 .step__num { margin-top: clamp(5px, 0.6vw, 9px); font-size: calc(clamp(9px, 0.9vw, 13px) * var(--ui-scale)); color: #fff; }
-.step__texto { margin: 10px 0 0; font-size: .92rem; line-height: 1.5; color: #fff; }
+.step__texto { margin: 10px 0 0; font-size: 16px; line-height: 1.5; color: #fff; }
+/* Celular: a borda passa do cartão para o passo inteiro, então ícone, número e descrição ficam na mesma caixa */
 @media (max-width: 620px) {
-  .steps { display: grid; grid-template-columns: 1fr 1fr; gap: 24px 12px; }
-  .step { max-width: none; }
+  .steps { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .step {
+    max-width: none; padding: 14px;
+    border: 1px solid rgba(255, 255, 255, 0.30); border-radius: 7px;
+    transition: border-color 0.3s cubic-bezier(0.22, 0.68, 0.32, 1), background 0.3s cubic-bezier(0.22, 0.68, 0.32, 1);
+  }
+  .step__card { height: auto; gap: 10px; padding: 0; border: 0; border-radius: 0; }
+  .step:hover .step__card { border-color: transparent; background: none; }
+  .step:hover { border-color: rgba(255, 255, 255, 0.6); background: rgba(255, 255, 255, 0.07); }
+  .step__label { font-size: 15px; }
+  .step__num { font-size: 13px; }
 }
 
 /* Sobre */
