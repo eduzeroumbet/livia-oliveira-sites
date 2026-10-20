@@ -37,6 +37,7 @@ WEBP = [
     ("terapia-hero-0973.webp", "2L2A0973", (0, 150, 1067, 1484), (960, 1200)),
     ("terapia-sessoes-1289.webp", "2L2A1289", (0, 180, 1067, 1514), (800, 1000)),
     ("terapia-sobre-0858.webp", "2L2A0858", (0, 200, 1067, 1534), (800, 1000)),
+    ("terapia-sobre-1110.webp", "2L2A1110", (0, 150, 1067, 1484), (800, 1000)),
 ]
 
 # Open Graph 1200x630 (proporção 1,905): faixa de 1067x560 na foto vertical, sem texto.

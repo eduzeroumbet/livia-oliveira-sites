@@ -82,6 +82,8 @@ def check_page(rel):
     if rel == "terapia/b/index.html":
         if 'value="Tarde (13h  - 17h)"' not in html:
             erros.append(f"{rel}: valor do turno da tarde difere do Google Form (\"Tarde (13h  - 17h)\")")
+        if 'value="Manhã (10h e 11h)"' not in html:
+            erros.append(f"{rel}: valor do turno da manhã difere do Google Form (\"Manhã (10h e 11h)\")")
 
 
 def main():
