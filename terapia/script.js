@@ -2,34 +2,63 @@
   "use strict";
 
   var reduz = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  var doc = document.documentElement;
 
-  /* Imagens que não carregarem somem sem deixar ícone quebrado */
+  /* Imagens que não carregarem somem sem deixar ícone quebrado. Lazy ainda não pedida também tem
+     naturalWidth 0, então só a eager entra na checagem imediata; o resto depende do evento error */
   document.querySelectorAll("img").forEach(function (img) {
     function esconde() { img.style.visibility = "hidden"; }
-    if (img.complete && img.naturalWidth === 0) esconde();
-    else img.addEventListener("error", esconde);
+    img.addEventListener("error", esconde);
+    img.addEventListener("load", function () { img.style.visibility = ""; });
+    if (img.loading !== "lazy" && img.complete && img.naturalWidth === 0) esconde();
   });
 
   /* Vídeo do hero (Aethera): 720 até 699px, 1280 no resto; fade-in no canplay;
-     pausado com prefers-reduced-motion; se falhar, fica o poster */
+     pausado com prefers-reduced-motion; se falhar, fica o poster.
+     No celular o poster é o LCP: o vídeo (preload="none") só começa a baixar e tocar depois do load */
   var video = document.querySelector(".hero__video");
   if (video) {
+    var celular = window.innerWidth <= 699;
     var pronto = function () { video.classList.add("is-ready"); };
-    var src = window.innerWidth <= 699 ? video.getAttribute("data-src-720") : video.getAttribute("data-src-1280");
-    var fonte = video.querySelector("source");
-    if (src && fonte && fonte.getAttribute("src") !== src) {
-      fonte.setAttribute("src", src);
-      video.load();
-    }
+    var inicia = function () {
+      var src = celular ? video.getAttribute("data-src-720") : video.getAttribute("data-src-1280");
+      var fonte = video.querySelector("source");
+      if (src && fonte && fonte.getAttribute("src") !== src) {
+        fonte.setAttribute("src", src);
+        video.load();
+      }
+      video.muted = true;
+      var toca = video.play();
+      if (toca && toca.catch) toca.catch(function () {});
+    };
     video.addEventListener("canplay", pronto);
     video.addEventListener("error", pronto, true);
     if (video.readyState >= 3) pronto();
-    var toca = video.play();
-    if (toca && toca.catch) toca.catch(function () {});
-    if (reduz) { video.pause(); pronto(); }
+    if (reduz) {
+      pronto();
+    } else if (celular && document.readyState !== "complete") {
+      window.addEventListener("load", inicia);
+    } else {
+      inicia();
+    }
   }
 
-  /* Navbar Aethera: sheet no celular trava a rolagem */
+  /* Navbar Aethera: transparente no hero; fora dele ganha fundo sólido (IntersectionObserver no hero) */
+  var nav = document.querySelector(".nav");
+  var heroNav = document.querySelector(".hero");
+  if (nav && heroNav) {
+    if ("IntersectionObserver" in window) {
+      new IntersectionObserver(function (entradas) {
+        nav.classList.toggle("is-solida", !entradas[0].isIntersecting);
+      }, { rootMargin: "-88px 0px 0px 0px", threshold: 0 }).observe(heroNav);
+    } else {
+      var marcaNav = function () { nav.classList.toggle("is-solida", window.scrollY > heroNav.offsetHeight - 88); };
+      marcaNav();
+      window.addEventListener("scroll", marcaNav, { passive: true });
+    }
+  }
+
+  /* Sheet no celular trava a rolagem */
   var toggle = document.querySelector(".nav__toggle");
   var sheet = document.getElementById("nav-sheet");
   function abreMenu(aberto) {
@@ -45,11 +74,21 @@
   }
 
   /* Reveal das seções: o que está acima da dobra já começa revelado;
-     rede de segurança revela o resto depois de 1,5 s ou ao chegar no fim da página */
+     rede de segurança força o estado final (sem transição, opacity 1) depois de 1,5 s,
+     no evento load e ao chegar no fim da página, para nenhum card ficar a meio caminho */
   var revelaveis = Array.prototype.slice.call(document.querySelectorAll(".reveal"));
   var io = null;
+  var revelado = false;
   function revelaTudo() {
-    revelaveis.forEach(function (el) { el.classList.add("is-visivel"); });
+    if (revelado) return;
+    revelado = true;
+    revelaveis.forEach(function (el) {
+      if (el.classList.contains("is-visivel")) return;
+      el.style.transition = "none";
+      el.classList.add("is-visivel");
+    });
+    doc.offsetHeight;
+    revelaveis.forEach(function (el) { el.style.transition = ""; });
     if (io) io.disconnect();
   }
   if (reduz || !("IntersectionObserver" in window)) {
@@ -71,6 +110,8 @@
       }
     });
     setTimeout(revelaTudo, 1500);
+    if (document.readyState === "complete") revelaTudo();
+    else window.addEventListener("load", revelaTudo);
   }
   function noFim() {
     return window.innerHeight + window.scrollY >= document.documentElement.scrollHeight - 4;
@@ -80,10 +121,10 @@
   var hero = document.querySelector(".hero");
   var foto = document.querySelector(".sobre .foto img");
   var whats = document.querySelector(".whats");
-  var evitaveis = Array.prototype.slice.call(document.querySelectorAll("main .btn"));
+  var evitaveis = Array.prototype.slice.call(document.querySelectorAll("main .btn, .step, .faq summary, .nota"));
   var pendente = false;
 
-  /* WhatsApp não pode cobrir CTAs */
+  /* WhatsApp não pode cobrir CTAs, passos, perguntas do FAQ nem a nota da lista de espera */
   function cobreAlgo() {
     var w = whats.getBoundingClientRect();
     return evitaveis.some(function (el) {
@@ -98,7 +139,7 @@
     var vh = window.innerHeight;
     var hh = hero.offsetHeight;
 
-    if (whats) whats.classList.toggle("is-visivel", y > hh * 0.85 && !cobreAlgo());
+    if (whats) whats.classList.toggle("is-visivel", y > hh - 88 && !cobreAlgo());
 
     if (noFim()) revelaTudo();
 

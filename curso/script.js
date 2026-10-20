@@ -4,11 +4,13 @@
   var reduz = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
   var doc = document.documentElement;
 
-  /* Imagens que não carregarem somem sem deixar ícone quebrado */
+  /* Imagens que não carregarem somem sem deixar ícone quebrado. Lazy ainda não pedida também tem
+     naturalWidth 0, então só a eager entra na checagem imediata; o resto depende do evento error */
   document.querySelectorAll("img").forEach(function (img) {
     function esconde() { img.style.visibility = "hidden"; }
-    if (img.complete && img.naturalWidth === 0) esconde();
-    else img.addEventListener("error", esconde);
+    img.addEventListener("error", esconde);
+    img.addEventListener("load", function () { img.style.visibility = ""; });
+    if (img.loading !== "lazy" && img.complete && img.naturalWidth === 0) esconde();
   });
 
   /* Preserva UTMs e fbclid nos links da Hotmart */
@@ -63,11 +65,21 @@
   }
 
   /* Reveal das seções: o que está acima da dobra já começa revelado;
-     rede de segurança revela o resto depois de 1,5 s ou ao chegar no fim da página */
+     rede de segurança força o estado final (sem transição, opacity 1) depois de 1,5 s,
+     no evento load e ao chegar no fim da página, para nenhum card ficar a meio caminho */
   var revelaveis = Array.prototype.slice.call(document.querySelectorAll(".reveal"));
   var io = null;
+  var revelado = false;
   function revelaTudo() {
-    revelaveis.forEach(function (el) { el.classList.add("is-visivel"); });
+    if (revelado) return;
+    revelado = true;
+    revelaveis.forEach(function (el) {
+      if (el.classList.contains("is-visivel")) return;
+      el.style.transition = "none";
+      el.classList.add("is-visivel");
+    });
+    doc.offsetHeight;
+    revelaveis.forEach(function (el) { el.style.transition = ""; });
     if (io) io.disconnect();
   }
   if (reduz || !("IntersectionObserver" in window)) {
@@ -89,6 +101,8 @@
       }
     });
     setTimeout(revelaTudo, 1500);
+    if (document.readyState === "complete") revelaTudo();
+    else window.addEventListener("load", revelaTudo);
   }
   function noFim() {
     return window.innerHeight + window.scrollY >= document.documentElement.scrollHeight - 4;
@@ -124,8 +138,7 @@
     contadores.forEach(function (el) { ioc.observe(el); });
   }
 
-  /* Marquee: duplica os cards para o loop; pausa no toque.
-     No celular vira carrossel com swipe (CSS) e pontinhos indicadores. */
+  /* Depoimentos: carrossel com swipe e scroll-snap (CSS) e pontinhos indicadores */
   var marquee = document.querySelector(".marquee");
   if (marquee) {
     var originais = Array.prototype.slice.call(marquee.querySelectorAll(".depo"));
@@ -146,21 +159,12 @@
     marquee.addEventListener("scroll", function () {
       var passo = originais.length > 1 ? originais[1].offsetLeft - originais[0].offsetLeft : 1;
       var atual = Math.min(originais.length - 1, Math.max(0, Math.round(marquee.scrollLeft / passo)));
+      if (marquee.scrollLeft + marquee.clientWidth >= marquee.scrollWidth - 4) atual = originais.length - 1;
       botoesPontos.forEach(function (b, n) {
         if (n === atual) b.setAttribute("aria-current", "true");
         else b.removeAttribute("aria-current");
       });
     }, { passive: true });
-  }
-  if (marquee && !reduz) {
-    var trilha = marquee.querySelector(".marquee-trilha");
-    Array.prototype.slice.call(trilha.children).forEach(function (card) {
-      var clone = card.cloneNode(true);
-      clone.setAttribute("aria-hidden", "true");
-      trilha.appendChild(clone);
-    });
-    marquee.addEventListener("touchstart", function () { marquee.classList.add("is-pausado"); }, { passive: true });
-    marquee.addEventListener("touchend", function () { marquee.classList.remove("is-pausado"); }, { passive: true });
   }
 
   /* FAQ: abre e fecha com altura suave */
