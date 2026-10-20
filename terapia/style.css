@@ -173,7 +173,8 @@ p { margin: 0 0 1em; }
   width: min(300px, 78%);
 }
 .hero__foto img {
-  position: relative; width: 100%; aspect-ratio: 3 / 4;
+  /* height auto: sem ele o height="1200" do HTML vence o aspect-ratio e a foto estica para 1200px */
+  position: relative; width: 100%; height: auto; aspect-ratio: 3 / 4;
   object-fit: cover; object-position: 80% 40%;
   /* arco: raio horizontal de 50% da largura e vertical de 37,5% da altura (= meia largura num 3:4) */
   border-radius: 50% 50% 26px 26px / 37.5% 37.5% 26px 26px;
