@@ -29,9 +29,9 @@
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;1,400;1,500&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;1,400;1,500&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600;9..40,700&display=swap" rel="stylesheet">
   <link rel="preload" as="image" href="../assets/video/scrolltide/hero-arbor-poster.webp" fetchpriority="high">
-  <link rel="stylesheet" href="style.css?v=5">
+  <link rel="stylesheet" href="style.css?v=6">
 
   <script type="application/ld+json">
   {
@@ -146,7 +146,11 @@
           <a class="btn btn--light" href="#programa">Ver o conteúdo</a>
           <a class="btn btn--ink" href="https://pay.hotmart.com/M100028858P?checkoutMode=10">Quero me inscrever</a>
         </div>
-        <p class="hero__preco">12x de R$ 88,94 ou R$ 860 à vista</p>
+        <div class="hero__valor">
+          <p class="hero__valor-de">De <s>R$ 1.497</s></p>
+          <p class="hero__valor-parcela">12x de R$ 88,94</p>
+          <p class="hero__valor-avista">ou R$ 860 à vista</p>
+        </div>
       </div>
     </section>
 
@@ -419,8 +423,8 @@
           </ul>
           <p class="preco-de">De <s>R$ 1.497</s></p>
           <p class="preco-parcela"><small>12x</small>R$ 88,94</p>
-          <p class="preco-avista">ou <strong>R$ 860 à vista</strong><span class="preco-economia">economize R$ 207 em relação ao parcelado (12x de R$ 88,94, total de R$ 1.067,28)</span></p>
-          <a class="btn btn-bloco" href="https://pay.hotmart.com/M100028858P?checkoutMode=10">Quero me inscrever <svg aria-hidden="true"><use href="#i-seta"/></svg></a>
+          <p class="preco-avista">ou <strong>R$ 860</strong> à vista<span class="preco-economia">economize R$ 207 em relação ao parcelado (12x de R$ 88,94, total de R$ 1.067,28)</span></p>
+          <a class="btn btn-bloco btn--papel" href="https://pay.hotmart.com/M100028858P?checkoutMode=10">Quero me inscrever <svg aria-hidden="true"><use href="#i-seta"/></svg></a>
           <p class="garantia-linha">7 dias de garantia</p>
           <p class="pagamentos">Pix · Cartão em até 12x · Boleto · Checkout seguro Hotmart</p>
           <p class="acesso">Acesso liberado na hora, por e-mail</p>
@@ -458,6 +462,7 @@
         </div>
         <div class="centro reveal">
           <a class="btn" href="https://pay.hotmart.com/M100028858P?checkoutMode=10">Quero garantir minha vaga <svg aria-hidden="true"><use href="#i-seta"/></svg></a>
+          <p class="preco-linha">12x de R$ 88,94 ou R$ 860 à vista</p>
           <p class="garantia-linha">7 dias de garantia</p>
         </div>
       </div>
@@ -473,7 +478,7 @@
   </footer>
 
   <aside class="barra-mobile" aria-label="Inscrição">
-    <span class="preco"><small>Inscrição</small>12x R$ 88,94</span>
+    <span class="preco">12x R$ 88,94<small>ou R$ 860 à vista</small></span>
     <a class="btn btn-sm" href="https://pay.hotmart.com/M100028858P?checkoutMode=10">Quero me inscrever</a>
   </aside>
 
@@ -481,6 +486,6 @@
     <svg aria-hidden="true"><use href="#i-whats"/></svg>
   </a>
 
-  <script src="script.js?v=5" defer></script>
+  <script src="script.js?v=6" defer></script>
 </body>
 </html>
