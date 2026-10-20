@@ -1,4 +1,15 @@
 /* Atendimento psicológico | hero claro com respiração em CSS, trilho Zephyr em Como funciona */
+
+/* Fallback com as métricas da Playfair: o título não muda de altura quando a fonte web chega (CLS) */
+@font-face {
+  font-family: "Playfair Fallback";
+  src: local("Times New Roman"), local("TimesNewRomanPSMT");
+  size-adjust: 111.52%;
+  ascent-override: 97.25%;
+  descent-override: 22.56%;
+  line-gap-override: 0%;
+}
+
 :root {
   --vinho: #3B1F2B;
   --vinho-fundo: #1E1016;
@@ -11,7 +22,7 @@
   --dourado: #C9A46A;
   --salvia: #A8B5A0;
   --linha: rgba(59, 31, 43, .12);
-  --serif: "Playfair Display", Georgia, "Times New Roman", serif;
+  --serif: "Playfair Display", "Playfair Fallback", Georgia, "Times New Roman", serif;
   --sans: "DM Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
   --raio: 22px;
   --sombra: 0 18px 50px -24px rgba(59, 31, 43, .35);
@@ -199,7 +210,8 @@ p { margin: 0 0 1em; }
   display: flex; flex-wrap: wrap; align-items: center; justify-content: center;
   gap: 6px 14px; margin-top: 32px; text-align: center;
 }
-.rating__count, .rating__score, .rating__sep { font-size: 14px; font-weight: 500; color: #4A3540; }
+/* vinho sobre o creme do hero: contraste acima de 12:1 */
+.rating__count, .rating__score, .rating__sep { font-size: 14px; font-weight: 500; color: var(--vinho); }
 .rating__sep { color: var(--rosa); }
 
 @media (max-width: 700px) {
@@ -212,6 +224,7 @@ p { margin: 0 0 1em; }
   .hero__grid { grid-template-columns: minmax(0, 1.08fr) minmax(0, .92fr); gap: clamp(40px, 6vw, 96px); padding-top: 0; }
   .hero__sub { font-size: 1.125rem; }
   .hero__foto { width: min(440px, 100%); }
+  .rating__count, .rating__score, .rating__sep { font-size: 15px; }
   .blob--rosa { right: 2%; top: 14%; width: min(640px, 48vw); }
 }
 
@@ -250,6 +263,21 @@ p { margin: 0 0 1em; }
 .step__dash { width: 14px; height: 1px; background: rgba(255, 255, 255, 0.7); margin-top: 12px; }
 .step__num { margin-top: 8px; font-size: 13px; color: #fff; }
 .step__texto { margin: 8px 0 0; font-size: 16px; line-height: 1.5; color: #fff; }
+
+/* Celular: uma coluna, com número, ícone e título na mesma linha e o texto embaixo */
+@media (max-width: 699px) {
+  .steps { grid-template-columns: 1fr; }
+  .step {
+    display: grid; grid-template-columns: auto auto 1fr; grid-template-areas: "num icone titulo" "texto texto texto";
+    align-items: center; column-gap: 12px; padding: 18px 20px;
+  }
+  .step__card { display: contents; }
+  .step__card svg { grid-area: icone; }
+  .step__label { grid-area: titulo; font-size: 17px; }
+  .step__num { grid-area: num; margin-top: 0; font-size: 15px; font-weight: 500; }
+  .step__dash { display: none; }
+  .step__texto { grid-area: texto; margin-top: 10px; font-size: 17px; }
+}
 
 /* Sobre */
 .sobre { background: var(--creme); }
