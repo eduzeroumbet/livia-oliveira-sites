@@ -325,6 +325,10 @@ p { margin: 0 0 1em; }
 /* Rodapé: o aviso do CVV fica maior e em destaque */
 .rodape { background: #160B10; color: rgba(250, 245, 242, .88); padding: 36px 0 96px; font-size: .9375rem; text-align: center; }
 .rodape p { margin: 0 0 6px; }
+/* Links para as outras páginas (como na consultoria): branco sobre o fundo escuro, mais de 15:1 */
+.rodape__links { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px 18px; margin: 12px 0 6px; }
+.rodape__links a { font-size: .9375rem; color: #fff; text-decoration: underline; text-decoration-color: rgba(255, 255, 255, .35); text-underline-offset: 3px; }
+.rodape__links a:hover { text-decoration-color: currentColor; }
 .rodape .crise {
   display: inline-block; margin-top: 8px; padding: 10px 16px; border-radius: 12px;
   border: 1px solid rgba(235, 211, 166, .35); background: rgba(235, 211, 166, .08);
