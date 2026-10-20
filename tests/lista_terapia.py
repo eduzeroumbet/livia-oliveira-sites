@@ -1,7 +1,8 @@
 """Testa no Chromium headless o formulário da lista de interesse de terapia/index.html.
 
 A requisição ao Google Forms é interceptada (nada é enviado de verdade). Confere a validação com campos vazios,
-a máscara do WhatsApp e o POST para o formResponse com os entries e valores exatos, em 390px e 1440px.
+a máscara do WhatsApp e o POST para o formResponse com os entries e valores exatos, em 390px e 1440px,
+e que a página não carrega Pixel da Meta, GA4 nem GTM (data-sem-rastreamento).
 
 Uso: /Users/educloud/orquestra/.venv/bin/python tests/lista_terapia.py
 Requer: playwright + chromium (python -m playwright install chromium).
@@ -110,6 +111,9 @@ with sync_playwright() as p:
         ok(page.evaluate("document.activeElement.id") == "lista-ok", "foco na mensagem de sucesso")
         ok(page.url.startswith(URL), "continua na mesma página")
         ok(page.evaluate("document.documentElement.scrollWidth") <= vp["width"], "sem rolagem horizontal")
+        rastreio = [u for u in externas if "facebook" in u or "googletagmanager" in u or "google-analytics" in u]
+        ok(not rastreio, f"sem Pixel/GA4/GTM na terapia {rastreio}")
+        ok(not page.evaluate("'fbq' in window || 'gtag' in window"), "fbq e gtag não definidos")
         ok(not erros_js, f"sem erros de JS {erros_js}")
         page.close()
     b.close()

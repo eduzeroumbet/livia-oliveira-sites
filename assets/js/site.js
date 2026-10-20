@@ -7,6 +7,8 @@
  *   ga4Id:       "G-XH74VZSNZ2"  (GA4 direto, propriedade 559914633: config com page_view em toda página)
  * As páginas do curso dizem qual versão são no atributo data-pagina da tag <script> (pgA = curso/,
  * pgB = curso/b/, pgC = curso/versao-b/); o valor vai no sck da Hotmart e no content_category dos eventos.
+ * Páginas com data-sem-rastreamento na tag <script> (as de terapia: conteúdo de saúde) não carregam GTM, GA4
+ * nem Pixel; o resto (UTMs, máscara, validação e envio dos formulários) funciona igual.
  */
 const CONFIG = { gtmId: "", metaPixelId: "1197036460960933", ga4Id: "G-XH74VZSNZ2" };
 
@@ -16,7 +18,9 @@ window.dataLayer = window.dataLayer || [];
   "use strict";
 
   /* Versão da página do curso (pgA, pgB, pgC); vazio nas outras páginas */
-  var pagina = (document.currentScript && document.currentScript.getAttribute("data-pagina")) || "";
+  var script = document.currentScript;
+  var pagina = (script && script.getAttribute("data-pagina")) || "";
+  var rastreia = !(script && script.hasAttribute("data-sem-rastreamento"));
 
   /* ---------- Carregamento condicional de GTM, GA4 e Pixel ---------- */
   function loadScript(src) {
@@ -26,19 +30,19 @@ window.dataLayer = window.dataLayer || [];
     document.head.appendChild(s);
   }
 
-  if (CONFIG.gtmId) {
+  if (rastreia && CONFIG.gtmId) {
     window.dataLayer.push({ "gtm.start": Date.now(), event: "gtm.js" });
     loadScript("https://www.googletagmanager.com/gtm.js?id=" + encodeURIComponent(CONFIG.gtmId));
   }
 
-  if (CONFIG.ga4Id) {
+  if (rastreia && CONFIG.ga4Id) {
     window.gtag = function () { window.dataLayer.push(arguments); };
     window.gtag("js", new Date());
     window.gtag("config", CONFIG.ga4Id);
     loadScript("https://www.googletagmanager.com/gtag/js?id=" + encodeURIComponent(CONFIG.ga4Id));
   }
 
-  if (CONFIG.metaPixelId) {
+  if (rastreia && CONFIG.metaPixelId) {
     /* Snippet oficial do Pixel da Meta, reescrito sem minificação */
     var fbq = function () {
       fbq.callMethod ? fbq.callMethod.apply(fbq, arguments) : fbq.queue.push(arguments);
@@ -59,8 +63,8 @@ window.dataLayer = window.dataLayer || [];
   function track(event, params) {
     var data = Object.assign({ event: event }, params || {});
     window.dataLayer.push(data);
-    if (CONFIG.ga4Id && window.gtag) window.gtag("event", event, params || {});
-    if (CONFIG.metaPixelId && window.fbq && PIXEL_EVENTS[event]) {
+    if (rastreia && CONFIG.ga4Id && window.gtag) window.gtag("event", event, params || {});
+    if (rastreia && CONFIG.metaPixelId && window.fbq && PIXEL_EVENTS[event]) {
       var p = {};
       if (params && params.value) { p.value = params.value; p.currency = params.currency || "BRL"; }
       if (params && params.form) p.content_name = params.form;
@@ -113,14 +117,18 @@ window.dataLayer = window.dataLayer || [];
     });
   });
 
+  /* Oferta vista: quando o topo de #oferta passa da metade da tela (a área observada é só a metade de cima,
+   * então vale para seção de qualquer altura). Uma vez por carregamento. */
   var offer = document.getElementById("oferta");
   if (offer && "IntersectionObserver" in window) {
+    var offerSeen = false;
     var offerIO = new IntersectionObserver(function (entries) {
-      if (entries[0].isIntersecting) {
-        track("view_offer", offerParams);
+      if (!offerSeen && entries.some(function (e) { return e.isIntersecting; })) {
+        offerSeen = true;
         offerIO.disconnect();
+        track("view_offer", offerParams);
       }
-    }, { threshold: 0.3 });
+    }, { rootMargin: "0px 0px -50% 0px", threshold: 0 });
     offerIO.observe(offer);
   }
 

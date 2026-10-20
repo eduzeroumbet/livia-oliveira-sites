@@ -15,7 +15,7 @@ import sys
 from pathlib import Path
 from urllib.parse import parse_qs, urlsplit
 
-from playwright.sync_api import sync_playwright
+from playwright.sync_api import TimeoutError as PlaywrightTimeout, sync_playwright
 
 ROOT = Path(__file__).resolve().parent.parent
 PAGINAS = {"pgA": "curso/index.html", "pgB": "curso/b/index.html", "pgC": "curso/versao-b/index.html"}
@@ -37,6 +37,8 @@ ESTADO = """() => ({
   fbq: window.fbq ? window.fbq.queue.map(a => Array.from(a)) : [],
   dl: (window.dataLayer || []).map(x => (x && typeof x.length === "number" && !Array.isArray(x)) ? Array.from(x) : x),
 })"""
+ROLAR_ATE = "el => window.scrollTo({top: el.getBoundingClientRect().top + window.scrollY, behavior: 'instant'})"
+VIU_OFERTA = "() => window.fbq && window.fbq.queue.some(a => a[0] === 'track' && a[1] === 'ViewContent')"
 
 
 def eventos_fbq(estado, nome):
@@ -100,11 +102,18 @@ with sync_playwright() as p:
             ok(eventos_fbq(estado, "InitiateCheckout") == [["track", "InitiateCheckout", esperado]], "InitiateCheckout no Pixel")
             ok(eventos_gtag(estado, "begin_checkout") == [["event", "begin_checkout", esperado]], "begin_checkout no GA4")
 
-            # oferta na tela (duas vezes): um único ViewContent / view_offer
-            for _ in range(2):
-                page.eval_on_selector("#oferta", "el => el.scrollIntoView()")
+            # oferta na tela (duas vezes): um único ViewContent / view_offer.
+            # Rolagem instantânea: as páginas usam scroll-behavior: smooth, e o scrollIntoView() animado era
+            # interrompido pela volta ao topo antes de a oferta chegar na tela.
+            for i in range(2):
+                page.eval_on_selector("#oferta", ROLAR_ATE)
+                if i == 0:
+                    try:
+                        page.wait_for_function(VIU_OFERTA, timeout=5000)
+                    except PlaywrightTimeout:
+                        pass  # a falha aparece na conferência abaixo
                 page.wait_for_timeout(400)
-                page.evaluate("window.scrollTo(0, 0)")
+                page.evaluate("window.scrollTo({top: 0, behavior: 'instant'})")
                 page.wait_for_timeout(400)
             estado = page.evaluate(ESTADO)
             ok(eventos_fbq(estado, "ViewContent") == [["track", "ViewContent", esperado]], "ViewContent no Pixel, uma vez")

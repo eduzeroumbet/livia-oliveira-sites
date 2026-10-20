@@ -40,6 +40,12 @@ CURSO_PAGINA = {
 }
 PIXEL_ID = "1197036460960933"
 GA4_ID = "G-XH74VZSNZ2"
+# terapia (conteúdo de saúde): site.js com data-sem-rastreamento, sem Pixel, GA4 nem GTM
+SEM_RASTREAMENTO = {
+    "terapia/index.html": "../assets/js/site.js",
+    "terapia/b/index.html": "../../assets/js/site.js",
+}
+TAGS_RASTREAMENTO = ("fbq(", "gtag(", "googletagmanager.com", "connect.facebook.net", PIXEL_ID, GA4_ID)
 HOTLINK = "r2" + ".dev"  # storage do Scrolltide; montado em partes para o próprio check não conter o literal
 DOMINIO = "liviaoliveira.me"
 URL_ANTIGA = "github.io" + "/livia-oliveira-sites"  # endereço antigo; em partes pelo mesmo motivo
@@ -122,6 +128,16 @@ def check_page(rel):
         if not re.search(rf'<script src="{re.escape(script)}(\?v=\d+)?" data-pagina="{pagina}"', html):
             erros.append(f"{rel}: sem <script src=\"{script}\" data-pagina=\"{pagina}\"> (rastreamento do curso)")
 
+    if rel in SEM_RASTREAMENTO:
+        script = SEM_RASTREAMENTO[rel]
+        if not re.search(rf'<script src="{re.escape(script)}(\?v=\d+)?" data-sem-rastreamento>', html):
+            erros.append(f"{rel}: sem <script src=\"{script}\" data-sem-rastreamento> (terapia não carrega Pixel/GA4)")
+        for tag in TAGS_RASTREAMENTO:
+            if tag in html:
+                erros.append(f"{rel}: contém {tag!r} (terapia não carrega Pixel/GA4/GTM)")
+    elif "data-sem-rastreamento" in html:
+        erros.append(f"{rel}: data-sem-rastreamento só nas páginas de terapia")
+
     if rel in ("curso/index.html", "curso/versao-b/index.html") and CHECKOUT not in html:
         erros.append(f"{rel}: sem link para o checkout Hotmart")
     if rel == "curso/versao-b/index.html":
@@ -188,6 +204,12 @@ def main():
                 erros.append(f"{extra}: CONFIG sem o Pixel da Meta {PIXEL_ID}")
             if f'ga4Id: "{GA4_ID}"' not in texto:
                 erros.append(f"{extra}: CONFIG sem o GA4 {GA4_ID}")
+            if 'hasAttribute("data-sem-rastreamento")' not in texto:
+                erros.append(f"{extra}: não respeita data-sem-rastreamento (terapia sem Pixel/GA4)")
+        if extra == "terapia/script.js":
+            for tag in TAGS_RASTREAMENTO:
+                if tag in texto:
+                    erros.append(f"{extra}: contém {tag!r} (terapia não carrega Pixel/GA4/GTM)")
 
     cname = ROOT / "CNAME"
     if not cname.exists():
