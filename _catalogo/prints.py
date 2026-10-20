@@ -13,6 +13,7 @@ PAGES = {
     "bio": "index.html",
     "curso": "curso/b/index.html",
     "curso-a": "curso/index.html",
+    "curso-versao-b": "curso/versao-b/index.html",
     "consultoria": "consultoria/index.html",
     "terapia": "terapia/b/index.html",
     "terapia-a": "terapia/index.html",
