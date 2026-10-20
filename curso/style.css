@@ -488,11 +488,13 @@ main .btn:not(.btn--light):not(.btn--ink):hover, .barra-mobile .btn:hover { back
   letter-spacing: -0.02em; line-height: 1.2; color: var(--vinho); margin: 26px 0;
 }
 
-/* Alunas: depoimentos em cards Verge; lista no celular, 2 colunas no tablet e grade de 3 no desktop
-   (todos os cards inteiros, sem carrossel cortando card na borda) */
+/* Alunas: depoimento em destaque (largura total) e grade masonry com CSS columns:
+   1 coluna no celular, 2 a partir de 700px e 3 a partir de 1024px (cards inteiros, sem quebra entre colunas) */
 .alunas { background: var(--papel); }
 .alunas-cabeca { padding-bottom: 8px; }
-.depo-grade { display: grid; gap: 14px; margin-top: 24px; }
+.alunas-cabeca .lead { max-width: 34rem; margin: 0; }
+.depo-grade { margin-top: 16px; column-count: 1; column-gap: 16px; }
+.depo-grade .depo { break-inside: avoid; -webkit-column-break-inside: avoid; margin-bottom: 16px; }
 .depo {
   margin: 0; padding: 26px 24px;
   background: var(--creme); border: 1px solid var(--linha); border-radius: 24px;
@@ -500,12 +502,24 @@ main .btn:not(.btn--light):not(.btn--ink):hover, .barra-mobile .btn:hover { back
 }
 .depo blockquote { margin: 0; font-family: var(--font-display); font-size: 18px; line-height: 1.5; letter-spacing: -0.01em; color: var(--tinta); }
 .depo blockquote::before { content: "\201C"; display: block; font-size: 2.8rem; line-height: .7; color: var(--rosa); margin-bottom: 6px; }
-.depo figcaption { display: flex; align-items: center; gap: 12px; padding-top: 14px; border-top: 1px solid rgba(59, 31, 43, .1); font-size: .8125rem; font-weight: 600; letter-spacing: .04em; text-transform: uppercase; color: var(--vinho); }
+.depo figcaption { display: flex; align-items: center; gap: 12px; padding-top: 14px; border-top: 1px solid rgba(59, 31, 43, .1); }
+.depo-legenda { display: flex; flex-direction: column; gap: 2px; font-size: .8125rem; line-height: 1.35; color: rgba(42, 31, 36, .84); }
+.depo-legenda strong { font-size: .9375rem; font-weight: 600; color: var(--vinho); }
 .depo-avatar {
   flex: none; display: grid; place-items: center; width: 38px; height: 38px; border-radius: 50%;
   background: var(--rosa-claro); border: 1px solid rgba(181, 131, 141, .5);
   font-family: var(--font-display); font-size: .95rem; font-weight: 500; letter-spacing: 0; color: var(--vinho);
 }
+.depo-destaque {
+  margin-top: 24px; padding: 34px 26px 28px;
+  background: var(--vinho); border: 0; border-left: 6px solid var(--rosa);
+}
+.depo-destaque blockquote { font-size: clamp(1.3rem, 3.4vw, 1.9rem); line-height: 1.42; color: var(--papel); max-width: 62rem; }
+.depo-destaque blockquote::before { font-size: clamp(4.5rem, 10vw, 7rem); line-height: .6; margin-bottom: 4px; }
+.depo-destaque figcaption { border-top-color: rgba(255, 255, 255, .16); }
+.depo-destaque .depo-legenda { color: rgba(250, 245, 242, .9); }
+.depo-destaque .depo-legenda strong { color: #E3C899; }
+.alunas-cta { margin-top: 24px; text-align: center; }
 
 /* Oferta */
 .oferta { background: var(--creme); }
@@ -624,7 +638,6 @@ body.tem-barra .whats { bottom: calc(var(--barra-h) + 16px); }
 .reveal.is-visivel { opacity: 1; transform: none; }
 
 @media (min-width: 640px) {
-  .depo-grade { grid-template-columns: 1fr 1fr; gap: 16px; }
   .wrap { width: min(1232px, 100% - 48px); }
   .wrap-estreito { width: min(800px, 100% - 48px); }
   .secao { padding: 96px 0; }
@@ -643,7 +656,6 @@ body.tem-barra .whats { bottom: calc(var(--barra-h) + 16px); }
 @media (min-width: 900px) {
   body { font-size: 17px; }
   .hero__sub { font-size: calc(18px * var(--ui-scale)); }
-  .depo-grade { grid-template-columns: repeat(3, 1fr); gap: 20px; }
   .numeros-grid { grid-template-columns: repeat(4, 1fr); }
   .video-grid { grid-template-columns: 380px 1fr; gap: 72px; }
   .diag-grid { grid-template-columns: 1.1fr .9fr; gap: 72px; }
@@ -657,7 +669,14 @@ body.tem-barra .whats { bottom: calc(var(--barra-h) + 16px); }
   .rodape { padding-bottom: 48px; }
 }
 
+@media (min-width: 700px) {
+  .depo-grade { column-count: 2; }
+  .depo-destaque { padding: 48px 52px 36px; }
+}
+
 @media (min-width: 1024px) {
+  .depo-grade { column-count: 3; column-gap: 20px; }
+  .depo-grade .depo { margin-bottom: 20px; }
   .wrap { width: min(1280px, 100% - 64px); }
   .programa-caixa { padding: 56px; }
   .programa-cabeca { flex-direction: row; align-items: flex-end; justify-content: space-between; gap: 24px; padding-bottom: 48px; }
