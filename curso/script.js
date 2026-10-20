@@ -49,17 +49,36 @@
     quebra(titulo);
   }
 
-  /* Reveal das seções */
-  var revelaveis = document.querySelectorAll(".reveal");
-  if (reduz || !("IntersectionObserver" in window)) {
+  /* Reveal das seções: o que está acima da dobra já começa revelado;
+     rede de segurança revela o resto depois de 2,5 s ou ao chegar no fim da página */
+  var revelaveis = Array.prototype.slice.call(document.querySelectorAll(".reveal"));
+  var io = null;
+  function revelaTudo() {
     revelaveis.forEach(function (el) { el.classList.add("is-visivel"); });
+    if (io) io.disconnect();
+  }
+  if (reduz || !("IntersectionObserver" in window)) {
+    revelaTudo();
   } else {
-    var io = new IntersectionObserver(function (entradas) {
+    io = new IntersectionObserver(function (entradas) {
       entradas.forEach(function (e) {
         if (e.isIntersecting) { e.target.classList.add("is-visivel"); io.unobserve(e.target); }
       });
-    }, { rootMargin: "0px 0px -8% 0px", threshold: 0.12 });
-    revelaveis.forEach(function (el) { io.observe(el); });
+    }, { rootMargin: "0px 0px -8% 0px", threshold: 0 });
+    revelaveis.forEach(function (el) {
+      if (el.getBoundingClientRect().top < window.innerHeight) {
+        el.style.transition = "none";
+        el.classList.add("is-visivel");
+        el.offsetHeight;
+        el.style.transition = "";
+      } else {
+        io.observe(el);
+      }
+    });
+    setTimeout(revelaTudo, 2500);
+  }
+  function noFim() {
+    return window.innerHeight + window.scrollY >= document.documentElement.scrollHeight - 4;
   }
 
   /* Contadores */
@@ -92,8 +111,34 @@
     contadores.forEach(function (el) { ioc.observe(el); });
   }
 
-  /* Marquee: duplica os cards para o loop; pausa no toque */
+  /* Marquee: duplica os cards para o loop; pausa no toque.
+     No celular vira carrossel com swipe (CSS) e pontinhos indicadores. */
   var marquee = document.querySelector(".marquee");
+  if (marquee) {
+    var originais = Array.prototype.slice.call(marquee.querySelectorAll(".depo"));
+    var pontos = document.createElement("div");
+    pontos.className = "depo-pontos";
+    originais.forEach(function (card, n) {
+      var b = document.createElement("button");
+      b.type = "button";
+      b.setAttribute("aria-label", "Depoimento " + (n + 1) + " de " + originais.length);
+      if (n === 0) b.setAttribute("aria-current", "true");
+      b.addEventListener("click", function () {
+        marquee.scrollTo({ left: card.offsetLeft - originais[0].offsetLeft, behavior: reduz ? "auto" : "smooth" });
+      });
+      pontos.appendChild(b);
+    });
+    marquee.parentNode.insertBefore(pontos, marquee.nextSibling);
+    var botoesPontos = pontos.querySelectorAll("button");
+    marquee.addEventListener("scroll", function () {
+      var passo = originais.length > 1 ? originais[1].offsetLeft - originais[0].offsetLeft : 1;
+      var atual = Math.min(originais.length - 1, Math.max(0, Math.round(marquee.scrollLeft / passo)));
+      botoesPontos.forEach(function (b, n) {
+        if (n === atual) b.setAttribute("aria-current", "true");
+        else b.removeAttribute("aria-current");
+      });
+    }, { passive: true });
+  }
   if (marquee && !reduz) {
     var trilha = marquee.querySelector(".marquee-trilha");
     Array.prototype.slice.call(trilha.children).forEach(function (card) {
@@ -134,7 +179,18 @@
   var itensModulo = document.querySelectorAll(".modulo");
   var barra = document.querySelector(".barra-mobile");
   var oferta = document.getElementById("oferta");
+  var whats = document.querySelector(".whats");
+  var evitaveis = Array.prototype.slice.call(document.querySelectorAll("main .btn, .trilho li"));
   var pendente = false;
+
+  /* WhatsApp não pode cobrir CTAs nem chips */
+  function cobreAlgo() {
+    var w = whats.getBoundingClientRect();
+    return evitaveis.some(function (el) {
+      var r = el.getBoundingClientRect();
+      return r.width > 0 && r.left < w.right + 8 && r.right > w.left - 8 && r.top < w.bottom + 8 && r.bottom > w.top - 8;
+    });
+  }
 
   function atualiza() {
     pendente = false;
@@ -150,8 +206,12 @@
     if (barra) {
       var mostra = depoisHero && !naOferta;
       barra.classList.toggle("is-visivel", mostra);
+      doc.style.setProperty("--barra-h", barra.offsetHeight + "px");
       document.body.classList.toggle("tem-barra", mostra && window.innerWidth < 900);
     }
+    if (whats) whats.classList.toggle("is-visivel", depoisHero && !cobreAlgo());
+
+    if (noFim()) revelaTudo();
 
     if (reduz) return;
 
@@ -189,6 +249,4 @@
   window.addEventListener("scroll", agenda, { passive: true });
   window.addEventListener("resize", agenda);
   atualiza();
-
-  doc.classList.add("js");
 })();
