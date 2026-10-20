@@ -8,12 +8,12 @@ from pathlib import Path
 from urllib.parse import unquote, urlsplit
 
 ROOT = Path(__file__).resolve().parent.parent
-PAGES = ["index.html", "curso/index.html", "consultoria/index.html", "terapia/index.html"]
+PAGES = ["index.html", "curso/index.html", "curso/b/index.html", "consultoria/index.html", "terapia/index.html", "terapia/b/index.html"]
 EXTERNAL = ("http://", "https://", "mailto:", "tel:", "data:", "javascript:", "#")
 
 ENTRIES = {
     "consultoria/index.html": ["entry.488014542", "entry.2112078615"],
-    "terapia/index.html": [
+    "terapia/b/index.html": [
         "entry.1886022350",
         "entry.1192162037",
         "entry.1202505729",
@@ -72,12 +72,14 @@ def check_page(rel):
         if f'data-entry="{entry}"' not in html:
             erros.append(f"{rel}: campo {entry} do Google Form ausente")
 
-    if rel == "curso/index.html" and parser.checkouts == 0:
+    if rel == "curso/b/index.html" and parser.checkouts == 0:
         erros.append(f"{rel}: nenhum botão class=\"checkout\" apontando para o Hotmart")
 
-    if rel == "terapia/index.html":
-        if "R$" in html:
-            erros.append(f"{rel}: contém preço (R$)")
+    if rel == "curso/index.html" and CHECKOUT not in html:
+        erros.append(f"{rel}: sem link para o checkout Hotmart")
+    if rel.startswith("terapia/") and "R$" in html:
+        erros.append(f"{rel}: contém preço (R$)")
+    if rel == "terapia/b/index.html":
         if 'value="Tarde (13h  - 17h)"' not in html:
             erros.append(f"{rel}: valor do turno da tarde difere do Google Form (\"Tarde (13h  - 17h)\")")
 

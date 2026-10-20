@@ -11,9 +11,9 @@ ROOT = Path(__file__).resolve().parent.parent
 OUT = ROOT / "_catalogo" / "prints"
 PAGES = {
     "bio": "index.html",
-    "curso": "curso/index.html",
+    "curso": "curso/b/index.html",
     "consultoria": "consultoria/index.html",
-    "terapia": "terapia/index.html",
+    "terapia": "terapia/b/index.html",
 }
 VIEWPORTS = {
     "desktop": {"width": 1440, "height": 900},
