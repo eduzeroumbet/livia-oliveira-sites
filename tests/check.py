@@ -10,9 +10,11 @@ from pathlib import Path
 from urllib.parse import unquote, urlsplit
 
 ROOT = Path(__file__).resolve().parent.parent
-PAGES = ["index.html", "curso/index.html", "curso/b/index.html", "curso/versao-b/index.html", "consultoria/index.html", "terapia/index.html", "terapia/b/index.html", "privacidade/index.html"]
-# política de privacidade (URL do app da Meta e dos anúncios): link no rodapé de todas as páginas e no sitemap
+PAGES = ["index.html", "curso/index.html", "curso/b/index.html", "curso/versao-b/index.html", "consultoria/index.html", "terapia/index.html", "terapia/b/index.html", "privacidade/index.html", "termos/index.html"]
+# política de privacidade (URL do app da Meta e dos anúncios) e termos de uso: link no rodapé de todas as páginas e no sitemap
 PRIVACIDADE = "privacidade/index.html"
+TERMOS = "termos/index.html"
+LEGAIS = {PRIVACIDADE: "Política de privacidade", TERMOS: "Termos de uso"}
 EXTERNAL = ("http://", "https://", "mailto:", "tel:", "data:", "javascript:", "#")
 
 ENTRIES = {
@@ -33,6 +35,7 @@ CURSO_ORGANICO = {
     "consultoria/index.html": "../curso/b/",
     "terapia/index.html": "../curso/b/",
     "privacidade/index.html": "../curso/b/",
+    "termos/index.html": "../curso/b/",
 }
 CHECKOUT = "https://pay.hotmart.com/M100028858P?checkoutMode=10"
 # as 3 versões do curso carregam o site.js (Pixel, GA4, src/sck) com o sufixo da página no data-pagina
@@ -119,27 +122,31 @@ def check_page(rel):
         if not target.exists():
             erros.append(f"{rel}: <{tag} {attr}=\"{value}\"> aponta para arquivo inexistente")
 
-    # link "Política de privacidade" dentro do <footer> (na bio, no rodapé .bio-footer)
+    # links "Política de privacidade" e "Termos de uso" dentro do <footer> (na bio, no rodapé .bio-footer)
     rodape = re.search(r"<footer\b.*?</footer>|<p class=\"bio-footer\">.*?</p>", html, re.S)
     links_rodape = Refs()
     links_rodape.feed(rodape.group(0) if rodape else "")
-    if not any(
-        t == "a" and a == "href" and not v.startswith(EXTERNAL)
-        and (path.parent / unquote(urlsplit(v).path)).resolve() == (ROOT / "privacidade").resolve()
-        for t, a, v, _ in links_rodape.refs
-    ):
-        erros.append(f"{rel}: rodapé sem o link \"Política de privacidade\" para {PRIVACIDADE}")
+    for legal, nome in LEGAIS.items():
+        if not any(
+            t == "a" and a == "href" and not v.startswith(EXTERNAL)
+            and (path.parent / unquote(urlsplit(v).path)).resolve() == (ROOT / legal).parent.resolve()
+            for t, a, v, _ in links_rodape.refs
+        ):
+            erros.append(f"{rel}: rodapé sem o link \"{nome}\" para {legal}")
 
-    if rel == PRIVACIDADE:
-        if '<link rel="canonical" href="https://liviaoliveira.me/privacidade/">' not in html:
-            erros.append(f"{rel}: canonical deve apontar para https://{DOMINIO}/privacidade/")
+    if rel in LEGAIS:
+        pasta = rel.split("/")[0]
+        if f'<link rel="canonical" href="https://liviaoliveira.me/{pasta}/">' not in html:
+            erros.append(f"{rel}: canonical deve apontar para https://{DOMINIO}/{pasta}/")
         if not re.search(r'<script src="\.\./assets/js/site\.js(\?v=\d+)?"></script>', html):
             erros.append(f"{rel}: sem <script src=\"../assets/js/site.js\"> (carrega o rastreamento normalmente)")
         for trecho in ("CRP 07/18713", "Lívia Carvalho de Oliveira", "(51) 99259-7638", "@liviaoliveira.psicologa", "20 de outubro de 2026"):
             if trecho not in html:
                 erros.append(f"{rel}: sem \"{trecho}\"")
-        if "https://liviaoliveira.me/privacidade/" not in (ROOT / "sitemap.xml").read_text(encoding="utf-8"):
+        if f"https://liviaoliveira.me/{pasta}/" not in (ROOT / "sitemap.xml").read_text(encoding="utf-8"):
             erros.append(f"{rel}: não está no sitemap.xml")
+    if rel == PRIVACIDADE and 'href="../termos/"' not in html.split("<footer", 1)[0]:
+        erros.append(f"{rel}: sem o link para os Termos de uso no texto da política")
 
     for entry in ENTRIES.get(rel, []):
         if f'data-entry="{entry}"' not in html:
