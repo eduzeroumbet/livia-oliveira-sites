@@ -529,6 +529,17 @@ body.has-sticky .wa-float { bottom: calc(var(--sticky-h, 72px) + 12px); }
 .emergency { background: var(--rose2); color: var(--ink); border-radius: var(--radius); padding: 16px 18px; margin-bottom: 22px; font-size: 14.5px; }
 .emergency a { color: var(--wine); font-weight: 600; }
 
+/* ========== Política de privacidade (texto longo) ========== */
+.legal h1 { font-size: clamp(42px, 10vw, 64px); margin: 10px 0 14px; }
+.legal h2 { font-size: clamp(30px, 6.5vw, 40px); margin: 44px 0 12px; }
+.legal h3 { font-size: 23px; margin: 22px 0 6px; }
+.legal p, .legal ul { margin-top: 0; margin-bottom: 1em; }
+.legal p + p { margin-top: 0; }
+.legal ul li { position: relative; padding-left: 22px; margin: 6px 0; }
+.legal ul li::before { content: ""; position: absolute; left: 4px; top: .7em; width: 7px; height: 7px; border-radius: 50%; background: var(--rose); }
+.legal a { color: var(--wine); text-underline-offset: 3px; }
+.legal .callout { margin: 22px 0; }
+
 /* ========== Tablet e desktop ========== */
 @media (min-width: 640px) {
   .brand { font-size: 19px; }

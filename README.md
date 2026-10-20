@@ -15,6 +15,7 @@ redireciona automaticamente para o domínio. `robots.txt` aponta para o `sitemap
 | `curso/versao-b/index.html` | Psicólogas (anúncios, teste A/B/C) | Versão C (`pgC`), hero "Fios que se organizam" (canvas em `curso/versao-b/hero-fios.js` e `hero-fios.css`). Usada nos anúncios do teste A/B/C; nenhuma página do site aponta para ela e o "Curso" do rodapé dela leva para `curso/b/`. `noindex`, canonical para `/curso/` e fora do sitemap |
 | `consultoria/index.html` | Psicólogas | Inscrição na Consultoria 1:1 (formulário que envia ao Google Forms) |
 | `terapia/index.html` | Pacientes adultos | Psicoterapia com agenda completa: lista de interesse (formulário que envia ao Google Forms, o mesmo de `terapia/b/`) e indicação de profissionais pelo WhatsApp da Thaís. Não há conversa inicial |
+| `privacidade/index.html` | Todos (app da Meta e anúncios) | Política de Privacidade (LGPD), linkada no rodapé de todas as páginas. Carrega o `site.js` normalmente (com rastreamento) |
 
 ## Como editar
 
