@@ -51,10 +51,11 @@
       { y0: 1.03, y1: 0.70, abre: 0.045, amp: 0.030, k: 1.35, fase: 3.1 },
       { y0: 0.90, y1: 0.90, abre: 0.035, amp: 0.022, k: 1.00, fase: 4.4 }
     ],
+    // celular: começa abaixo dos botões (que terminam em ~70% da altura); o cartão de preço é opaco
     celular: [
-      { y0: 0.74, y1: 0.66, abre: 0.030, amp: 0.020, k: 0.90, fase: 0.0 },
-      { y0: 0.84, y1: 0.78, abre: 0.035, amp: 0.024, k: 0.70, fase: 1.7 },
-      { y0: 0.92, y1: 0.89, abre: 0.028, amp: 0.018, k: 1.10, fase: 3.1 },
+      { y0: 0.80, y1: 0.75, abre: 0.026, amp: 0.018, k: 0.90, fase: 0.0 },
+      { y0: 0.87, y1: 0.83, abre: 0.030, amp: 0.020, k: 0.70, fase: 1.7 },
+      { y0: 0.93, y1: 0.91, abre: 0.026, amp: 0.016, k: 1.10, fase: 3.1 },
       { y0: 0.99, y1: 0.97, abre: 0.022, amp: 0.014, k: 0.85, fase: 4.4 }
     ]
   };
@@ -107,7 +108,7 @@
 
   /* No emaranhado os fios ficam na mesma região dos feixes, só que embaralhados */
   function centroEmaranhado(fio, u) {
-    if (celular) return 0.7 + fio.centro * 0.28;
+    if (celular) return 0.79 + fio.centro * 0.2;
     var topo = 0.88 - 0.5 * suave(u);
     return topo + fio.centro * (1 - topo) * 0.95;
   }
@@ -118,7 +119,9 @@
     var g = Math.min(1, organiza + rolagem);
     var px = new Array(pontos + 1), py = new Array(pontos + 1);
     // no celular o texto ocupa quase toda a altura: emaranhado mais baixo para não subir atrás dele
-    var escala = celular ? 0.55 : 1;
+    var escala = celular ? 0.42 : 1;
+    // no celular são menos fios numa faixa estreita: um pouco mais opacos para não sumirem
+    var reforco = celular ? 1.25 : 1;
 
     for (var n = 0; n < quantos; n++) {
       var fio = fios[n];
@@ -151,7 +154,7 @@
         ctx.quadraticCurveTo(px[m], py[m], (px[m] + px[m + 1]) / 2, (py[m] + py[m + 1]) / 2);
       }
       ctx.lineTo(px[pontos], py[pontos]);
-      ctx.strokeStyle = "rgba(" + fio.cor + ", " + fio.alfa + ")";
+      ctx.strokeStyle = "rgba(" + fio.cor + ", " + Math.min(0.75, fio.alfa * reforco) + ")";
       ctx.lineWidth = fio.largura;
       ctx.stroke();
     }

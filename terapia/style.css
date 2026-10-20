@@ -21,7 +21,9 @@
   --serif: "Noto Serif Display", Georgia, "Times New Roman", serif;
   --sans: "Helvetica Neue", Helvetica, Arial, sans-serif;
   /* espaçamento dos títulos: o site da marca usa -.07em */
-  --titulo-ls: -.07em;
+  --titulo-ls: -.045em;          /* -.07em da marca grudava letras e engolia os espaços nestes tamanhos */
+  --titulo-ls-pequeno: -.02em;   /* h3 dos cards */
+  --titulo-ws: .08em;
   --raio: 22px;
   --raio-card: .5rem;
   --sombra: 0 20px 50px -20px rgba(110, 23, 44, .35);
@@ -55,7 +57,8 @@ body {
 }
 img { max-width: 100%; display: block; }
 a { color: inherit; }
-h1, h2, h3 { font-family: var(--serif); font-stretch: 62.5%; font-weight: 500; line-height: 1.02; margin: 0; color: var(--vinho); letter-spacing: var(--titulo-ls); }
+h1, h2, h3 { font-family: var(--serif); font-stretch: 62.5%; font-weight: 500; line-height: 1.02; margin: 0; color: var(--vinho); letter-spacing: var(--titulo-ls); word-spacing: var(--titulo-ws); }
+h3 { letter-spacing: var(--titulo-ls-pequeno); }
 em { font-family: var(--serif); font-stretch: 62.5%; font-style: italic; font-weight: 400; }
 /* Títulos da marca: o trecho final em itálico numa linha própria, petróleo no fundo claro
    (as seções escuras trocam para rosé) */
@@ -169,7 +172,7 @@ p { margin: 0 0 1em; }
 }
 /* formas nas cores da marca: rosé, petróleo bem claro e rosé suave (os nomes das classes ficaram) */
 .blob--rosa { width: min(620px, 86vw); aspect-ratio: 1; right: -4%; top: 10%; background: rgba(219, 168, 173, .42); }
-.blob--salvia { width: min(460px, 70vw); aspect-ratio: 1.15; left: -10%; bottom: -12%; background: rgba(38, 64, 86, .16); animation-delay: calc(var(--respiro) / -3); }
+.blob--salvia { width: min(460px, 70vw); aspect-ratio: 1.15; left: -10%; bottom: -12%; background: rgba(38, 64, 86, .08); animation-delay: calc(var(--respiro) / -3); }
 .blob--dourado { width: min(340px, 52vw); aspect-ratio: 1; right: 30%; top: -8%; background: rgba(219, 168, 173, .26); animation-delay: calc(var(--respiro) / -1.5); }
 
 @keyframes respira {
