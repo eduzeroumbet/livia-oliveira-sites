@@ -66,6 +66,8 @@ def check_page(rel):
         erros.append(f"{rel}: referencia o storage do Scrolltide ({HOTLINK}); sirva o arquivo localmente")
     if URL_ANTIGA in html:
         erros.append(f"{rel}: usa o endereço antigo ({URL_ANTIGA}); use https://{DOMINIO}/")
+    if 'location.protocol==="http:"' not in html:
+        erros.append(f"{rel}: sem o script que força HTTPS no domínio próprio")
 
     parser = Refs()
     parser.feed(html)
