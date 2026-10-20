@@ -22,6 +22,15 @@ ENTRIES = {
     ],
 }
 CHECKOUT = "https://pay.hotmart.com/M100028858P?checkoutMode=10"
+HOTLINK = "r2" + ".dev"  # storage do Scrolltide; montado em partes para o próprio check não conter o literal
+EXTRAS = (
+    "assets/css/site.css",
+    "assets/js/site.js",
+    "curso/style.css",
+    "curso/script.js",
+    "terapia/style.css",
+    "terapia/script.js",
+)
 
 erros = []
 
@@ -34,7 +43,8 @@ class Refs(HTMLParser):
 
     def handle_starttag(self, tag, attrs):
         a = dict(attrs)
-        for attr in ("src", "href", "poster"):
+        # data-src-720 / data-src-1280: fontes do vídeo do hero que o JS escolhe pela largura
+        for attr in ("src", "href", "poster", "data-src-720", "data-src-1280"):
             if a.get(attr):
                 self.refs.append((tag, attr, a[attr]))
         if tag == "a" and "checkout" in (a.get("class") or "").split() and a.get("href") == CHECKOUT:
@@ -50,6 +60,8 @@ def check_page(rel):
 
     if "—" in html:
         erros.append(f"{rel}: contém travessão (—)")
+    if HOTLINK in html:
+        erros.append(f"{rel}: referencia o storage do Scrolltide ({HOTLINK}); sirva o arquivo localmente")
 
     parser = Refs()
     parser.feed(html)
@@ -89,12 +101,16 @@ def check_page(rel):
 def main():
     for rel in PAGES:
         check_page(rel)
-    for extra in ("assets/css/site.css", "assets/js/site.js"):
+    for extra in EXTRAS:
         p = ROOT / extra
         if not p.exists():
             erros.append(f"{extra}: não existe")
-        elif "—" in p.read_text(encoding="utf-8"):
+            continue
+        texto = p.read_text(encoding="utf-8")
+        if "—" in texto:
             erros.append(f"{extra}: contém travessão (—)")
+        if HOTLINK in texto:
+            erros.append(f"{extra}: referencia o storage do Scrolltide ({HOTLINK})")
 
     if erros:
         print("FALHOU:")

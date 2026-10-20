@@ -10,34 +10,42 @@
     else img.addEventListener("error", esconde);
   });
 
-  /* Título: palavras com blur-in escalonado */
-  var titulo = document.querySelector("[data-palavras]");
-  if (titulo && !reduz) {
-    var i = 0;
-    var quebra = function (no) {
-      Array.prototype.slice.call(no.childNodes).forEach(function (filho) {
-        if (filho.nodeType === 3) {
-          var frag = document.createDocumentFragment();
-          filho.textContent.split(/(\s+)/).forEach(function (parte) {
-            if (!parte) return;
-            if (/^\s+$/.test(parte)) { frag.appendChild(document.createTextNode(parte)); return; }
-            var s = document.createElement("span");
-            s.className = "palavra";
-            s.style.setProperty("--i", i++);
-            s.textContent = parte;
-            frag.appendChild(s);
-          });
-          no.replaceChild(frag, filho);
-        } else if (filho.nodeType === 1) {
-          quebra(filho);
-        }
-      });
-    };
-    quebra(titulo);
+  /* Vídeo do hero (Aethera): 720 até 699px, 1280 no resto; fade-in no canplay;
+     pausado com prefers-reduced-motion; se falhar, fica o poster */
+  var video = document.querySelector(".hero__video");
+  if (video) {
+    var pronto = function () { video.classList.add("is-ready"); };
+    var src = window.innerWidth <= 699 ? video.getAttribute("data-src-720") : video.getAttribute("data-src-1280");
+    var fonte = video.querySelector("source");
+    if (src && fonte && fonte.getAttribute("src") !== src) {
+      fonte.setAttribute("src", src);
+      video.load();
+    }
+    video.addEventListener("canplay", pronto);
+    video.addEventListener("error", pronto, true);
+    if (video.readyState >= 3) pronto();
+    var toca = video.play();
+    if (toca && toca.catch) toca.catch(function () {});
+    if (reduz) { video.pause(); pronto(); }
+  }
+
+  /* Navbar Aethera: sheet no celular trava a rolagem */
+  var toggle = document.querySelector(".nav__toggle");
+  var sheet = document.getElementById("nav-sheet");
+  function abreMenu(aberto) {
+    toggle.setAttribute("aria-expanded", aberto ? "true" : "false");
+    toggle.setAttribute("aria-label", aberto ? "Fechar menu" : "Abrir menu");
+    sheet.hidden = !aberto;
+    document.body.style.overflow = aberto ? "hidden" : "";
+  }
+  if (toggle && sheet) {
+    toggle.addEventListener("click", function () { abreMenu(sheet.hidden); });
+    sheet.querySelectorAll("a").forEach(function (a) { a.addEventListener("click", function () { abreMenu(false); }); });
+    window.addEventListener("resize", function () { if (window.innerWidth > 1040 && !sheet.hidden) abreMenu(false); });
   }
 
   /* Reveal das seções: o que está acima da dobra já começa revelado;
-     rede de segurança revela o resto depois de 2,5 s ou ao chegar no fim da página */
+     rede de segurança revela o resto depois de 1,5 s ou ao chegar no fim da página */
   var revelaveis = Array.prototype.slice.call(document.querySelectorAll(".reveal"));
   var io = null;
   function revelaTudo() {
@@ -62,18 +70,15 @@
         io.observe(el);
       }
     });
-    setTimeout(revelaTudo, 2500);
+    setTimeout(revelaTudo, 1500);
   }
   function noFim() {
     return window.innerHeight + window.scrollY >= document.documentElement.scrollHeight - 4;
   }
 
-  /* Scroll: WhatsApp flutuante, parallax do hero, véu dourado que levanta, foto e linha dos passos */
+  /* Scroll: WhatsApp flutuante e foto */
   var hero = document.querySelector(".hero");
-  var heroMedia = document.querySelector(".hero-media");
-  var veu = document.querySelector(".hero-veu");
   var foto = document.querySelector(".sobre .foto img");
-  var passos = document.querySelector(".passos");
   var whats = document.querySelector(".whats");
   var evitaveis = Array.prototype.slice.call(document.querySelectorAll("main .btn"));
   var pendente = false;
@@ -99,25 +104,12 @@
 
     if (reduz) return;
 
-    if (y < hh) {
-      var p = y / hh;
-      heroMedia.style.transform = "translate3d(0," + (y * 0.25).toFixed(1) + "px,0) scale(" + (1 + p * 0.05).toFixed(4) + ")";
-      veu.style.transform = "translateX(-50%) translate3d(0," + (-p * 35).toFixed(1) + "%,0)";
-      veu.style.opacity = Math.max(0, 1 - p * 1.4).toFixed(3);
-    }
-
     if (foto) {
       var r = foto.parentNode.getBoundingClientRect();
       if (r.bottom > 0 && r.top < vh) {
         var c = (r.top + r.height / 2 - vh / 2) / vh;
         foto.style.transform = "translate3d(0," + (c * -36).toFixed(1) + "px,0)";
       }
-    }
-
-    if (passos) {
-      var q = passos.getBoundingClientRect();
-      var prog = Math.min(Math.max((vh * 0.85 - q.top) / (vh * 0.5), 0), 1);
-      passos.style.setProperty("--p", prog.toFixed(4));
     }
   }
 

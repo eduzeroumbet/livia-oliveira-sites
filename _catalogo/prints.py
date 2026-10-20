@@ -1,4 +1,4 @@
-"""Tira prints das 4 páginas (desktop 1440 e mobile 390) em _catalogo/prints/.
+"""Tira prints das páginas (desktop 1440 e mobile 390) em _catalogo/prints/.
 
 Uso: /Users/educloud/orquestra/.venv/bin/python _catalogo/prints.py
 Requer: playwright + chromium (python -m playwright install chromium).
@@ -12,8 +12,10 @@ OUT = ROOT / "_catalogo" / "prints"
 PAGES = {
     "bio": "index.html",
     "curso": "curso/b/index.html",
+    "curso-a": "curso/index.html",
     "consultoria": "consultoria/index.html",
     "terapia": "terapia/b/index.html",
+    "terapia-a": "terapia/index.html",
 }
 VIEWPORTS = {
     "desktop": {"width": 1440, "height": 900},
@@ -37,7 +39,8 @@ def main():
                 page.goto((ROOT / rel).as_uri(), wait_until="networkidle")
                 # força o carregamento das imagens lazy antes do print de página inteira
                 page.evaluate("document.querySelectorAll('img[loading=lazy]').forEach(i => i.loading = 'eager')")
-                page.wait_for_timeout(600)
+                # passa do fallback de 1,5 s do reveal e do fade-in do vídeo do hero
+                page.wait_for_timeout(2200)
                 largura = page.evaluate("document.documentElement.scrollWidth")
                 if largura > vp["width"]:
                     print(f"ATENÇÃO {name} {vp_name}: rolagem horizontal ({largura}px > {vp['width']}px)")
