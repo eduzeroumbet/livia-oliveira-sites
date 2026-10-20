@@ -500,6 +500,8 @@ main .programa-caixa .btn:not(.btn--light):not(.btn--ink):not(.btn--contorno):no
 
 /* Método: cards de processo */
 .metodo { background: var(--creme); }
+/* balance evita a palavra solta ("em") sozinha na linha */
+.metodo h2 { text-wrap: balance; }
 .frentes { display: grid; gap: 16px; margin-top: 36px; }
 .frente {
   display: flex; flex-direction: column; gap: 14px;
@@ -627,7 +629,7 @@ main .programa-caixa .btn:not(.btn--light):not(.btn--ink):not(.btn--contorno):no
 }
 .card-oferta::before { content: ""; position: absolute; z-index: -1; top: -96px; right: -96px; width: 384px; height: 384px; border-radius: 50%; background: rgba(219, 168, 173, .14); filter: blur(64px); }
 .card-oferta .sobretitulo { background: rgba(255, 255, 255, .06); color: var(--rosa); border-color: rgba(219, 168, 173, .4); }
-.card-oferta h2 { color: var(--papel); font-size: clamp(2.4rem, 7.2vw, 3.6rem); margin: 0 auto 26px; }
+.card-oferta h2 { color: var(--papel); font-size: clamp(2.4rem, 7.2vw, 3.6rem); margin: 0 auto 26px; text-wrap: balance; }
 .card-oferta h2 em { color: var(--rosa); }
 .incluso { margin: 0 auto 28px; padding: 22px 0; text-align: left; display: grid; gap: 10px; max-width: 420px; border-block: 1px solid rgba(255, 255, 255, .1); }
 .incluso li { position: relative; padding-left: 30px; font-size: 1.02rem; color: var(--papel); }
@@ -752,7 +754,9 @@ body.tem-barra .whats { bottom: calc(var(--barra-h) + 16px); }
   .secao { padding: 96px 0; }
   .numeros-grid { gap: 16px; }
   .numero { min-height: 220px; padding: 26px; }
-  .frentes { grid-template-columns: repeat(3, 1fr); gap: 20px; }
+  .frentes { grid-template-columns: repeat(3, 1fr); grid-template-rows: auto 1fr auto; gap: 20px; }
+  /* subgrid: os três títulos ficam na mesma altura mesmo com textos de tamanhos diferentes */
+  .frente { display: grid; grid-row: span 3; grid-template-rows: subgrid; }
   .paraquem-grid { grid-template-columns: 1fr 1fr; gap: 20px; }
   .programa-caixa { padding: 40px; }
   .modulo { grid-template-columns: 64px 1fr; padding: 28px 0; }
