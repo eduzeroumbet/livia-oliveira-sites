@@ -539,9 +539,34 @@ body.has-sticky .wa-float { bottom: calc(var(--sticky-h, 72px) + 12px); }
 .legal ul li::before { content: ""; position: absolute; left: 4px; top: .7em; width: 7px; height: 7px; border-radius: 50%; background: var(--rose); }
 .legal a { color: var(--wine); text-underline-offset: 3px; }
 .legal .callout { margin: 22px 0; }
+/* padding visual igual em cima e embaixo do box */
+.legal .callout > p:last-child { margin-bottom: 0; }
+/* Índice "Nesta página": uma coluna com área de toque de 44px no celular, duas colunas a partir de 640px */
+.legal-toc { background: var(--white); border: 1px solid var(--line); border-radius: var(--radius); padding: 18px 22px; margin: 26px 0 8px; }
+.legal .legal-toc__titulo { margin-bottom: 4px; font-size: 13px; font-weight: 600; letter-spacing: .16em; text-transform: uppercase; color: var(--wine); }
+.legal-toc li { break-inside: avoid; }
+.legal-toc a { display: flex; align-items: center; min-height: 44px; padding: 6px 0; line-height: 1.3; }
+.legal-toc .legal-toc__sub a { padding-left: 18px; font-size: .94em; }
+/* Fechamento "Ficou alguma dúvida?" */
+.legal .legal-cta { margin-top: 44px; }
+.legal .legal-cta h2 { margin: 0 0 8px; }
+.legal .legal-cta .btn-row { margin: 18px 0; }
+.legal .legal-cta .btn { color: var(--cream); text-decoration: none; }
+.legal-cta__links { display: flex; flex-wrap: wrap; gap: 4px 22px; }
+.legal-cta__links a { display: inline-flex; align-items: center; min-height: 44px; }
+
+/* ========== Celular: rodapé ========== */
+/* links do rodapé com área de toque de 44px; política e termos numa linha própria, abaixo do copyright */
+@media (max-width: 600px) {
+  .site-footer nav { gap: 0 18px; }
+  .site-footer nav a { display: inline-flex; align-items: center; min-height: 44px; }
+  .footer-sep { display: none; }
+  .footer-legal { display: block; margin-top: 6px; }
+}
 
 /* ========== Tablet e desktop ========== */
 @media (min-width: 640px) {
+  .legal-toc ol { columns: 2; column-gap: 28px; }
   .brand { font-size: 19px; }
   .brand span { letter-spacing: .1em; }
   .site-header .btn { padding: 9px 18px; font-size: 15px; }
