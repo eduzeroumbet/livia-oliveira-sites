@@ -10,9 +10,9 @@ redireciona automaticamente para o domínio. `robots.txt` aponta para o `sitemap
 | Arquivo | Para quem | O que faz |
 |---|---|---|
 | `index.html` | Bio do Instagram | Página de links: curso, consultoria, terapia, WhatsApp da Thaís e Instagram |
-| `curso/index.html` | Psicólogas (tráfego pago) | Versão A da página de vendas do Carreira com Sentido (checkout Hotmart), com o vídeo da árvore. É a página de destino dos anúncios da Meta e a página indexada (sitemap) |
-| `curso/b/index.html` | Psicólogas (público orgânico) | Página do curso para a bio e os links internos do site (https://liviaoliveira.me/curso/b/). `noindex`, canonical para `/curso/` e fora do sitemap |
-| `curso/versao-b/index.html` | Ninguém (fica no ar) | Versão B antiga (hero "Fios que se organizam", canvas em `curso/versao-b/hero-fios.js` e `hero-fios.css`). Continua publicada para quem tiver o link, mas nenhuma página aponta para ela; o "Curso" do rodapé dela leva para `curso/b/`. `noindex`, canonical para `/curso/` e fora do sitemap |
+| `curso/index.html` | Psicólogas (anúncios) | Versão A (`pgA`) da página de vendas do Carreira com Sentido (checkout Hotmart), com o vídeo da árvore. Página de destino dos anúncios da Meta e a página indexada (sitemap) |
+| `curso/b/index.html` | Psicólogas (bio, links internos e anúncios) | Versão B (`pgB`): página do curso para a bio, os links internos do site e também anúncios (https://liviaoliveira.me/curso/b/). `noindex`, canonical para `/curso/` e fora do sitemap |
+| `curso/versao-b/index.html` | Psicólogas (anúncios, teste A/B/C) | Versão C (`pgC`), hero "Fios que se organizam" (canvas em `curso/versao-b/hero-fios.js` e `hero-fios.css`). Usada nos anúncios do teste A/B/C; nenhuma página do site aponta para ela e o "Curso" do rodapé dela leva para `curso/b/`. `noindex`, canonical para `/curso/` e fora do sitemap |
 | `consultoria/index.html` | Psicólogas | Inscrição na Consultoria 1:1 (formulário que envia ao Google Forms) |
 | `terapia/index.html` | Pacientes adultos | Psicoterapia com agenda completa: lista de interesse (formulário que envia ao Google Forms, o mesmo de `terapia/b/`) e indicação de profissionais pelo WhatsApp da Thaís. Não há conversa inicial |
 
@@ -65,10 +65,23 @@ Cada script só é carregado se o ID estiver preenchido (Pixel da Meta da conta 
 559914633; sem GTM). Os eventos vão para o `dataLayer` (`begin_checkout`, `view_offer`, `generate_lead`), para o GA4 e,
 no Pixel, viram `InitiateCheckout`, `ViewContent` e `Lead`.
 
-As 3 versões do curso carregam o `site.js` com `data-pagina` na tag `<script>` (`pgA` = `curso/`, `pgB` = `curso/b/`,
-`pgC` = `curso/versao-b/`). Nos links da Hotmart, `src` = `utm_source|utm_medium|utm_campaign|utm_content` e `sck` = o
-mesmo + `|pgX` (sem UTM: `sck=direto|pgX`). Os eventos do curso levam `content_name` "Carreira com Sentido" e
-`content_category` `pgX`. Ao mudar o `site.js`, suba o `?v=` dele em todas as páginas.
+As 3 versões do curso carregam o `site.js` com `data-pagina` na tag `<script>`, que diz qual versão vendeu:
+
+| Sufixo | Página | Versão |
+|---|---|---|
+| `pgA` | `curso/` | A (anúncios) |
+| `pgB` | `curso/b/` | B (bio, links internos e anúncios) |
+| `pgC` | `curso/versao-b/` | C (anúncios, teste A/B/C) |
+
+Nos links da Hotmart, `src` = `utm_source|utm_medium|utm_campaign|utm_content` e `sck` = o mesmo + `|pgX`, com o
+sufixo da versão no fim (ex.: `sck=meta|paid|ccs_frio_criativos|V01|pgA`; sem UTM: `sck=direto|pgX`). Assim o relatório
+da Hotmart mostra o anúncio e a versão da página de cada venda. Os eventos do curso levam `content_name` "Carreira com
+Sentido" e `content_category` `pgX`. `view_offer`/`ViewContent` sai uma vez por carregamento, quando o topo da seção
+`#oferta` passa da metade da tela.
+
+As páginas de terapia (`terapia/` e `terapia/b/`) carregam o `site.js` com `data-sem-rastreamento`: sem Pixel, GA4 nem
+GTM (conteúdo de saúde pode fazer a Meta restringir o Pixel); formulário, máscara e validação funcionam igual. O
+`tests/check.py` confere isso. Ao mudar o `site.js`, suba o `?v=` dele em todas as páginas.
 
 ## Verificar
 
