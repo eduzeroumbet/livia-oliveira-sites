@@ -36,34 +36,68 @@
     quebra(titulo);
   }
 
-  /* Reveal das seções */
-  var revelaveis = document.querySelectorAll(".reveal");
-  if (reduz || !("IntersectionObserver" in window)) {
+  /* Reveal das seções: o que está acima da dobra já começa revelado;
+     rede de segurança revela o resto depois de 2,5 s ou ao chegar no fim da página */
+  var revelaveis = Array.prototype.slice.call(document.querySelectorAll(".reveal"));
+  var io = null;
+  function revelaTudo() {
     revelaveis.forEach(function (el) { el.classList.add("is-visivel"); });
+    if (io) io.disconnect();
+  }
+  if (reduz || !("IntersectionObserver" in window)) {
+    revelaTudo();
   } else {
-    var io = new IntersectionObserver(function (entradas) {
+    io = new IntersectionObserver(function (entradas) {
       entradas.forEach(function (e) {
         if (e.isIntersecting) { e.target.classList.add("is-visivel"); io.unobserve(e.target); }
       });
-    }, { rootMargin: "0px 0px -8% 0px", threshold: 0.12 });
-    revelaveis.forEach(function (el) { io.observe(el); });
+    }, { rootMargin: "0px 0px -8% 0px", threshold: 0 });
+    revelaveis.forEach(function (el) {
+      if (el.getBoundingClientRect().top < window.innerHeight) {
+        el.style.transition = "none";
+        el.classList.add("is-visivel");
+        el.offsetHeight;
+        el.style.transition = "";
+      } else {
+        io.observe(el);
+      }
+    });
+    setTimeout(revelaTudo, 2500);
+  }
+  function noFim() {
+    return window.innerHeight + window.scrollY >= document.documentElement.scrollHeight - 4;
   }
 
-  if (reduz) return;
-
-  /* Scroll: parallax do hero, véu dourado que levanta, foto e linha dos passos */
+  /* Scroll: WhatsApp flutuante, parallax do hero, véu dourado que levanta, foto e linha dos passos */
   var hero = document.querySelector(".hero");
   var heroMedia = document.querySelector(".hero-media");
   var veu = document.querySelector(".hero-veu");
   var foto = document.querySelector(".sobre .foto img");
   var passos = document.querySelector(".passos");
+  var whats = document.querySelector(".whats");
+  var evitaveis = Array.prototype.slice.call(document.querySelectorAll("main .btn"));
   var pendente = false;
+
+  /* WhatsApp não pode cobrir CTAs */
+  function cobreAlgo() {
+    var w = whats.getBoundingClientRect();
+    return evitaveis.some(function (el) {
+      var r = el.getBoundingClientRect();
+      return r.width > 0 && r.left < w.right + 8 && r.right > w.left - 8 && r.top < w.bottom + 8 && r.bottom > w.top - 8;
+    });
+  }
 
   function atualiza() {
     pendente = false;
     var y = window.scrollY;
     var vh = window.innerHeight;
     var hh = hero.offsetHeight;
+
+    if (whats) whats.classList.toggle("is-visivel", y > hh * 0.85 && !cobreAlgo());
+
+    if (noFim()) revelaTudo();
+
+    if (reduz) return;
 
     if (y < hh) {
       var p = y / hh;

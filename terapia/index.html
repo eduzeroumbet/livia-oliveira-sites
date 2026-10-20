@@ -3,6 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <script>document.documentElement.classList.add('js')</script>
   <title>Psicoterapia online com Lívia Oliveira | ACT | CRP 07/18713</title>
   <meta name="description" content="Psicoterapia online para adultos com base na Terapia de Aceitação e Compromisso (ACT), com a psicóloga clínica Lívia Oliveira (CRP 07/18713). Agende uma conversa pelo WhatsApp.">
   <meta name="theme-color" content="#1E1016">
@@ -23,9 +24,62 @@
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@300&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600&family=Playfair+Display:ital,wght@0,400;0,500;1,400&display=swap" rel="stylesheet">
-  <link rel="preload" as="image" href="assets/hero-maos-900.jpg" media="(max-width: 699px)">
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600&family=Playfair+Display:ital,wght@0,400;0,500;1,400&display=swap" rel="stylesheet">
+  <link rel="preload" as="image" href="assets/hero-maos-900.jpg" media="(max-width: 699px)" fetchpriority="high">
+  <link rel="preload" as="image" href="assets/hero-maos-1920.jpg" media="(min-width: 700px)" fetchpriority="high">
   <link rel="stylesheet" href="style.css">
+
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@graph": [
+      {
+        "@type": "Person",
+        "@id": "https://eduzeroumbet.github.io/livia-oliveira-sites/terapia/#livia",
+        "name": "Lívia Oliveira",
+        "jobTitle": "Psicóloga clínica",
+        "description": "Psicóloga clínica, CRP 07/18713, com prática em Terapia de Aceitação e Compromisso (ACT). Atendimento online para adultos.",
+        "knowsLanguage": "pt-BR",
+        "url": "https://eduzeroumbet.github.io/livia-oliveira-sites/terapia/"
+      },
+      {
+        "@type": "ProfessionalService",
+        "@id": "https://eduzeroumbet.github.io/livia-oliveira-sites/terapia/#atendimento",
+        "name": "Psicoterapia online com Lívia Oliveira",
+        "description": "Psicoterapia online para adultos com base na Terapia de Aceitação e Compromisso (ACT), com a psicóloga clínica Lívia Oliveira, CRP 07/18713.",
+        "url": "https://eduzeroumbet.github.io/livia-oliveira-sites/terapia/",
+        "image": "https://eduzeroumbet.github.io/livia-oliveira-sites/terapia/assets/livia-consultorio.jpg",
+        "founder": { "@id": "https://eduzeroumbet.github.io/livia-oliveira-sites/terapia/#livia" },
+        "employee": { "@id": "https://eduzeroumbet.github.io/livia-oliveira-sites/terapia/#livia" },
+        "areaServed": [
+          { "@type": "Country", "name": "BR" },
+          "Online"
+        ],
+        "availableLanguage": "pt-BR",
+        "contactPoint": {
+          "@type": "ContactPoint",
+          "contactType": "agendamento",
+          "url": "https://wa.me/5551992597638",
+          "availableLanguage": "pt-BR"
+        }
+      }
+    ]
+  }
+  </script>
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": [
+      { "@type": "Question", "name": "Quanto tempo dura a sessão?", "acceptedAnswer": { "@type": "Answer", "text": "As sessões duram cerca de 50 minutos, normalmente uma vez por semana." } },
+      { "@type": "Question", "name": "Como funciona o atendimento online?", "acceptedAnswer": { "@type": "Answer", "text": "Por videochamada, numa plataforma segura, de onde você estiver, com o mesmo sigilo do consultório." } },
+      { "@type": "Question", "name": "Qual é o valor?", "acceptedAnswer": { "@type": "Answer", "text": "O valor e as formas de pagamento são informados no primeiro contato pelo WhatsApp." } },
+      { "@type": "Question", "name": "Emite recibo para reembolso?", "acceptedAnswer": { "@type": "Answer", "text": "Sim. Você recebe recibo com CRP para solicitar reembolso ao seu plano de saúde, conforme as regras do seu plano." } },
+      { "@type": "Question", "name": "Atende quem mora fora do Brasil?", "acceptedAnswer": { "@type": "Answer", "text": "Sim, o atendimento online é possível para brasileiros que moram no exterior, em português." } },
+      { "@type": "Question", "name": "E se não houver horário disponível?", "acceptedAnswer": { "@type": "Answer", "text": "Você entra na lista de espera e é avisada assim que abrir uma vaga." } }
+    ]
+  }
+  </script>
 </head>
 <body>
 
@@ -54,6 +108,7 @@
           <a class="btn" href="https://wa.me/5551992597638?text=Oi%20L%C3%ADvia!%20Gostaria%20de%20saber%20sobre%20o%20atendimento%20psicol%C3%B3gico" target="_blank" rel="noopener">
             <svg aria-hidden="true"><use href="#i-whats"/></svg> Quero agendar uma conversa
           </a>
+          <p class="hero-assinatura">Lívia Oliveira · Psicóloga clínica · CRP 07/18713 · Atendimento online para adultos</p>
         </div>
       </div>
     </section>
@@ -128,6 +183,22 @@
           <h2 id="sobre-titulo" class="reveal">Prazer, sou <em>Lívia.</em></h2>
           <p class="lead reveal">Sou Lívia Oliveira, psicóloga clínica (CRP 07/18713) há mais de 15 anos, com formação e prática em ACT. Atendo adultos online, com escuta cuidadosa e um trabalho que respeita o seu tempo.</p>
           <p class="nota reveal">Atendimentos sujeitos à disponibilidade de agenda. Se não houver horário no momento, você entra na lista de espera e é avisada assim que abrir uma vaga.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- FAQ -->
+    <section class="secao faq" aria-labelledby="faq-titulo">
+      <div class="wrap-estreito">
+        <span class="sobretitulo reveal">Dúvidas</span>
+        <h2 id="faq-titulo" class="reveal">Perguntas frequentes</h2>
+        <div class="faq-lista reveal">
+          <details><summary>Quanto tempo dura a sessão?</summary><p>As sessões duram cerca de 50 minutos, normalmente uma vez por semana.</p></details>
+          <details><summary>Como funciona o atendimento online?</summary><p>Por videochamada, numa plataforma segura, de onde você estiver, com o mesmo sigilo do consultório.</p></details>
+          <details><summary>Qual é o valor?</summary><p>O valor e as formas de pagamento são informados no primeiro contato pelo WhatsApp.</p></details>
+          <details><summary>Emite recibo para reembolso?</summary><p>Sim. Você recebe recibo com CRP para solicitar reembolso ao seu plano de saúde, conforme as regras do seu plano.</p></details>
+          <details><summary>Atende quem mora fora do Brasil?</summary><p>Sim, o atendimento online é possível para brasileiros que moram no exterior, em português.</p></details>
+          <details><summary>E se não houver horário disponível?</summary><p>Você entra na lista de espera e é avisada assim que abrir uma vaga.</p></details>
         </div>
       </div>
     </section>
