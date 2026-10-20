@@ -1,18 +1,22 @@
 /* Lívia Oliveira: JS compartilhado (sem dependências) */
 
 /*
- * IDs de rastreamento. Hoje estão vazios de propósito: preencha quando houver os IDs
- * e o script correspondente passa a ser carregado em todas as páginas.
- *   gtmId:       "GTM-XXXXXXX"  (Google Tag Manager)
- *   metaPixelId: "123456789012345"  (Pixel da Meta)
- *   ga4Id:       "G-XXXXXXXXXX"  (GA4 direto; deixe vazio se o GA4 já estiver dentro do GTM)
+ * IDs de rastreamento. Cada script só é carregado se o ID estiver preenchido (vazio = desligado).
+ *   gtmId:       vazio (sem Google Tag Manager; o GA4 vai direto)
+ *   metaPixelId: "1197036460960933"  (Pixel da Meta da conta de anúncios da Lívia: PageView em toda página)
+ *   ga4Id:       "G-XH74VZSNZ2"  (GA4 direto, propriedade 559914633: config com page_view em toda página)
+ * As páginas do curso dizem qual versão são no atributo data-pagina da tag <script> (pgA = curso/,
+ * pgB = curso/b/, pgC = curso/versao-b/); o valor vai no sck da Hotmart e no content_category dos eventos.
  */
-const CONFIG = { gtmId: "", metaPixelId: "", ga4Id: "" };
+const CONFIG = { gtmId: "", metaPixelId: "1197036460960933", ga4Id: "G-XH74VZSNZ2" };
 
 window.dataLayer = window.dataLayer || [];
 
 (function () {
   "use strict";
+
+  /* Versão da página do curso (pgA, pgB, pgC); vazio nas outras páginas */
+  var pagina = (document.currentScript && document.currentScript.getAttribute("data-pagina")) || "";
 
   /* ---------- Carregamento condicional de GTM, GA4 e Pixel ---------- */
   function loadScript(src) {
@@ -60,6 +64,8 @@ window.dataLayer = window.dataLayer || [];
       var p = {};
       if (params && params.value) { p.value = params.value; p.currency = params.currency || "BRL"; }
       if (params && params.form) p.content_name = params.form;
+      if (params && params.content_name) p.content_name = params.content_name;
+      if (params && params.content_category) p.content_category = params.content_category;
       window.fbq("track", PIXEL_EVENTS[event], p);
     }
   }
@@ -85,18 +91,25 @@ window.dataLayer = window.dataLayer || [];
     });
   }
 
-  /* ---------- Checkout Hotmart: UTMs em src/sck + eventos ---------- */
+  /* ---------- Checkout Hotmart: UTMs em src/sck + eventos ----------
+   * src = utm_source|utm_medium|utm_campaign|utm_content; sck = o mesmo + |pgX da página
+   * (sem UTM: sem src e sck=direto|pgX). Ex.: sck=meta|paid|ccs_frio_criativos|V01|pgA
+   */
   var src = ["utm_source", "utm_medium", "utm_campaign", "utm_content"]
     .map(function (k) { return visit.get(k); })
     .filter(Boolean)
     .join("|");
+  var sck = pagina ? (src || "direto") + "|" + pagina : src;
+  var offerParams = { value: 860, currency: "BRL" };
+  if (pagina) { offerParams.content_name = "Carreira com Sentido"; offerParams.content_category = pagina; }
 
-  document.querySelectorAll("a.checkout").forEach(function (a) {
+  document.querySelectorAll('a.checkout, a[href*="pay.hotmart.com"]').forEach(function (a) {
     var url = mergeParams(new URL(a.href));
-    if (src) { url.searchParams.set("src", src); url.searchParams.set("sck", src); }
+    if (src) url.searchParams.set("src", src);
+    if (sck) url.searchParams.set("sck", sck);
     a.href = url.toString();
     a.addEventListener("click", function () {
-      track("begin_checkout", { value: 860, currency: "BRL" });
+      track("begin_checkout", offerParams);
     });
   });
 
@@ -104,7 +117,7 @@ window.dataLayer = window.dataLayer || [];
   if (offer && "IntersectionObserver" in window) {
     var offerIO = new IntersectionObserver(function (entries) {
       if (entries[0].isIntersecting) {
-        track("view_offer", { value: 860, currency: "BRL" });
+        track("view_offer", offerParams);
         offerIO.disconnect();
       }
     }, { threshold: 0.3 });

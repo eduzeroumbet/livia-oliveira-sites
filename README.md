@@ -58,11 +58,17 @@ Identidade do site da Lívia, https://carreiracomsentido.com.br/ (cores converti
 No topo de `assets/js/site.js`:
 
 ```js
-const CONFIG = { gtmId: "", metaPixelId: "", ga4Id: "" };
+const CONFIG = { gtmId: "", metaPixelId: "1197036460960933", ga4Id: "G-XH74VZSNZ2" };
 ```
 
-Preencha os IDs quando existirem; cada script só é carregado se o ID estiver preenchido. Os eventos vão para o `dataLayer`
-(`begin_checkout`, `view_offer`, `generate_lead`) e, com o Pixel ativo, viram `InitiateCheckout`, `ViewContent` e `Lead`.
+Cada script só é carregado se o ID estiver preenchido (Pixel da Meta da conta de anúncios da Lívia e GA4 da propriedade
+559914633; sem GTM). Os eventos vão para o `dataLayer` (`begin_checkout`, `view_offer`, `generate_lead`), para o GA4 e,
+no Pixel, viram `InitiateCheckout`, `ViewContent` e `Lead`.
+
+As 3 versões do curso carregam o `site.js` com `data-pagina` na tag `<script>` (`pgA` = `curso/`, `pgB` = `curso/b/`,
+`pgC` = `curso/versao-b/`). Nos links da Hotmart, `src` = `utm_source|utm_medium|utm_campaign|utm_content` e `sck` = o
+mesmo + `|pgX` (sem UTM: `sck=direto|pgX`). Os eventos do curso levam `content_name` "Carreira com Sentido" e
+`content_category` `pgX`. Ao mudar o `site.js`, suba o `?v=` dele em todas as páginas.
 
 ## Verificar
 
@@ -70,6 +76,7 @@ Preencha os IDs quando existirem; cada script só é carregado se o ID estiver p
 /Users/educloud/orquestra/.venv/bin/python _catalogo/preparar_assets.py   # gera imagens e copia vídeos
 /Users/educloud/orquestra/.venv/bin/python tests/check.py                  # verificações
 /Users/educloud/orquestra/.venv/bin/python tests/lista_terapia.py          # formulário da lista (terapia/) no Chromium, sem enviar ao Google
+/Users/educloud/orquestra/.venv/bin/python tests/rastreamento_curso.py     # Pixel, GA4, src/sck e eventos nas 3 versões do curso, no Chromium
 /Users/educloud/orquestra/.venv/bin/python _catalogo/prints.py             # prints em _catalogo/prints/
 ```
 
