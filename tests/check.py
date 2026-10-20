@@ -3,6 +3,7 @@
 Uso: /Users/educloud/orquestra/.venv/bin/python tests/check.py
 """
 import json
+import re
 import sys
 from html.parser import HTMLParser
 from pathlib import Path
@@ -31,6 +32,14 @@ CURSO_ORGANICO = {
     "terapia/index.html": "../curso/b/",
 }
 CHECKOUT = "https://pay.hotmart.com/M100028858P?checkoutMode=10"
+# as 3 versões do curso carregam o site.js (Pixel, GA4, src/sck) com o sufixo da página no data-pagina
+CURSO_PAGINA = {
+    "curso/index.html": ("../assets/js/site.js", "pgA"),
+    "curso/b/index.html": ("../../assets/js/site.js", "pgB"),
+    "curso/versao-b/index.html": ("../../assets/js/site.js", "pgC"),
+}
+PIXEL_ID = "1197036460960933"
+GA4_ID = "G-XH74VZSNZ2"
 HOTLINK = "r2" + ".dev"  # storage do Scrolltide; montado em partes para o próprio check não conter o literal
 DOMINIO = "liviaoliveira.me"
 URL_ANTIGA = "github.io" + "/livia-oliveira-sites"  # endereço antigo; em partes pelo mesmo motivo
@@ -108,6 +117,11 @@ def check_page(rel):
     if rel == "curso/b/index.html" and parser.checkouts == 0:
         erros.append(f"{rel}: nenhum botão class=\"checkout\" apontando para o Hotmart")
 
+    if rel in CURSO_PAGINA:
+        script, pagina = CURSO_PAGINA[rel]
+        if not re.search(rf'<script src="{re.escape(script)}(\?v=\d+)?" data-pagina="{pagina}"', html):
+            erros.append(f"{rel}: sem <script src=\"{script}\" data-pagina=\"{pagina}\"> (rastreamento do curso)")
+
     if rel in ("curso/index.html", "curso/versao-b/index.html") and CHECKOUT not in html:
         erros.append(f"{rel}: sem link para o checkout Hotmart")
     if rel == "curso/versao-b/index.html":
@@ -169,6 +183,11 @@ def main():
             erros.append(f"{extra}: contém travessão (—)")
         if HOTLINK in texto:
             erros.append(f"{extra}: referencia o storage do Scrolltide ({HOTLINK})")
+        if extra == "assets/js/site.js":
+            if f'metaPixelId: "{PIXEL_ID}"' not in texto:
+                erros.append(f"{extra}: CONFIG sem o Pixel da Meta {PIXEL_ID}")
+            if f'ga4Id: "{GA4_ID}"' not in texto:
+                erros.append(f"{extra}: CONFIG sem o GA4 {GA4_ID}")
 
     cname = ROOT / "CNAME"
     if not cname.exists():
