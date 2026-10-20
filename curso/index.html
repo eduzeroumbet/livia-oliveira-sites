@@ -31,7 +31,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;1,400;1,500&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600&display=swap" rel="stylesheet">
   <link rel="preload" as="image" href="../assets/video/scrolltide/hero-arbor-poster.webp" fetchpriority="high">
-  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="style.css?v=4">
 
   <script type="application/ld+json">
   {
@@ -383,7 +383,7 @@
       </div>
       <div class="wrap">
         <figure class="depo depo-destaque reveal"><blockquote>No primeiro módulo, organizei o fluxo de mensagens com os pacientes, valores, política de cobrança, pacotes e algumas questões do presencial e online. E já consegui testar tudo: entraram dois pacientes novos, usei as mensagens, segui o fluxo e até coloquei essas demandas dentro do meu agora “horário administrativo”. Senti que fiz tudo com muito mais tranquilidade.</blockquote><figcaption><span class="depo-avatar" aria-hidden="true">CS</span><span class="depo-legenda"><strong>Depois do módulo 1</strong>Aluna do Carreira com Sentido</span></figcaption></figure>
-        <div class="depo-grade">
+        <div class="depo-grade" id="depo-grade">
           <figure class="depo"><blockquote>Foi a primeira vez que o percurso dos módulos de um curso foi tão leve, parecendo uma conversa. Enquanto assistia, parecia que eu estava conversando com uma amiga psi que já tem experiência e que está me ajudando no meu caminho.</blockquote><figcaption><span class="depo-avatar" aria-hidden="true">CS</span><span class="depo-legenda"><strong>Ao terminar o curso</strong>Aluna do Carreira com Sentido</span></figcaption></figure>
           <figure class="depo"><blockquote>Se eu pudesse investir em apenas uma coisa ao sair da faculdade, sem dúvidas, seria no seu curso.</blockquote><figcaption><span class="depo-avatar" aria-hidden="true">CS</span><span class="depo-legenda"><strong>Recém-formada</strong>Aluna do Carreira com Sentido</span></figcaption></figure>
           <figure class="depo"><blockquote>Ontem assisti ao último módulo do Carreira com Sentido. Atendeu o que eu precisava. Bem completo, Lívia! Senti que fui pega pela mão do início ao fim. Recomendei às minhas amigas e colegas da psi!</blockquote><figcaption><span class="depo-avatar" aria-hidden="true">CS</span><span class="depo-legenda"><strong>Ao terminar o curso</strong>Aluna do Carreira com Sentido</span></figcaption></figure>
@@ -393,8 +393,12 @@
           <figure class="depo"><blockquote>Estou amando o curso, não dá vontade de parar de ver as aulas. Pra mim, que estou fazendo uma transição de carreira, antes administradora e agora psicóloga, está fazendo muito sentido retomar e aprofundar estes conceitos. Sua didática é incrível, simples e clara!</blockquote><figcaption><span class="depo-avatar" aria-hidden="true">CS</span><span class="depo-legenda"><strong>Em transição de carreira</strong>Aluna do Carreira com Sentido</span></figcaption></figure>
           <figure class="depo"><blockquote>Seu curso é precioso! É um privilégio ter acesso a esse tipo de conhecimento tão no início da carreira, ainda mais passado de uma forma tão humana.</blockquote><figcaption><span class="depo-avatar" aria-hidden="true">CS</span><span class="depo-legenda"><strong>Início de carreira</strong>Aluna do Carreira com Sentido</span></figcaption></figure>
         </div>
+        <!-- Só no celular e só com JS: sem JS fica hidden e a grade aparece inteira -->
+        <div class="depo-mais-wrap">
+          <button type="button" class="btn btn--contorno depo-mais" aria-controls="depo-grade" aria-expanded="false" hidden>Ver mais relatos</button>
+        </div>
         <div class="alunas-cta reveal">
-          <a class="btn" href="#oferta">Quero começar agora</a>
+          <a class="btn btn-bloco" href="#oferta">Quero começar agora <svg aria-hidden="true"><use href="#i-seta"/></svg></a>
           <p class="garantia-linha">7 dias de garantia</p>
         </div>
       </div>
@@ -477,6 +481,6 @@
     <svg aria-hidden="true"><use href="#i-whats"/></svg>
   </a>
 
-  <script src="script.js" defer></script>
+  <script src="script.js?v=4" defer></script>
 </body>
 </html>

@@ -188,6 +188,23 @@
     });
   });
 
+  /* Alunas: no celular (CSS até 699px) a grade mostra 4 cartões e o botão revela o resto e some.
+     Sem JS o botão segue hidden e a grade fica inteira */
+  var grade = document.getElementById("depo-grade");
+  var mais = document.querySelector(".depo-mais");
+  if (grade && mais && grade.children.length > 4) {
+    grade.classList.add("is-recolhida");
+    mais.hidden = false;
+    mais.addEventListener("click", function () {
+      grade.classList.remove("is-recolhida");
+      mais.setAttribute("aria-expanded", "true");
+      mais.hidden = true;
+      var proximo = grade.children[4];
+      proximo.setAttribute("tabindex", "-1");
+      proximo.focus({ preventScroll: true });
+    });
+  }
+
   /* Scroll: retrato, barra mobile e WhatsApp */
   var hero = document.querySelector(".hero");
   var retrato = document.querySelector(".guia-foto img");

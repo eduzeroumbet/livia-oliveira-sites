@@ -103,14 +103,22 @@ p { margin: 0 0 1em; }
 
 /* Botões do corpo da página: mesma pílula, no acento da Lívia.
    Fundo no coral escuro: o coral claro com texto branco dá 4,36:1 (abaixo de 4,5) */
-main .btn:not(.btn--light):not(.btn--ink), .barra-mobile .btn {
+main .btn:not(.btn--light):not(.btn--ink):not(.btn--contorno), .barra-mobile .btn {
   background: var(--coral-escuro); color: #fff;
   padding: 15px 30px; font-size: 15px;
   box-shadow: 0 10px 24px -12px rgba(209, 73, 91, .7);
 }
-main .btn:not(.btn--light):not(.btn--ink):hover, .barra-mobile .btn:hover { background: #9F3242; }
+main .btn:not(.btn--light):not(.btn--ink):not(.btn--contorno):hover, .barra-mobile .btn:hover { background: #9F3242; }
 .barra-mobile .btn { padding: 11px 20px; font-size: 14px; }
 .btn-bloco { width: 100%; }
+
+/* Secundário: contorno no coral escuro (4,68:1 sobre o creme, 5,15:1 sobre o papel) */
+.btn--contorno {
+  padding: 13px 28px; font-size: 15px;
+  background: transparent; color: var(--coral-escuro);
+  border: 1.5px solid var(--coral-escuro); box-shadow: none;
+}
+.btn--contorno:hover { background: var(--rosa-claro); }
 
 /* ------------------------------------------------------------------
    Navbar Arbor
@@ -503,8 +511,9 @@ main .btn:not(.btn--light):not(.btn--ink):hover, .barra-mobile .btn:hover { back
 .depo blockquote { margin: 0; font-family: var(--font-display); font-size: 18px; line-height: 1.5; letter-spacing: -0.01em; color: var(--tinta); }
 .depo blockquote::before { content: "\201C"; display: block; font-size: 2.8rem; line-height: .7; color: var(--rosa); margin-bottom: 6px; }
 .depo figcaption { display: flex; align-items: center; gap: 12px; padding-top: 14px; border-top: 1px solid rgba(59, 31, 43, .1); }
-.depo-legenda { display: flex; flex-direction: column; gap: 2px; font-size: .8125rem; line-height: 1.35; color: rgba(42, 31, 36, .84); }
-.depo-legenda strong { font-size: .9375rem; font-weight: 600; color: var(--vinho); }
+/* Legenda: contexto 14px/600 no vinho; linha "Aluna do..." 13px em #5A4650 (7,27:1 sobre o creme) */
+.depo-legenda { display: flex; flex-direction: column; gap: 2px; font-size: 13px; line-height: 1.35; color: #5A4650; }
+.depo-legenda strong { font-size: 14px; font-weight: 600; color: var(--vinho); }
 .depo-avatar {
   flex: none; display: grid; place-items: center; width: 38px; height: 38px; border-radius: 50%;
   background: var(--rosa-claro); border: 1px solid rgba(181, 131, 141, .5);
@@ -519,7 +528,16 @@ main .btn:not(.btn--light):not(.btn--ink):hover, .barra-mobile .btn:hover { back
 .depo-destaque figcaption { border-top-color: rgba(255, 255, 255, .16); }
 .depo-destaque .depo-legenda { color: rgba(250, 245, 242, .9); }
 .depo-destaque .depo-legenda strong { color: #E3C899; }
-.alunas-cta { margin-top: 24px; text-align: center; }
+.alunas-cta { max-width: 420px; margin: 24px auto 0; text-align: center; }
+
+/* "Ver mais relatos": só até 699px e só quando o JS tirou o hidden; com .is-recolhida a grade
+   mostra os 4 primeiros cartões. Sem JS nada disso se aplica e todos os cartões aparecem */
+.depo-mais-wrap { display: none; }
+@media (max-width: 699px) {
+  .depo-grade.is-recolhida .depo:nth-child(n+5) { display: none; }
+  .depo-mais-wrap { display: flex; justify-content: center; margin-top: 8px; }
+  .depo-mais[hidden] { display: none; }
+}
 
 /* Oferta */
 .oferta { background: var(--creme); }
