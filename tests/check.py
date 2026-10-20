@@ -22,6 +22,14 @@ ENTRIES = {
         "entry.1892587682",
     ],
 }
+ENTRIES["terapia/index.html"] = ENTRIES["terapia/b/index.html"]
+GFORM_TERAPIA = "https://docs.google.com/forms/d/e/1FAIpQLSfBmYNmVucSkEQvBLERoWCcRs_zaT0MN2P944cHZapHvCwfUA/formResponse"
+# links orgânicos para o curso: todos vão para curso/b/ (a versão A, curso/, fica só para os anúncios)
+CURSO_ORGANICO = {
+    "index.html": "curso/b/",
+    "consultoria/index.html": "../curso/b/",
+    "terapia/index.html": "../curso/b/",
+}
 CHECKOUT = "https://pay.hotmart.com/M100028858P?checkoutMode=10"
 HOTLINK = "r2" + ".dev"  # storage do Scrolltide; montado em partes para o próprio check não conter o literal
 DOMINIO = "liviaoliveira.me"
@@ -109,9 +117,39 @@ def check_page(rel):
             erros.append(f"{rel}: canonical deve apontar para https://{DOMINIO}/curso/")
         if "versao-b" in (ROOT / "sitemap.xml").read_text(encoding="utf-8"):
             erros.append(f"{rel}: não deve estar no sitemap.xml")
+        if not any(t == "a" and a == "href" and v == "../b/" for t, a, v, _ in parser.refs):
+            erros.append(f"{rel}: o link \"Curso\" do rodapé deve apontar para ../b/")
+    if rel == "curso/b/index.html":
+        if '<meta name="robots" content="noindex">' not in html:
+            erros.append(f"{rel}: sem <meta name=\"robots\" content=\"noindex\">")
+        if '<link rel="canonical" href="https://liviaoliveira.me/curso/">' not in html:
+            erros.append(f"{rel}: canonical deve apontar para https://{DOMINIO}/curso/")
+        if "curso/b/" in (ROOT / "sitemap.xml").read_text(encoding="utf-8"):
+            erros.append(f"{rel}: não deve estar no sitemap.xml")
+        for destino in ("../../", "../../consultoria/", "../../terapia/", "https://www.instagram.com/liviaoliveira.psicologa/"):
+            if f'href="{destino}"' not in html:
+                erros.append(f"{rel}: rodapé sem o link {destino}")
+    if rel in CURSO_ORGANICO:
+        if not any(t == "a" and a == "href" and v == CURSO_ORGANICO[rel] for t, a, v, _ in parser.refs):
+            erros.append(f"{rel}: sem link para o curso em {CURSO_ORGANICO[rel]}")
+    if not rel.startswith("curso/versao-b/"):
+        for t, a, v, _ in parser.refs:
+            if t == "a" and "versao-b" in v:
+                erros.append(f"{rel}: link interno para curso/versao-b/ ({v}); use curso/b/")
     if rel.startswith("terapia/") and "R$" in html:
         erros.append(f"{rel}: contém preço (R$)")
-    if rel == "terapia/b/index.html":
+    if rel == "terapia/index.html":
+        baixo = html.lower()
+        for proibido in ("conversa inicial", "agendar uma conversa", "primeiro contato", "combinamos horário"):
+            if proibido in baixo:
+                erros.append(f"{rel}: contém \"{proibido}\" (a Lívia não faz conversa inicial; a página é lista de interesse)")
+        if 'id="lista"' not in html:
+            erros.append(f"{rel}: sem a seção id=\"lista\" da lista de interesse")
+        if f'data-gform="{GFORM_TERAPIA}"' not in html:
+            erros.append(f"{rel}: formulário da lista não envia ao Google Form da terapia")
+        if "../assets/js/site.js" not in html:
+            erros.append(f"{rel}: sem ../assets/js/site.js (validação e envio do formulário)")
+    if rel in ("terapia/index.html", "terapia/b/index.html"):
         if 'value="Tarde (13h  - 17h)"' not in html:
             erros.append(f"{rel}: valor do turno da tarde difere do Google Form (\"Tarde (13h  - 17h)\")")
         if 'value="Manhã (10h e 11h)"' not in html:

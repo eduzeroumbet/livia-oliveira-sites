@@ -11,15 +11,16 @@ redireciona automaticamente para o domínio. `robots.txt` aponta para o `sitemap
 |---|---|---|
 | `index.html` | Bio do Instagram | Página de links: curso, consultoria, terapia, WhatsApp da Thaís e Instagram |
 | `curso/index.html` | Psicólogas (tráfego pago) | Versão A da página de vendas do Carreira com Sentido (checkout Hotmart), com o vídeo da árvore. É a página de destino dos anúncios da Meta e a página indexada (sitemap) |
-| `curso/versao-b/index.html` | Psicólogas (público orgânico) | Versão B do curso (https://liviaoliveira.me/curso/versao-b/): mesma página, com o hero "Fios que se organizam" (canvas em `curso/versao-b/hero-fios.js` e `hero-fios.css`) no lugar do vídeo da árvore. É a página do curso para a bio e os links internos do site. `noindex`, canonical para `/curso/` e fora do sitemap |
+| `curso/b/index.html` | Psicólogas (público orgânico) | Página do curso para a bio e os links internos do site (https://liviaoliveira.me/curso/b/). `noindex`, canonical para `/curso/` e fora do sitemap |
+| `curso/versao-b/index.html` | Ninguém (fica no ar) | Versão B antiga (hero "Fios que se organizam", canvas em `curso/versao-b/hero-fios.js` e `hero-fios.css`). Continua publicada para quem tiver o link, mas nenhuma página aponta para ela; o "Curso" do rodapé dela leva para `curso/b/`. `noindex`, canonical para `/curso/` e fora do sitemap |
 | `consultoria/index.html` | Psicólogas | Inscrição na Consultoria 1:1 (formulário que envia ao Google Forms) |
-| `terapia/index.html` | Pacientes adultos | Atendimento psicológico, lista de interesse (Google Forms) e indicação pelo WhatsApp |
+| `terapia/index.html` | Pacientes adultos | Psicoterapia com agenda completa: lista de interesse (formulário que envia ao Google Forms, o mesmo de `terapia/b/`) e indicação de profissionais pelo WhatsApp da Thaís. Não há conversa inicial |
 
 ## Como editar
 
 - Textos: direto no HTML de cada página. Não use travessão; prefira vírgula, ponto ou dois-pontos.
 - Links e imagens: sempre com caminho relativo (`assets/...` na raiz, `../assets/...` nas subpastas). Nunca comece com `/`.
-- Links para o curso: a bio (`index.html`) e os links internos do site (consultoria, terapia, rodapés) apontam para a versão B (`curso/versao-b/`). A versão A (`curso/`) fica só para os anúncios (tráfego pago): use `https://liviaoliveira.me/curso/` nos anúncios da Meta e não crie links internos para ela.
+- Links para o curso: a bio (`index.html`) e os links internos do site (consultoria, terapia, rodapés) apontam para `curso/b/`. Não crie links para `curso/versao-b/` (só o próprio rodapé dela, que leva para `curso/b/`). A versão A (`curso/`) fica só para os anúncios (tráfego pago): use `https://liviaoliveira.me/curso/` nos anúncios da Meta e não crie links internos para ela.
 - Visual: `assets/css/site.css`, `curso/style.css` e `terapia/style.css` (cores da marca nas variáveis do topo; veja a seção Visual).
 - Comportamento: `assets/js/site.js` (UTMs, checkout, barra fixa, máscara de WhatsApp e formulários).
 - Formulários: cada campo enviado ao Google Forms tem `data-entry="entry.XXXX"`; campos sem `data-entry` não são enviados.
@@ -68,6 +69,7 @@ Preencha os IDs quando existirem; cada script só é carregado se o ID estiver p
 ```sh
 /Users/educloud/orquestra/.venv/bin/python _catalogo/preparar_assets.py   # gera imagens e copia vídeos
 /Users/educloud/orquestra/.venv/bin/python tests/check.py                  # verificações
+/Users/educloud/orquestra/.venv/bin/python tests/lista_terapia.py          # formulário da lista (terapia/) no Chromium, sem enviar ao Google
 /Users/educloud/orquestra/.venv/bin/python _catalogo/prints.py             # prints em _catalogo/prints/
 ```
 

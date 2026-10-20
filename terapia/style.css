@@ -194,7 +194,17 @@ p { margin: 0 0 1em; }
   margin: 20px 0 0; max-width: 34em;
   font-size: 1.0625rem; line-height: 1.65; color: var(--tinta);
 }
-.hero__cta { margin-top: 28px; }
+.hero__cta { margin-top: 24px; }
+/* Aviso de agenda completa: caixa branca com filete vinho, logo abaixo do subtítulo */
+.hero__aviso {
+  display: flex; align-items: flex-start; gap: 12px;
+  margin: 22px 0 0; max-width: 34em; padding: 14px 18px;
+  border: 1px solid var(--linha); border-left: 3px solid var(--vinho); border-radius: var(--raio-card);
+  background: rgba(255, 255, 255, .86); box-shadow: var(--sombra-suave);
+  font-size: 1rem; line-height: 1.5; color: var(--tinta);
+}
+.hero__aviso b { color: var(--vinho); font-weight: 600; }
+.hero__aviso-ponto { flex: none; width: 10px; height: 10px; margin-top: .45em; border-radius: 50%; background: var(--vinho); box-shadow: 0 0 0 4px rgba(110, 23, 44, .14); }
 
 .hero__foto {
   position: relative; justify-self: center;
@@ -297,6 +307,66 @@ p { margin: 0 0 1em; }
   .step__texto { grid-area: texto; margin-top: 10px; font-size: 17px; }
 }
 
+/* Botão secundário: borda vinho a 30% e texto vinho */
+.btn--contorno { background: transparent; color: var(--vinho); border: 1.5px solid rgba(110, 23, 44, .3); box-shadow: none; }
+.btn--contorno:hover { background: var(--rosa-claro); border-color: var(--vinho); }
+
+/* Lista de interesse: aviso de urgência e formulário (validação e envio em ../assets/js/site.js) */
+.lista { background: var(--papel); }
+.urgente {
+  margin-top: 28px; padding: 24px 22px; border-radius: var(--raio-card);
+  background: var(--rosa-claro); border: 1px solid var(--linha); border-left: 3px solid var(--vinho);
+}
+.urgente h3 { font-size: clamp(1.7rem, 5.4vw, 2.1rem); margin-bottom: 10px; }
+.urgente h3 em { display: block; font-weight: 500; color: var(--petroleo); }
+.urgente p { color: var(--tinta); }
+.urgente .btn { margin-top: 4px; }
+
+.form-card {
+  margin-top: 28px; padding: 28px 20px; border-radius: var(--raio-card);
+  background: #fff; border: 1px solid var(--linha); box-shadow: var(--sombra-suave);
+}
+.field { margin-bottom: 22px; }
+.field > label:not(.check), .fieldset legend { display: block; margin-bottom: 8px; font-weight: 500; color: var(--tinta); }
+.hint { font-weight: 400; font-size: .875rem; color: var(--texto-suave); }
+.field input[type=text], .field input[type=email], .field input[type=tel] {
+  display: block; width: 100%; min-height: 54px; padding: 12px 16px;
+  border: 1px solid #CDB7B6; border-radius: 10px; background: var(--papel);
+  font-size: 17px; color: var(--tinta);
+  transition: border-color .2s ease, box-shadow .2s ease;
+}
+.field input:focus { outline: none; border-color: var(--vinho); box-shadow: 0 0 0 3px rgba(110, 23, 44, .18); }
+.fieldset { margin: 0 0 22px; padding: 0; border: 0; min-width: 0; }
+.fieldset legend { padding: 0; }
+.checks { display: grid; gap: 10px; }
+.check {
+  display: flex; align-items: center; gap: 12px; min-height: 54px; padding: 12px 16px;
+  border: 1px solid var(--linha); border-radius: 10px; background: var(--papel);
+  cursor: pointer; line-height: 1.4; transition: border-color .2s ease, background .2s ease;
+}
+.check:hover { border-color: var(--rosa); }
+.check:has(input:checked) { border-color: var(--vinho); background: var(--rosa-claro); }
+.check input { flex: none; width: 22px; height: 22px; margin: 0; accent-color: var(--vinho); }
+.check input:focus-visible { outline: 3px solid var(--vinho); outline-offset: 2px; }
+.check-block { align-items: flex-start; }
+.check-block input { margin-top: 1px; }
+[aria-invalid="true"]:is(input[type=text], input[type=email], input[type=tel]) { border-color: #A4161A; }
+.error { display: block; margin-top: 6px; font-size: .9375rem; color: #A4161A; }
+.error:empty { display: none; }
+.btn-block { width: 100%; cursor: pointer; }
+.btn:disabled { opacity: .7; cursor: wait; transform: none; }
+.form-note { margin: 14px 0 0; font-size: .875rem; color: var(--texto-suave); }
+.form-status:not(:empty) { margin-top: 16px; }
+.form-status .error { font-size: 1rem; }
+.form-success { text-align: center; }
+.form-success:focus { outline: none; }
+.form-success h3 { font-size: 2rem; margin-bottom: 12px; }
+.form-success p { color: var(--texto-suave); }
+.form-success__icone {
+  display: grid; place-items: center; width: 56px; height: 56px; margin: 0 auto 16px; border-radius: 50%;
+  background: var(--rosa-claro); color: var(--vinho); font-size: 1.6rem; font-weight: 600;
+}
+
 /* Sobre */
 .sobre { background: var(--creme); }
 .sobre-grid { display: grid; gap: 40px; align-items: center; }
@@ -343,6 +413,11 @@ p { margin: 0 0 1em; }
 .final .btn, .trilho-secao .btn { background: var(--rosa); color: var(--vinho); font-weight: 600; box-shadow: 0 14px 30px -14px rgba(0, 0, 0, .6); }
 .final .btn:hover, .trilho-secao .btn:hover { background: var(--papel); }
 .final .btn:focus-visible, .trilho-secao .btn:focus-visible { outline-color: var(--rosa); }
+/* link secundário do CTA final (indicação pelo WhatsApp): creme sublinhado */
+.final__sec { margin: 22px 0 0; font-size: .9375rem; }
+.final__sec a { color: var(--papel); text-decoration: underline; text-decoration-color: rgba(252, 250, 246, .45); text-underline-offset: 3px; }
+.final__sec a:hover { text-decoration-color: currentColor; }
+.final__sec a:focus-visible { outline-color: var(--rosa); }
 
 /* Rodapé: o aviso do CVV fica maior e em destaque */
 .rodape { background: var(--tinta); color: rgba(252, 250, 246, .88); padding: 36px 0 96px; font-size: .9375rem; text-align: center; }
@@ -384,6 +459,9 @@ p { margin: 0 0 1em; }
 
 @media (min-width: 600px) {
   .cards { grid-template-columns: 1fr 1fr; }
+  .checks-2 { grid-template-columns: 1fr 1fr; }
+  .form-card { padding: 40px 36px; }
+  .urgente { padding: 28px 30px; }
 }
 
 @media (min-width: 900px) {
