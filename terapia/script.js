@@ -91,10 +91,10 @@
   var hero = document.querySelector(".hero");
   var foto = document.querySelector(".sobre .foto img");
   var whats = document.querySelector(".whats");
-  var evitaveis = Array.prototype.slice.call(document.querySelectorAll("main .btn, .step, .faq summary, .nota"));
+  var evitaveis = Array.prototype.slice.call(document.querySelectorAll("main .btn, .step, .faq summary, .nota, .hero__aviso, .urgente, .form-card .field, .form-card .fieldset"));
   var pendente = false;
 
-  /* WhatsApp não pode cobrir CTAs, passos, perguntas do FAQ nem a nota da lista de espera */
+  /* WhatsApp não pode cobrir CTAs, passos, perguntas do FAQ, os avisos nem os campos da lista de interesse */
   function cobreAlgo() {
     var w = whats.getBoundingClientRect();
     return evitaveis.some(function (el) {
