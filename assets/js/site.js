@@ -111,18 +111,28 @@ window.dataLayer = window.dataLayer || [];
     offerIO.observe(offer);
   }
 
-  /* ---------- Barra fixa no celular: aparece depois do hero ---------- */
+  /* ---------- Barra fixa no celular ----------
+   * Aparece depois que o botão principal do hero sai da tela e some enquanto a
+   * oferta ou o formulário ([data-hide-sticky]) estão visíveis. Com a barra visível,
+   * o body ganha padding-bottom igual à altura dela (e o botão do WhatsApp sobe junto).
+   */
   var bar = document.querySelector(".sticky-bar");
   var hero = document.querySelector(".hero");
   if (bar && hero && "IntersectionObserver" in window) {
+    var heroCta = hero.querySelector(".btn") || hero;
     var hideOn = document.querySelectorAll("[data-hide-sticky]");
     var pastHero = false;
     var hidden = 0;
-    var update = function () { bar.classList.toggle("on", pastHero && hidden === 0); };
+    var update = function () {
+      var show = pastHero && hidden === 0;
+      bar.classList.toggle("on", show);
+      document.body.classList.toggle("has-sticky", show);
+      document.body.style.setProperty("--sticky-h", bar.offsetHeight + "px");
+    };
     new IntersectionObserver(function (entries) {
       pastHero = !entries[0].isIntersecting && entries[0].boundingClientRect.top < 0;
       update();
-    }).observe(hero);
+    }).observe(heroCta);
     hideOn.forEach(function (el) {
       var visible = false;
       new IntersectionObserver(function (entries) {
@@ -133,6 +143,7 @@ window.dataLayer = window.dataLayer || [];
         }
       }).observe(el);
     });
+    window.addEventListener("resize", update);
   }
 
   /* ---------- Máscara de WhatsApp: (51) 99999-9999 ---------- */
@@ -171,7 +182,7 @@ window.dataLayer = window.dataLayer || [];
     form.querySelectorAll("[data-error-for]").forEach(function (o) { setError(form, o.getAttribute("data-error-for"), ""); });
 
     var nome = form.elements.nome;
-    if (nome && nome.value.trim().length < 3) fail("nome", "Escreva o seu nome completo.");
+    if (nome && nome.value.trim().length < 3) fail("nome", "Escreva o seu nome.");
 
     var whats = form.elements.whatsapp;
     if (whats) {
