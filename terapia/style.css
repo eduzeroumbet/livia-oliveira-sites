@@ -1,34 +1,42 @@
-/* Atendimento psicológico | hero claro com respiração em CSS, trilho Zephyr em Como funciona */
-
-/* Fallback com as métricas da Playfair: o título não muda de altura quando a fonte web chega (CLS) */
-@font-face {
-  font-family: "Playfair Fallback";
-  src: local("Times New Roman"), local("TimesNewRomanPSMT");
-  size-adjust: 111.52%;
-  ascent-override: 97.25%;
-  descent-override: 22.56%;
-  line-gap-override: 0%;
-}
+/* Atendimento psicológico | hero claro com respiração em CSS, trilho Zephyr em Como funciona.
+   Identidade de carreiracomsentido.com.br: vinho, rosé, azul petróleo e creme; Noto Serif Display extra condensada */
 
 :root {
-  --vinho: #3B1F2B;
-  --vinho-fundo: #1E1016;
-  --rosa: #B5838D;
-  --coral: #D1495B;
-  --coral-escuro: #B83B4C;
-  --tinta: #2A1F24;
-  --papel: #FAF5F2;
-  --creme: #F3EADF;
-  --dourado: #C9A46A;
-  --salvia: #A8B5A0;
-  --linha: rgba(59, 31, 43, .12);
-  --serif: "Playfair Display", "Playfair Fallback", Georgia, "Times New Roman", serif;
-  --sans: "DM Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+  /* os nomes antigos continuam, apontando para a paleta nova */
+  --vinho: #6E172C;
+  --vinho-escuro: #5A1025;
+  --vinho-fundo: var(--vinho);
+  --rosa: #DBA8AD;
+  --rosa-claro: #F5ECEA;
+  --petroleo: #264056;
+  --coral: var(--vinho);
+  --coral-escuro: var(--vinho);
+  --tinta: #1E1212;
+  --texto-suave: #605151;
+  --papel: #FCFAF6;
+  --creme: #F5ECEA;
+  --dourado: var(--rosa);
+  --salvia: var(--petroleo);
+  --linha: #E5D3D2;
+  --serif: "Noto Serif Display", Georgia, "Times New Roman", serif;
+  --sans: "Helvetica Neue", Helvetica, Arial, sans-serif;
+  /* espaçamento dos títulos: o site da marca usa -.07em */
+  --titulo-ls: -.07em;
   --raio: 22px;
-  --sombra: 0 18px 50px -24px rgba(59, 31, 43, .35);
+  --raio-card: .5rem;
+  --sombra: 0 20px 50px -20px rgba(110, 23, 44, .35);
+  --sombra-suave: 0 10px 30px -15px rgba(38, 64, 86, .25);
+  --grad-vinho: linear-gradient(135deg, #5A1025, #82222F);
+  --grad-petroleo: linear-gradient(135deg, #1C3448, #2F4E66);
   --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
   /* ciclo da respiração do hero: ~4,5 s inspirando e ~4,5 s soltando */
   --respiro: 9s;
+}
+@supports (color: oklch(0% 0 0)) {
+  :root {
+    --grad-vinho: linear-gradient(135deg, oklch(32% .12 10), oklch(40% .13 18));
+    --grad-petroleo: linear-gradient(135deg, oklch(32% .05 245), oklch(40% .06 240));
+  }
 }
 
 *, *::before, *::after { box-sizing: border-box; }
@@ -42,12 +50,16 @@ body {
   color: var(--tinta);
   background: var(--papel);
   overflow-x: hidden;
+  letter-spacing: -.015em;
   -webkit-font-smoothing: antialiased;
 }
 img { max-width: 100%; display: block; }
 a { color: inherit; }
-h1, h2, h3 { font-family: var(--serif); font-weight: 500; line-height: 1.14; margin: 0; color: var(--vinho); letter-spacing: -.01em; }
-em { font-family: var(--serif); font-style: italic; font-weight: 400; }
+h1, h2, h3 { font-family: var(--serif); font-stretch: 62.5%; font-weight: 500; line-height: 1.02; margin: 0; color: var(--vinho); letter-spacing: var(--titulo-ls); }
+em { font-family: var(--serif); font-stretch: 62.5%; font-style: italic; font-weight: 400; }
+/* Títulos da marca: o trecho final em itálico numa linha própria, petróleo no fundo claro
+   (as seções escuras trocam para rosé) */
+h1 em, h2 em { display: block; font-weight: 500; color: var(--petroleo); }
 p { margin: 0 0 1em; }
 .wrap { width: min(1080px, 100% - 40px); margin-inline: auto; }
 .wrap-estreito { width: min(720px, 100% - 40px); margin-inline: auto; }
@@ -59,23 +71,24 @@ p { margin: 0 0 1em; }
   font-size: .8125rem;
   letter-spacing: .2em;
   text-transform: uppercase;
-  color: #7A4553;
+  color: var(--vinho);
   margin-bottom: 14px;
 }
 .secao { padding: 88px 0; }
-.secao h2 { font-size: clamp(1.9rem, 6.2vw, 3rem); margin-bottom: 20px; }
-.lead { font-size: 1.06rem; color: rgba(42, 31, 36, .86); }
+/* fonte estreita: h2 de 38 a 60px, como no site da marca */
+.secao h2 { font-size: clamp(2.4rem, 8.4vw, 3.75rem); margin-bottom: 20px; }
+.lead { font-size: 1.06rem; color: var(--texto-suave); }
 
-/* Fundo no coral escuro: o coral claro com texto branco dá 4,36:1 (abaixo de 4,5) */
+/* Botão principal: vinho com texto creme (11:1) */
 .btn {
   display: inline-flex; align-items: center; justify-content: center; gap: 10px;
   min-height: 52px; padding: 14px 28px; border-radius: 999px; border: 0;
-  background: var(--coral-escuro); color: #fff;
-  font-family: var(--sans); font-weight: 600; font-size: 1rem; text-decoration: none;
-  box-shadow: 0 12px 28px -12px rgba(184, 59, 76, .7);
+  background: var(--vinho); color: var(--papel);
+  font-family: var(--sans); font-weight: 500; font-size: 1rem; text-decoration: none;
+  box-shadow: var(--sombra);
   transition: transform .25s ease, background .25s ease;
 }
-.btn:hover { background: #9F3242; transform: translateY(-2px); }
+.btn:hover { background: var(--vinho-escuro); transform: translateY(-2px); }
 .btn svg { width: 20px; height: 20px; flex: none; }
 .btn:focus-visible, a:focus-visible { outline: 3px solid var(--vinho); outline-offset: 3px; }
 
@@ -96,13 +109,13 @@ p { margin: 0 0 1em; }
   transition: background-color .4s var(--ease-out), border-color .4s var(--ease-out), box-shadow .4s var(--ease-out);
 }
 .nav.is-solida {
-  background: rgba(250, 245, 242, 0.94);
+  background: rgba(252, 250, 246, 0.94);
   -webkit-backdrop-filter: blur(16px); backdrop-filter: blur(16px);
   border-bottom-color: var(--linha);
 }
 .nav.is-solida .nav__inner { min-height: 66px; }
 .nav__inner { display: flex; align-items: center; gap: 20px; min-height: var(--nav-h); transition: min-height .4s var(--ease-out); }
-.nav__brand { font-family: var(--serif); font-size: 21px; font-weight: 500; letter-spacing: -.01em; color: var(--vinho); text-decoration: none; white-space: nowrap; }
+.nav__brand { font-family: var(--serif); font-stretch: 62.5%; font-size: 27px; font-weight: 500; letter-spacing: -.02em; color: var(--vinho); text-decoration: none; white-space: nowrap; }
 .nav__rail {
   display: flex; align-items: center; margin-inline: auto;
   padding: 12px 28px; border-radius: 999px;
@@ -112,7 +125,7 @@ p { margin: 0 0 1em; }
 }
 .nav__slot { display: inline-flex; align-items: center; }
 .nav__dot { width: 3px; height: 3px; margin-inline: clamp(12px, 1.6vw, 22px); border-radius: 999px; background: var(--rosa); }
-.nav__rail a { font-size: 15px; font-weight: 500; color: #4A3540; text-decoration: none; transition: color .3s var(--ease-out); }
+.nav__rail a { font-size: 15px; font-weight: 500; color: var(--texto-suave); text-decoration: none; transition: color .3s var(--ease-out); }
 .nav__rail a:hover { color: var(--vinho); }
 .nav__toggle { display: none; margin-left: auto; padding: 10px; border: 0; background: none; color: var(--vinho); cursor: pointer; }
 .nav__toggle svg { display: block; }
@@ -144,7 +157,7 @@ p { margin: 0 0 1em; }
   position: relative; isolation: isolate; overflow: hidden;
   display: flex; flex-direction: column;
   padding-top: calc(var(--nav-h) + 12px); padding-bottom: 28px;
-  background: linear-gradient(180deg, #FBF6F2 0%, var(--papel) 70%, #F7EEE8 100%);
+  background: linear-gradient(180deg, var(--papel) 0%, var(--papel) 70%, var(--rosa-claro) 100%);
 }
 .hero__respiro { position: absolute; inset: 0; z-index: -1; pointer-events: none; }
 .blob {
@@ -154,9 +167,10 @@ p { margin: 0 0 1em; }
   will-change: transform, opacity;
   animation: respira var(--respiro) ease-in-out infinite;
 }
-.blob--rosa { width: min(620px, 86vw); aspect-ratio: 1; right: -4%; top: 10%; background: rgba(214, 160, 170, .42); }
-.blob--salvia { width: min(460px, 70vw); aspect-ratio: 1.15; left: -10%; bottom: -12%; background: rgba(168, 181, 160, .40); animation-delay: calc(var(--respiro) / -3); }
-.blob--dourado { width: min(340px, 52vw); aspect-ratio: 1; right: 30%; top: -8%; background: rgba(201, 164, 106, .26); animation-delay: calc(var(--respiro) / -1.5); }
+/* formas nas cores da marca: rosé, petróleo bem claro e rosé suave (os nomes das classes ficaram) */
+.blob--rosa { width: min(620px, 86vw); aspect-ratio: 1; right: -4%; top: 10%; background: rgba(219, 168, 173, .42); }
+.blob--salvia { width: min(460px, 70vw); aspect-ratio: 1.15; left: -10%; bottom: -12%; background: rgba(38, 64, 86, .16); animation-delay: calc(var(--respiro) / -3); }
+.blob--dourado { width: min(340px, 52vw); aspect-ratio: 1; right: 30%; top: -8%; background: rgba(219, 168, 173, .26); animation-delay: calc(var(--respiro) / -1.5); }
 
 @keyframes respira {
   0%, 100% { transform: scale(.9); opacity: .7; }
@@ -168,14 +182,14 @@ p { margin: 0 0 1em; }
   padding-top: clamp(16px, 4vh, 56px);
 }
 .hero__title {
-  font-family: var(--serif); font-weight: 500;
-  font-size: clamp(2.15rem, 4.6vw, 3.9rem); line-height: 1.12; letter-spacing: -.015em;
+  font-family: var(--serif); font-stretch: 62.5%; font-weight: 500;
+  font-size: clamp(3rem, 6.6vw, 5.25rem); line-height: 1.02; letter-spacing: var(--titulo-ls);
   color: var(--vinho); text-wrap: balance;
 }
-.hero__title em { font-weight: 400; color: #5A2A3B; }
+.hero__title em { color: var(--petroleo); }
 .hero__sub {
   margin: 20px 0 0; max-width: 34em;
-  font-size: 1.0625rem; line-height: 1.65; color: rgba(42, 31, 36, .9);
+  font-size: 1.0625rem; line-height: 1.65; color: var(--tinta);
 }
 .hero__cta { margin-top: 28px; }
 
@@ -190,12 +204,12 @@ p { margin: 0 0 1em; }
   /* arco: raio horizontal de 50% da largura e vertical de 37,5% da altura (= meia largura num 3:4) */
   border-radius: 50% 50% 26px 26px / 37.5% 37.5% 26px 26px;
   background: linear-gradient(160deg, var(--creme), var(--rosa));
-  box-shadow: 0 30px 60px -34px rgba(59, 31, 43, .55);
+  box-shadow: var(--sombra);
 }
 /* Anel fino que pulsa no mesmo ritmo das formas */
 .hero__anel {
   position: absolute; inset: -14px; z-index: 0;
-  border: 1.5px solid rgba(201, 164, 106, .85);
+  border: 1.5px solid rgba(110, 23, 44, .35);
   border-radius: 50% 50% 38px 38px / 37.5% 37.5% 38px 38px;
   will-change: transform, opacity;
   animation: anel var(--respiro) ease-in-out infinite;
@@ -210,7 +224,7 @@ p { margin: 0 0 1em; }
   display: flex; flex-wrap: wrap; align-items: center; justify-content: center;
   gap: 6px 14px; margin-top: 32px; text-align: center;
 }
-/* vinho sobre o creme do hero: contraste acima de 12:1 */
+/* vinho sobre o creme do hero: contraste acima de 11:1 */
 .rating__count, .rating__score, .rating__sep { font-size: 14px; font-weight: 500; color: var(--vinho); }
 .rating__sep { color: var(--rosa); }
 
@@ -230,30 +244,31 @@ p { margin: 0 0 1em; }
 
 /* Cards de ajuda */
 .cards { display: grid; gap: 16px; margin-top: 32px; }
-.card { background: #fff; border: 1px solid var(--linha); border-radius: var(--raio); padding: 26px 24px; }
-.card .marca-card { display: block; width: 34px; height: 2px; background: var(--dourado); margin-bottom: 18px; }
-.card h3 { font-size: 1.3rem; margin-bottom: 10px; }
-.card p { margin: 0; color: rgba(42, 31, 36, .86); }
+.card { background: #fff; border: 1px solid var(--linha); border-radius: var(--raio-card); padding: 26px 24px; box-shadow: var(--sombra-suave); }
+.card .marca-card { display: block; width: 34px; height: 2px; background: var(--rosa); margin-bottom: 18px; }
+.card h3 { font-size: 1.8rem; line-height: 1.08; margin-bottom: 10px; }
+.card p { margin: 0; color: var(--texto-suave); }
 
 /* ACT */
-.act { background: linear-gradient(180deg, var(--papel), #eef0ea 60%, var(--papel)); }
+.act { background: linear-gradient(180deg, var(--papel), var(--rosa-claro) 60%, var(--papel)); }
 .act-grid { display: grid; gap: 40px; align-items: center; }
 .foto { border-radius: var(--raio); overflow: hidden; box-shadow: var(--sombra); background: linear-gradient(160deg, var(--creme), var(--rosa)); aspect-ratio: 4 / 5; }
 .foto img { width: 100%; height: 100%; object-fit: cover; }
 
 /* Como funciona: 4 passos do trilho Zephyr; cada passo é um card só, com ícone, rótulo, número e texto */
 .trilho-secao {
-  /* verde um tom abaixo do sálvia escuro: texto branco passa de 4,5:1 para mais de 5,9:1 */
-  background: linear-gradient(180deg, #5f6c61 0%, #56625a 100%);
-  color: #fff;
+  /* seção petróleo da marca: texto creme acima de 9:1 */
+  background: var(--petroleo); background-image: var(--grad-petroleo);
+  color: var(--papel);
 }
 .trilho-grid { display: grid; gap: clamp(32px, 4vw, 48px); }
-.trilho-secao h2 { color: #fff; font-weight: 400; margin-bottom: 0; }
-.trilho-secao .sobretitulo { color: #fff; }
+.trilho-secao h2 { color: var(--papel); margin-bottom: 0; }
+.trilho-secao h2 em { color: var(--rosa); }
+.trilho-secao .sobretitulo { color: var(--papel); }
 .steps { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin: 0; padding: 0; list-style: none; }
 .step {
   display: flex; flex-direction: column; min-width: 0; padding: 16px;
-  border: 1px solid rgba(255, 255, 255, 0.42); border-radius: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.42); border-radius: var(--raio-card);
   transition: border-color 0.3s cubic-bezier(0.22, 0.68, 0.32, 1), background 0.3s cubic-bezier(0.22, 0.68, 0.32, 1);
 }
 .step:hover { border-color: rgba(255, 255, 255, 0.7); background: rgba(255, 255, 255, 0.07); }
@@ -285,9 +300,9 @@ p { margin: 0 0 1em; }
 .sobre .foto { max-width: 440px; width: 100%; margin-inline: auto; }
 .sobre .foto img { height: 112%; margin-top: -6%; will-change: transform; }
 .nota {
-  margin-top: 28px; padding: 18px 20px; border-radius: 16px;
-  background: rgba(168, 181, 160, .22); border-left: 3px solid var(--salvia);
-  font-size: 1rem; color: rgba(42, 31, 36, .9);
+  margin-top: 28px; padding: 18px 20px; border-radius: var(--raio-card);
+  background: rgba(38, 64, 86, .07); border-left: 3px solid var(--petroleo);
+  font-size: 1rem; color: var(--tinta);
 }
 .nota + .btn { margin-top: 4px; }
 
@@ -307,32 +322,36 @@ p { margin: 0 0 1em; }
 .faq summary::-webkit-details-marker { display: none; }
 .faq summary::after {
   content: ""; position: absolute; right: 6px; top: 50%; width: 12px; height: 12px; margin-top: -8px;
-  border-right: 1.5px solid var(--rosa); border-bottom: 1.5px solid var(--rosa);
+  border-right: 1.5px solid var(--vinho); border-bottom: 1.5px solid var(--vinho);
   transform: rotate(45deg); transition: transform .3s ease;
 }
 .faq details[open] summary::after { transform: rotate(-135deg); margin-top: -2px; }
 .faq summary:focus-visible { outline: 3px solid var(--vinho); outline-offset: 3px; }
-.faq details p { margin: 0; padding: 0 0 22px; color: rgba(42, 31, 36, .86); }
+.faq details p { margin: 0; padding: 0 0 22px; color: var(--texto-suave); }
 
-/* CTA final */
-.final { background: var(--vinho-fundo); color: var(--papel); text-align: center; position: relative; overflow: hidden; isolation: isolate; }
-.final::before { content: ""; position: absolute; z-index: -1; left: 50%; top: 0; width: 520px; height: 100%; transform: translateX(-50%); background: radial-gradient(closest-side, rgba(201, 164, 106, .22), transparent); }
+/* CTA final: seção vinho da marca, destaques em rosé e texto de apoio creme */
+.final { background: var(--vinho); background-image: var(--grad-vinho); color: var(--papel); text-align: center; position: relative; overflow: hidden; isolation: isolate; }
+.final::before { content: ""; position: absolute; z-index: -1; left: 50%; top: 0; width: 520px; height: 100%; transform: translateX(-50%); background: radial-gradient(closest-side, rgba(219, 168, 173, .18), transparent); }
 .final h2 { color: var(--papel); }
-.final .sobretitulo { color: var(--dourado); }
-.final p { color: rgba(250, 245, 242, .92); }
-.final .btn:focus-visible { outline-color: var(--dourado); }
+.final h2 em { color: var(--rosa); }
+.final .sobretitulo { color: var(--rosa); }
+.final p { color: rgba(252, 250, 246, .9); }
+/* botão sobre o vinho e o petróleo: rosé com texto vinho (6:1), peso 600; hover creme */
+.final .btn, .trilho-secao .btn { background: var(--rosa); color: var(--vinho); font-weight: 600; box-shadow: 0 14px 30px -14px rgba(0, 0, 0, .6); }
+.final .btn:hover, .trilho-secao .btn:hover { background: var(--papel); }
+.final .btn:focus-visible, .trilho-secao .btn:focus-visible { outline-color: var(--rosa); }
 
 /* Rodapé: o aviso do CVV fica maior e em destaque */
-.rodape { background: #160B10; color: rgba(250, 245, 242, .88); padding: 36px 0 96px; font-size: .9375rem; text-align: center; }
+.rodape { background: var(--tinta); color: rgba(252, 250, 246, .88); padding: 36px 0 96px; font-size: .9375rem; text-align: center; }
 .rodape p { margin: 0 0 6px; }
-/* Links para as outras páginas (como na consultoria): branco sobre o fundo escuro, mais de 15:1 */
+/* Links para as outras páginas (como na consultoria): creme sobre o fundo escuro, mais de 15:1 */
 .rodape__links { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px 18px; margin: 12px 0 6px; }
-.rodape__links a { font-size: .9375rem; color: #fff; text-decoration: underline; text-decoration-color: rgba(255, 255, 255, .35); text-underline-offset: 3px; }
+.rodape__links a { font-size: .9375rem; color: var(--papel); text-decoration: underline; text-decoration-color: rgba(255, 255, 255, .35); text-underline-offset: 3px; }
 .rodape__links a:hover { text-decoration-color: currentColor; }
 .rodape .crise {
-  display: inline-block; margin-top: 8px; padding: 10px 16px; border-radius: 12px;
-  border: 1px solid rgba(235, 211, 166, .35); background: rgba(235, 211, 166, .08);
-  font-size: 1rem; font-weight: 500; line-height: 1.5; color: #EBD3A6;
+  display: inline-block; margin-top: 8px; padding: 10px 16px; border-radius: var(--raio-card);
+  border: 1px solid rgba(219, 168, 173, .4); background: rgba(219, 168, 173, .08);
+  font-size: 1rem; font-weight: 500; line-height: 1.5; color: var(--rosa);
 }
 
 /* WhatsApp flutuante: só aparece depois do hero; o JS esconde quando encosta em CTAs, passos, FAQ ou na nota */
