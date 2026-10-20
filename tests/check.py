@@ -2,6 +2,7 @@
 
 Uso: /Users/educloud/orquestra/.venv/bin/python tests/check.py
 """
+import json
 import sys
 from html.parser import HTMLParser
 from pathlib import Path
@@ -33,6 +34,9 @@ EXTRAS = (
     "terapia/style.css",
     "terapia/script.js",
 )
+# favicons e manifest usam caminho absoluto (site na raiz do domínio)
+REL_ABSOLUTO = {"icon", "apple-touch-icon", "manifest"}
+MANIFEST = "site.webmanifest"
 
 erros = []
 
@@ -48,7 +52,7 @@ class Refs(HTMLParser):
         # data-src-720 / data-src-1280: fontes do vídeo do hero que o JS escolhe pela largura
         for attr in ("src", "href", "poster", "data-src-720", "data-src-1280"):
             if a.get(attr):
-                self.refs.append((tag, attr, a[attr]))
+                self.refs.append((tag, attr, a[attr], a.get("rel") or ""))
         if tag == "a" and "checkout" in (a.get("class") or "").split() and a.get("href") == CHECKOUT:
             self.checkouts += 1
 
@@ -71,8 +75,9 @@ def check_page(rel):
 
     parser = Refs()
     parser.feed(html)
-    for tag, attr, value in parser.refs:
-        if value.startswith("/"):
+    for tag, attr, value, link_rel in parser.refs:
+        absoluto = tag == "link" and link_rel in REL_ABSOLUTO and value.startswith("/") and not value.startswith("//")
+        if value.startswith("/") and not absoluto:
             erros.append(f"{rel}: <{tag} {attr}=\"{value}\"> começa com \"/\" (use caminho relativo)")
             continue
         if value.startswith(EXTERNAL):
@@ -80,7 +85,7 @@ def check_page(rel):
         local = unquote(urlsplit(value).path)
         if not local:
             continue
-        target = (path.parent / local).resolve()
+        target = (ROOT / local.lstrip("/")).resolve() if absoluto else (path.parent / local).resolve()
         if local.endswith("/") or target.is_dir():
             target = target / "index.html"
         if not target.exists():
@@ -125,6 +130,18 @@ def main():
         erros.append(f"CNAME: deve conter exatamente {DOMINIO}")
     if not (ROOT / "robots.txt").exists():
         erros.append("robots.txt: não existe")
+    manifest = ROOT / MANIFEST
+    if not manifest.exists():
+        erros.append(f"{MANIFEST}: não existe")
+    else:
+        try:
+            icones = json.loads(manifest.read_text(encoding="utf-8")).get("icons", [])
+        except ValueError as e:
+            erros.append(f"{MANIFEST}: JSON inválido ({e})")
+            icones = []
+        for icone in icones:
+            if not (ROOT / icone.get("src", "").lstrip("/")).is_file():
+                erros.append(f"{MANIFEST}: ícone {icone.get('src')} aponta para arquivo inexistente")
     for p in [ROOT / "sitemap.xml", *ROOT.glob("**/*.html")]:
         if ".git" in p.parts:
             continue
