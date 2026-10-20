@@ -19,9 +19,9 @@
     linear-gradient(180deg, rgba(74, 12, 30, .45) 0%, rgba(74, 12, 30, 0) 22%),
     linear-gradient(90deg,
       rgba(74, 12, 30, .82) 0%,
-      rgba(74, 12, 30, .66) 34%,
-      rgba(74, 12, 30, .22) 54%,
-      rgba(74, 12, 30, 0) 68%);
+      rgba(74, 12, 30, .66) 38%,
+      rgba(74, 12, 30, .26) 58%,
+      rgba(74, 12, 30, 0) 72%);
 }
 .hero--fios .hero__body::before { content: none; }
 
@@ -60,7 +60,9 @@
     padding-top: calc(var(--nav-h) + clamp(36px, 8vh, 84px));
   }
   .hero--fios .feats, .hero--fios .hero__cta { justify-content: flex-start; }
-  .hero--fios .hero__title { max-width: 7.6em; }
+  /* 8.8em: com o espaçamento de título mais aberto, "É possível viver bem da" ainda cabe numa linha
+     (com 7.6em o "da" caía sozinho) */
+  .hero--fios .hero__title { max-width: 8.8em; }
   .hero--fios .hero__sub { max-width: 46ch; }
 }
 

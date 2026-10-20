@@ -15,8 +15,12 @@
   --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
   --font-display: 'Noto Serif Display', Georgia, 'Times New Roman', serif;
   --font-body: 'Helvetica Neue', Helvetica, Arial, sans-serif;
-  /* espaçamento dos títulos: o site da marca usa -.07em */
-  --titulo-ls: -.07em;
+  /* espaçamento dos títulos: o site da marca usa -.07em, mas nos tamanhos daqui as letras grudavam
+     e os espaços entre palavras sumiam; -.045em mantém o bloco compacto e legível.
+     Títulos pequenos (h3) apertam menos e o espaço entre palavras é reforçado */
+  --titulo-ls: -.045em;
+  --titulo-ls-pequeno: -.02em;
+  --titulo-ws: .08em;
 
   /* Zephyr */
   --line: rgba(255, 255, 255, 0.42);
@@ -80,7 +84,8 @@ ul, ol { list-style: none; padding: 0; }
 :focus-visible { outline: 2px solid var(--ink); outline-offset: 3px; border-radius: 2px; }
 ::selection { background: var(--rosa-claro); color: var(--vinho); }
 
-h1, h2, h3 { font-family: var(--font-display); font-stretch: 62.5%; font-weight: 500; line-height: 1.02; letter-spacing: var(--titulo-ls); color: var(--vinho); }
+h1, h2, h3 { font-family: var(--font-display); font-stretch: 62.5%; font-weight: 500; line-height: 1.02; letter-spacing: var(--titulo-ls); word-spacing: var(--titulo-ws); color: var(--vinho); }
+h3 { letter-spacing: var(--titulo-ls-pequeno); }
 em { font-family: var(--font-display); font-stretch: 62.5%; font-style: italic; font-weight: 400; }
 /* Títulos da marca: primeira parte em vinho e o trecho final em itálico numa linha própria,
    petróleo no fundo claro e rosé no escuro (as regras das seções escuras ficam em cada seção) */
