@@ -705,6 +705,13 @@ main .programa-caixa .btn:not(.btn--light):not(.btn--ink):not(.btn--contorno):no
 .rodape__links { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px 18px; margin: 12px 0 14px; }
 .rodape__links a { font-size: .9375rem; color: var(--papel); text-decoration: underline; text-decoration-color: rgba(255, 255, 255, .35); text-underline-offset: 3px; }
 .rodape__links a:hover { text-decoration-color: currentColor; }
+/* Celular: links com área de toque de 44px; política e termos numa linha própria, abaixo do copyright */
+@media (max-width: 600px) {
+  .rodape__links { gap: 0 18px; }
+  .rodape__links a { display: inline-flex; align-items: center; min-height: 44px; }
+  .rodape__sep { display: none; }
+  .rodape__legal { display: block; margin-top: 6px; }
+}
 
 /* Barra fixa mobile */
 .barra-mobile {

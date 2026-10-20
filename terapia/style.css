@@ -426,6 +426,11 @@ p { margin: 0 0 1em; }
 .rodape__links { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px 18px; margin: 12px 0 6px; }
 .rodape__links a { font-size: .9375rem; color: var(--papel); text-decoration: underline; text-decoration-color: rgba(255, 255, 255, .35); text-underline-offset: 3px; }
 .rodape__links a:hover { text-decoration-color: currentColor; }
+/* Celular: links com área de toque de 44px (política e termos já ficam numa linha própria) */
+@media (max-width: 600px) {
+  .rodape__links { gap: 0 18px; }
+  .rodape__links a { display: inline-flex; align-items: center; min-height: 44px; }
+}
 .rodape .crise {
   display: inline-block; margin-top: 8px; padding: 10px 16px; border-radius: var(--raio-card);
   border: 1px solid rgba(219, 168, 173, .4); background: rgba(219, 168, 173, .08);
