@@ -2,7 +2,8 @@
 Landing pages da psicóloga Lívia Oliveira: curso Carreira com Sentido, consultoria e atendimento psicológico
 
 Site estático (HTML, CSS e JS puros, sem build) publicado pelo GitHub Pages em
-https://eduzeroumbet.github.io/livia-oliveira-sites/
+https://liviaoliveira.me/ (domínio próprio, definido no arquivo `CNAME`). O endereço antigo do GitHub Pages
+redireciona automaticamente para o domínio. `robots.txt` aponta para o `sitemap.xml`.
 
 ## Páginas
 

@@ -23,6 +23,8 @@ ENTRIES = {
 }
 CHECKOUT = "https://pay.hotmart.com/M100028858P?checkoutMode=10"
 HOTLINK = "r2" + ".dev"  # storage do Scrolltide; montado em partes para o próprio check não conter o literal
+DOMINIO = "liviaoliveira.me"
+URL_ANTIGA = "github.io" + "/livia-oliveira-sites"  # endereço antigo; em partes pelo mesmo motivo
 EXTRAS = (
     "assets/css/site.css",
     "assets/js/site.js",
@@ -62,6 +64,8 @@ def check_page(rel):
         erros.append(f"{rel}: contém travessão (—)")
     if HOTLINK in html:
         erros.append(f"{rel}: referencia o storage do Scrolltide ({HOTLINK}); sirva o arquivo localmente")
+    if URL_ANTIGA in html:
+        erros.append(f"{rel}: usa o endereço antigo ({URL_ANTIGA}); use https://{DOMINIO}/")
 
     parser = Refs()
     parser.feed(html)
@@ -111,6 +115,20 @@ def main():
             erros.append(f"{extra}: contém travessão (—)")
         if HOTLINK in texto:
             erros.append(f"{extra}: referencia o storage do Scrolltide ({HOTLINK})")
+
+    cname = ROOT / "CNAME"
+    if not cname.exists():
+        erros.append("CNAME: não existe")
+    elif cname.read_text(encoding="utf-8").strip() != DOMINIO:
+        erros.append(f"CNAME: deve conter exatamente {DOMINIO}")
+    if not (ROOT / "robots.txt").exists():
+        erros.append("robots.txt: não existe")
+    for p in [ROOT / "sitemap.xml", *ROOT.glob("**/*.html")]:
+        if ".git" in p.parts:
+            continue
+        rel = p.relative_to(ROOT).as_posix()
+        if p.exists() and URL_ANTIGA in p.read_text(encoding="utf-8") and rel not in PAGES:
+            erros.append(f"{rel}: usa o endereço antigo ({URL_ANTIGA}); use https://{DOMINIO}/")
 
     if erros:
         print("FALHOU:")
