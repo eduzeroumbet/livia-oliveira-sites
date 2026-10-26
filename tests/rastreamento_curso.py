@@ -4,7 +4,7 @@ Os scripts do Pixel e do GA4 são bloqueados (nada é enviado de verdade): os co
 dataLayer, e é isso que o teste confere. Para cada página, com e sem UTMs na URL:
 - Pixel 1197036460960933 iniciado com PageView e GA4 G-XH74VZSNZ2 configurado;
 - links da Hotmart com as UTMs (sem duplicar), src=utm_source|utm_medium|utm_campaign|utm_content e sck com o
-  sufixo da página (|pgA, |pgB, |pgC); sem UTM, sem src e sck=direto|pgX;
+  sufixo da página (|pgA, |pgB, |pgC); sem UTM, sem src e sck=direto|pgX; a oferta off=n2h6k72h (12x sem juros) mantida;
 - clique no link da Hotmart: InitiateCheckout (Pixel) e begin_checkout (GA4), 860 BRL, com content_name e content_category;
 - seção #oferta na tela: ViewContent e view_offer uma vez só.
 
@@ -23,6 +23,7 @@ PIXEL_ID = "1197036460960933"
 GA4_ID = "G-XH74VZSNZ2"
 UTMS = "utm_source=meta&utm_medium=paid&utm_campaign=ccs_frio_criativos&utm_content=V01&fbclid=abc123"
 SRC = "meta|paid|ccs_frio_criativos|V01"
+OFERTA = "n2h6k72h"  # oferta da Hotmart com 12x sem juros
 falhas = []
 
 
@@ -85,9 +86,10 @@ with sync_playwright() as p:
                     certo = (q.get("src") == [SRC] and q.get("sck") == [f"{SRC}|{pagina}"]
                              and q.get("utm_source") == ["meta"] and q.get("utm_content") == ["V01"]
                              and q.get("fbclid") == ["abc123"] and q.get("checkoutMode") == ["10"]
-                             and all(len(v) == 1 for v in q.values()))
+                             and q.get("off") == [OFERTA] and all(len(v) == 1 for v in q.values()))
                 else:
-                    certo = "src" not in q and q.get("sck") == [f"direto|{pagina}"] and q.get("checkoutMode") == ["10"]
+                    certo = ("src" not in q and q.get("sck") == [f"direto|{pagina}"] and q.get("checkoutMode") == ["10"]
+                             and q.get("off") == [OFERTA])
                 if not certo:
                     ok(False, f"link da Hotmart: {h}")
                     break

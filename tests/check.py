@@ -37,7 +37,7 @@ CURSO_ORGANICO = {
     "privacidade/index.html": "../curso/b/",
     "termos/index.html": "../curso/b/",
 }
-CHECKOUT = "https://pay.hotmart.com/M100028858P?checkoutMode=10"
+CHECKOUT = "https://pay.hotmart.com/M100028858P?off=n2h6k72h&checkoutMode=10"
 # as 3 versões do curso carregam o site.js (Pixel, GA4, src/sck) com o sufixo da página no data-pagina
 CURSO_PAGINA = {
     "curso/index.html": ("../assets/js/site.js", "pgA"),
