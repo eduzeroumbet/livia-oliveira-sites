@@ -555,6 +555,43 @@ body.has-sticky .wa-float { bottom: calc(var(--sticky-h, 72px) + 12px); }
 .legal-cta__links { display: flex; flex-wrap: wrap; gap: 4px 22px; }
 .legal-cta__links a { display: inline-flex; align-items: center; min-height: 44px; }
 
+/* ========== Calculadora do valor da sessão (calculadora/) ========== */
+.calc-hero { padding-bottom: 28px; }
+.calc-hero .assinatura { margin-top: 16px; font-size: 14.5px; font-weight: 600; color: var(--wine); }
+.calc-form-sec { padding-top: 0; }
+.calc-form .fieldset { margin-bottom: 26px; }
+.calc-form .fieldset legend { font-family: var(--serif); font-stretch: 62.5%; font-weight: 500; font-size: 28px; line-height: 1.1; letter-spacing: var(--titulo-ls-pequeno); color: var(--wine); margin-bottom: 12px; }
+.calc-grid { display: grid; gap: 0 16px; }
+.calc-grid .field { min-width: 0; }
+/* prefixo "R$" ou sufixo "%" dentro do campo */
+.campo-un { position: relative; display: block; }
+.campo-un span { position: absolute; top: 50%; transform: translateY(-50%); color: var(--muted); font-size: 16px; pointer-events: none; }
+.campo-rs span { left: 16px; }
+.campo-rs input[type="text"] { padding-left: 46px; }
+.campo-pct span { right: 16px; }
+.campo-pct input[type="text"] { padding-right: 40px; }
+.calc-form .btn-cta { max-width: none; min-height: 60px; }
+.calc-resultado { padding-top: 0; }
+.calc-resultado:focus { outline: none; }
+.calc-nums { display: grid; gap: 12px; }
+.calc-num { background: var(--white); border: 1px solid var(--line); border-radius: var(--radius); padding: 20px 22px; box-shadow: var(--shadow-soft); }
+.calc-num p { font-size: 16px; color: var(--muted); }
+.calc-num b { display: block; font-family: var(--serif); font-stretch: 62.5%; font-weight: 500; font-size: 52px; letter-spacing: -.02em; line-height: 1.05; color: var(--wine); margin: 4px 0; }
+.calc-num--meta { background: var(--wine); background-image: var(--grad-wine); border-color: var(--wine); }
+.calc-num--meta p { color: rgba(252, 250, 246, .88); }
+.calc-num--meta b { color: var(--rose); }
+.calc-atual { margin-top: 18px; }
+.calc-atual h3 { font-size: 26px; margin-bottom: 10px; }
+.calc-atual .field { margin-bottom: 0; max-width: 320px; }
+.calc-atual__texto { margin-top: 12px; font-size: 16.5px; }
+.calc-atual__texto:empty { display: none; }
+.calc-aviso { margin-top: 14px; font-size: 13.5px; color: var(--muted); }
+.calc-oferta { margin-top: 28px; text-align: left; }
+.calc-oferta h2 { font-size: clamp(32px, 7.5vw, 46px); margin: 8px 0 14px; }
+.calc-oferta .btn-row { flex-direction: column; align-items: stretch; }
+.calc-oferta .btn { width: 100%; }
+.calc-oferta .preco-linha { margin-top: 0; }
+
 /* ========== Celular: rodapé ========== */
 /* links do rodapé com área de toque de 44px; política e termos numa linha própria, abaixo do copyright */
 @media (max-width: 600px) {
@@ -578,6 +615,10 @@ body.has-sticky .wa-float { bottom: calc(var(--sticky-h, 72px) + 12px); }
   .checks-2 { display: flex; }
   .topics { grid-template-columns: repeat(2, 1fr); }
   .form-card { padding: 34px 32px; }
+  .calc-grid { grid-template-columns: repeat(2, 1fr); }
+  .calc-nums { grid-template-columns: repeat(3, 1fr); }
+  .calc-oferta .btn-row { flex-direction: row; align-items: center; }
+  .calc-oferta .btn { width: auto; }
 }
 
 @media (min-width: 900px) {

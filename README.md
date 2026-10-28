@@ -15,6 +15,7 @@ redireciona automaticamente para o domínio. `robots.txt` aponta para o `sitemap
 | `curso/versao-b/index.html` | Psicólogas (anúncios, teste A/B/C) | Versão C (`pgC`), hero "Fios que se organizam" (canvas em `curso/versao-b/hero-fios.js` e `hero-fios.css`). Usada nos anúncios do teste A/B/C; nenhuma página do site aponta para ela e o "Curso" do rodapé dela leva para `curso/b/`. `noindex`, canonical para `/curso/` e fora do sitemap |
 | `consultoria/index.html` | Psicólogas | Inscrição na Consultoria 1:1 (formulário que envia ao Google Forms) |
 | `terapia/index.html` | Pacientes adultos | Psicoterapia com agenda completa: lista de interesse (formulário que envia ao Google Forms, o mesmo de `terapia/b/`) e indicação de profissionais pelo WhatsApp da Thaís. Não há conversa inicial |
+| `calculadora/index.html` | Psicólogas (anúncios) | Calculadora do valor da sessão (`pgCalc`), isca dos anúncios: custos, imposto, faltas e meta dão o custo por sessão, o valor mínimo e o ideal (conta em `calculadora/script.js`). No resultado, o convite para o curso (`curso/b/`, com as UTMs) e o WhatsApp. No sitemap |
 | `privacidade/index.html` | Todos (app da Meta e anúncios) | Política de Privacidade (LGPD), linkada no rodapé de todas as páginas. Carrega o `site.js` normalmente (com rastreamento) |
 | `termos/index.html` | Todos | Termos de Uso (curso, consultoria, lista da terapia, uso do site), linkados no rodapé de todas as páginas ao lado da Política de privacidade. Carrega o `site.js` normalmente (com rastreamento) |
 
@@ -74,6 +75,7 @@ As 3 versões do curso carregam o `site.js` com `data-pagina` na tag `<script>`,
 | `pgA` | `curso/` | A (anúncios) |
 | `pgB` | `curso/b/` | B (bio, links internos e anúncios) |
 | `pgC` | `curso/versao-b/` | C (anúncios, teste A/B/C) |
+| `pgCalc` | `calculadora/` | Calculadora do valor da sessão (sem checkout) |
 
 Nos links da Hotmart, `src` = `utm_source|utm_medium|utm_campaign|utm_content` e `sck` = o mesmo + `|pgX`, com o
 sufixo da versão no fim (ex.: `sck=meta|paid|ccs_frio_criativos|V01|pgA`; sem UTM: `sck=direto|pgX`). Assim o relatório
@@ -85,6 +87,11 @@ As páginas de terapia (`terapia/` e `terapia/b/`) carregam o `site.js` com `dat
 GTM (conteúdo de saúde pode fazer a Meta restringir o Pixel); formulário, máscara e validação funcionam igual. O
 `tests/check.py` confere isso. Ao mudar o `site.js`, suba o `?v=` dele em todas as páginas.
 
+A calculadora (`calculadora/`) não tem link da Hotmart nem `#oferta`, então não dispara `InitiateCheckout` nem o
+`ViewContent` automático. O `calculadora/script.js` chama o `window.siteTrack`: `generate_lead` (`Lead`) com
+`content_name` "calculadora_sessao" e `content_category` "calc" quando o resultado aparece pela primeira vez no
+carregamento, e `view_offer` (`ViewContent`) com `content_name` "calculadora_para_curso" no clique em "Conhecer o curso".
+
 ## Verificar
 
 ```sh
@@ -92,6 +99,7 @@ GTM (conteúdo de saúde pode fazer a Meta restringir o Pixel); formulário, má
 /Users/educloud/orquestra/.venv/bin/python tests/check.py                  # verificações
 /Users/educloud/orquestra/.venv/bin/python tests/lista_terapia.py          # formulário da lista (terapia/) no Chromium, sem enviar ao Google
 /Users/educloud/orquestra/.venv/bin/python tests/rastreamento_curso.py     # Pixel, GA4, src/sck e eventos nas 3 versões do curso, no Chromium
+/Users/educloud/orquestra/.venv/bin/python tests/calculadora.py            # conta, erros, Lead, UTMs e 390px da calculadora, no Chromium
 /Users/educloud/orquestra/.venv/bin/python _catalogo/prints.py             # prints em _catalogo/prints/
 ```
 
