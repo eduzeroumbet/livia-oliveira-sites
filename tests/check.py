@@ -10,7 +10,7 @@ from pathlib import Path
 from urllib.parse import unquote, urlsplit
 
 ROOT = Path(__file__).resolve().parent.parent
-PAGES = ["index.html", "curso/index.html", "curso/b/index.html", "curso/versao-b/index.html", "consultoria/index.html", "terapia/index.html", "terapia/b/index.html", "privacidade/index.html", "termos/index.html"]
+PAGES = ["index.html", "curso/index.html", "curso/b/index.html", "curso/versao-b/index.html", "consultoria/index.html", "terapia/index.html", "terapia/b/index.html", "privacidade/index.html", "termos/index.html", "calculadora/index.html"]
 # política de privacidade (URL do app da Meta e dos anúncios) e termos de uso: link no rodapé de todas as páginas e no sitemap
 PRIVACIDADE = "privacidade/index.html"
 TERMOS = "termos/index.html"
@@ -36,6 +36,7 @@ CURSO_ORGANICO = {
     "terapia/index.html": "../curso/b/",
     "privacidade/index.html": "../curso/b/",
     "termos/index.html": "../curso/b/",
+    "calculadora/index.html": "../curso/b/",
 }
 CHECKOUT = "https://pay.hotmart.com/M100028858P?off=n2h6k72h&checkoutMode=10"
 # as 3 versões do curso carregam o site.js (Pixel, GA4, src/sck) com o sufixo da página no data-pagina
@@ -51,6 +52,8 @@ SEM_RASTREAMENTO = {
     "terapia/index.html": "../assets/js/site.js",
     "terapia/b/index.html": "../../assets/js/site.js",
 }
+# calculadora (isca dos anúncios): site.js com data-pagina="pgCalc", Lead ao mostrar o resultado, sem checkout
+CALCULADORA = "calculadora/index.html"
 TAGS_RASTREAMENTO = ("fbq(", "gtag(", "googletagmanager.com", "connect.facebook.net", PIXEL_ID, GA4_ID)
 HOTLINK = "r2" + ".dev"  # storage do Scrolltide; montado em partes para o próprio check não conter o literal
 DOMINIO = "liviaoliveira.me"
@@ -64,6 +67,7 @@ EXTRAS = (
     "curso/versao-b/hero-fios.js",
     "terapia/style.css",
     "terapia/script.js",
+    "calculadora/script.js",
 )
 # favicons e manifest usam caminho absoluto (site na raiz do domínio)
 REL_ABSOLUTO = {"icon", "apple-touch-icon", "manifest"}
@@ -170,6 +174,21 @@ def check_page(rel):
     elif "data-sem-rastreamento" in html:
         erros.append(f"{rel}: data-sem-rastreamento só nas páginas de terapia")
 
+    if rel == CALCULADORA:
+        if not re.search(r'<script src="\.\./assets/js/site\.js(\?v=\d+)?" data-pagina="pgCalc"></script>', html):
+            erros.append(f"{rel}: sem <script src=\"../assets/js/site.js\" data-pagina=\"pgCalc\">")
+        if '<link rel="canonical" href="https://liviaoliveira.me/calculadora/">' not in html:
+            erros.append(f"{rel}: canonical deve apontar para https://{DOMINIO}/calculadora/")
+        if "https://liviaoliveira.me/calculadora/" not in (ROOT / "sitemap.xml").read_text(encoding="utf-8"):
+            erros.append(f"{rel}: não está no sitemap.xml")
+        if "pay.hotmart.com" in html or 'id="oferta"' in html:
+            erros.append(f"{rel}: sem checkout nem #oferta (nada de InitiateCheckout nem view_offer automático)")
+        script = (ROOT / "calculadora/script.js").read_text(encoding="utf-8")
+        for trecho in ('"generate_lead"', '"calculadora_sessao"', '"view_offer"', '"calculadora_para_curso"'):
+            if trecho not in script:
+                erros.append(f"calculadora/script.js: sem {trecho}")
+        if "begin_checkout" in script:
+            erros.append("calculadora/script.js: não pode disparar begin_checkout (InitiateCheckout)")
     if rel in ("curso/index.html", "curso/versao-b/index.html") and CHECKOUT not in html:
         erros.append(f"{rel}: sem link para o checkout Hotmart")
     if rel == "curso/versao-b/index.html":
@@ -198,6 +217,8 @@ def check_page(rel):
         for t, a, v, _ in parser.refs:
             if t == "a" and "versao-b" in v:
                 erros.append(f"{rel}: link interno para curso/versao-b/ ({v}); use curso/b/")
+    if rel.startswith("curso/") and re.search(r"total (de )?R\$ 860", html):
+        erros.append(f"{rel}: diz que o total no cartão é R$ 860 (a Hotmart mostra R$ 860,04); use \"12x de R$ 71,67 sem juros ou R$ 860 à vista\"")
     if rel.startswith("terapia/") and "R$" in html:
         erros.append(f"{rel}: contém preço (R$)")
     if rel == "terapia/index.html":
