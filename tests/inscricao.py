@@ -141,6 +141,8 @@ def envia(page, ctx, nome=NOME, email=EMAIL, whats=WHATS, forma="cartao"):
     page.fill("#email", email)
     page.fill("#whatsapp", whats)
     page.evaluate(ESPIAO)
+    # espera o botão parar (rolagem suave ao abrir os campos) para medir só o tempo do envio até a Hotmart
+    page.click("button[type=submit]", trial=True)
     t0 = time.monotonic()
     botao = None
     with page.expect_request(lambda r: "pay.hotmart.com" in r.url, timeout=5000):
