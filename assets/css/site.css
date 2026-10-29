@@ -592,6 +592,29 @@ body.has-sticky .wa-float { bottom: calc(var(--sticky-h, 72px) + 12px); }
 .calc-oferta .btn { width: 100%; }
 .calc-oferta .preco-linha { margin-top: 0; }
 
+/* ========== Pré-página de inscrição do curso (curso/inscricao/) ==========
+   Celular primeiro: título, preço e formulário cabem em 390x844 sem rolar */
+.insc { padding: 22px 0 48px; }
+.insc-grid { display: grid; gap: 18px; max-width: 560px; }
+.insc h1 { font-size: clamp(38px, 10vw, 60px); margin-bottom: 8px; }
+.insc-resumo { font-size: 15.5px; font-weight: 600; color: var(--wine); }
+.insc-preco { margin-top: 2px; font-size: 16px; }
+.insc-preco b { color: var(--ink); }
+.insc .insc-pag { margin-top: 0; font-size: 14px; color: var(--muted); }
+.insc-form { padding: 20px 18px; }
+.insc-form .field { margin-bottom: 12px; }
+.insc-form .field > label { margin-bottom: 4px; }
+.insc-form .btn-cta { max-width: none; min-height: 58px; margin-top: 4px; }
+.insc-form .form-note a { color: var(--wine); }
+.insc-form .btn:disabled { opacity: .75; cursor: progress; transform: none; }
+/* honeypot fora da tela (não usar display:none, que alguns robôs pulam) */
+.insc-hp { position: absolute; left: -9999px; top: auto; width: 1px; height: 1px; overflow: hidden; }
+.insc-passos h2 { font-size: clamp(30px, 7.5vw, 40px); margin: 8px 0 4px; }
+.insc-passos .steps { margin-top: 12px; }
+.insc-passos .steps li { font-size: 16px; }
+.insc-duvida { margin-top: 18px; font-size: 15.5px; }
+.insc-duvida a { color: var(--wine); font-weight: 600; text-underline-offset: 3px; }
+
 /* ========== Celular: rodapé ========== */
 /* links do rodapé com área de toque de 44px; política e termos numa linha própria, abaixo do copyright */
 @media (max-width: 600px) {
@@ -644,4 +667,10 @@ body.has-sticky .wa-float { bottom: calc(var(--sticky-h, 72px) + 12px); }
   body.has-sticky { padding-bottom: 0; }
   .wa-float, body.has-sticky .wa-float { bottom: 24px; right: 24px; }
   .site-footer { padding-bottom: 40px; }
+  /* pré-página: título e passos à esquerda, formulário à direita */
+  .insc { padding: 64px 0 88px; }
+  .insc-grid { max-width: 1040px; grid-template-columns: 1fr 440px; grid-template-areas: "topo form" "passos form"; gap: 28px 64px; align-items: start; }
+  .insc-topo { grid-area: topo; }
+  .insc-form { grid-area: form; padding: 30px 28px; }
+  .insc-passos { grid-area: passos; }
 }

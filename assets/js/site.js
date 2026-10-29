@@ -6,7 +6,8 @@
  *   metaPixelId: "1197036460960933"  (Pixel da Meta da conta de anúncios da Lívia: PageView em toda página)
  *   ga4Id:       "G-XH74VZSNZ2"  (GA4 direto, propriedade 559914633: config com page_view em toda página)
  * As páginas do curso dizem qual versão são no atributo data-pagina da tag <script> (pgA = curso/,
- * pgB = curso/b/, pgC = curso/versao-b/); o valor vai no sck da Hotmart e no content_category dos eventos.
+ * pgB = curso/b/, pgC = curso/versao-b/); o valor vai no pg do link da pré-página de inscrição (e dali no sck
+ * da Hotmart) e no content_category dos eventos.
  * Páginas com data-sem-rastreamento na tag <script> (as de terapia: conteúdo de saúde) não carregam GTM, GA4
  * nem Pixel; o resto (UTMs, máscara, validação e envio dos formulários) funciona igual.
  */
@@ -59,21 +60,30 @@ window.dataLayer = window.dataLayer || [];
   }
 
   var PIXEL_EVENTS = { begin_checkout: "InitiateCheckout", generate_lead: "Lead", view_offer: "ViewContent" };
+  /* Eventos personalizados do Pixel (trackCustom) */
+  var PIXEL_CUSTOM = { clique_comprar: "CliqueComprar", cadastro_checkout: "CadastroCheckout" };
 
   function track(event, params) {
     var data = Object.assign({ event: event }, params || {});
     window.dataLayer.push(data);
     if (rastreia && CONFIG.ga4Id && window.gtag) window.gtag("event", event, params || {});
-    if (rastreia && CONFIG.metaPixelId && window.fbq && PIXEL_EVENTS[event]) {
+    if (rastreia && CONFIG.metaPixelId && window.fbq && (PIXEL_EVENTS[event] || PIXEL_CUSTOM[event])) {
       var p = {};
       if (params && params.value) { p.value = params.value; p.currency = params.currency || "BRL"; }
       if (params && params.form) p.content_name = params.form;
       if (params && params.content_name) p.content_name = params.content_name;
       if (params && params.content_category) p.content_category = params.content_category;
-      window.fbq("track", PIXEL_EVENTS[event], p);
+      if (PIXEL_EVENTS[event]) window.fbq("track", PIXEL_EVENTS[event], p);
+      else window.fbq("trackCustom", PIXEL_CUSTOM[event], p);
     }
   }
   window.siteTrack = track;
+
+  /* Advanced matching do Pixel: reinicia o Pixel com os dados da pessoa (o Pixel faz o hash).
+   * Só no Pixel; nada de dados pessoais no GA4 nem no dataLayer. */
+  window.siteIdentify = function (dados) {
+    if (rastreia && CONFIG.metaPixelId && window.fbq) window.fbq("init", CONFIG.metaPixelId, dados);
+  };
 
   /* ---------- UTMs: repassa a query string da visita para links internos ---------- */
   var visit = new URLSearchParams(location.search);
@@ -95,25 +105,24 @@ window.dataLayer = window.dataLayer || [];
     });
   }
 
-  /* ---------- Checkout Hotmart: UTMs em src/sck + eventos ----------
-   * src = utm_source|utm_medium|utm_campaign|utm_content; sck = o mesmo + |pgX da página
-   * (sem UTM: sem src e sck=direto|pgX). Ex.: sck=meta|paid|ccs_frio_criativos|V01|pgA
+  /* ---------- Botões de compra do curso (a.checkout) ----------
+   * Levam à pré-página de inscrição (curso/inscricao/) com pg=pgX da página e a query da visita (bloco acima).
+   * É a pré-página que monta o link da Hotmart com src/sck. O clique dispara clique_comprar (CliqueComprar no
+   * Pixel); o begin_checkout (InitiateCheckout) sai só no envio do formulário da pré-página.
    */
-  var src = ["utm_source", "utm_medium", "utm_campaign", "utm_content"]
-    .map(function (k) { return visit.get(k); })
-    .filter(Boolean)
-    .join("|");
-  var sck = pagina ? (src || "direto") + "|" + pagina : src;
   var offerParams = { value: 860, currency: "BRL" };
   if (pagina) { offerParams.content_name = "Carreira com Sentido"; offerParams.content_category = pagina; }
 
-  document.querySelectorAll('a.checkout, a[href*="pay.hotmart.com"]').forEach(function (a) {
-    var url = mergeParams(new URL(a.href));
-    if (src) url.searchParams.set("src", src);
-    if (sck) url.searchParams.set("sck", sck);
-    a.href = url.toString();
+  document.querySelectorAll("a.checkout").forEach(function (a) {
+    if (pagina) {
+      var url = new URL(a.href);
+      if (!url.searchParams.has("pg")) {
+        url.searchParams.set("pg", pagina);
+        a.href = url.toString();
+      }
+    }
     a.addEventListener("click", function () {
-      track("begin_checkout", offerParams);
+      track("clique_comprar", { content_category: pagina });
     });
   });
 

@@ -13,10 +13,10 @@
     if (img.loading !== "lazy" && img.complete && img.naturalWidth === 0) esconde();
   });
 
-  /* Preserva UTMs e fbclid nos links da Hotmart */
+  /* Preserva UTMs e fbclid nos botões de compra (a.checkout, que levam à pré-página de inscrição) */
   var qs = window.location.search.replace(/^\?/, "");
   if (qs) {
-    document.querySelectorAll('a[href*="pay.hotmart.com"]').forEach(function (a) {
+    document.querySelectorAll("a.checkout").forEach(function (a) {
       var url = new URL(a.href);
       new URLSearchParams(qs).forEach(function (valor, chave) {
         if (!url.searchParams.has(chave)) url.searchParams.append(chave, valor);
