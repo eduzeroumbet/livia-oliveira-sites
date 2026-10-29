@@ -7,7 +7,8 @@
  *   ga4Id:       "G-XH74VZSNZ2"  (GA4 direto, propriedade 559914633: config com page_view em toda página)
  * As páginas do curso dizem qual versão são no atributo data-pagina da tag <script> (pgA = curso/,
  * pgB = curso/b/, pgC = curso/versao-b/); o valor vai no pg do link da pré-página de inscrição (e dali no sck
- * da Hotmart) e no content_category dos eventos.
+ * da Hotmart) e no content_category dos eventos. Calculadora (pgCalc) e quiz (pgQuiz) usam o data-pagina no
+ * pagina e no sck do contato enviado à Lambda (window.siteContato).
  * Páginas com data-sem-rastreamento na tag <script> (as de terapia: conteúdo de saúde) não carregam GTM, GA4
  * nem Pixel; o resto (UTMs, máscara, validação e envio dos formulários) funciona igual.
  */
@@ -61,7 +62,10 @@ window.dataLayer = window.dataLayer || [];
 
   var PIXEL_EVENTS = { begin_checkout: "InitiateCheckout", generate_lead: "Lead", view_offer: "ViewContent" };
   /* Eventos personalizados do Pixel (trackCustom) */
-  var PIXEL_CUSTOM = { clique_comprar: "CliqueComprar", cadastro_checkout: "CadastroCheckout", escolha_pagamento: "EscolhaPagamento" };
+  var PIXEL_CUSTOM = {
+    clique_comprar: "CliqueComprar", cadastro_checkout: "CadastroCheckout", escolha_pagamento: "EscolhaPagamento",
+    quiz_inicio: "QuizInicio", quiz_completo: "QuizCompleto", contato_calculadora: "ContatoCalculadora"
+  };
 
   function track(event, params) {
     var data = Object.assign({ event: event }, params || {});
@@ -74,6 +78,8 @@ window.dataLayer = window.dataLayer || [];
       if (params && params.content_name) p.content_name = params.content_name;
       if (params && params.content_category) p.content_category = params.content_category;
       if (params && params.payment_type) p.payment_type = params.payment_type;
+      if (params && params.pontos !== undefined) p.pontos = params.pontos;
+      if (params && params.faixa) p.faixa = params.faixa;
       if (PIXEL_EVENTS[event]) window.fbq("track", PIXEL_EVENTS[event], p);
       else window.fbq("trackCustom", PIXEL_CUSTOM[event], p);
     }
@@ -190,6 +196,91 @@ window.dataLayer = window.dataLayer || [];
   document.querySelectorAll('input[data-mask="phone"]').forEach(function (input) {
     input.addEventListener("input", function () { input.value = maskPhone(input.value); });
   });
+
+  /* ---------- Contato do quiz e da calculadora (Lambda livia-leads) ----------
+   * Mesma Lambda, validação e campos da pré-página de inscrição (curso/inscricao/script.js), mais o consentimento
+   * obrigatório (checkbox name="consentimento"). src = utm_source|utm_medium|utm_campaign|utm_content; sck = o mesmo
+   * + |pgX da página (data-pagina; sem UTM: direto|pgX). O envio nunca trava a página: espera no máximo 1,5 s.
+   *   siteContato.prepara(form)          limpa o erro do campo ao digitar
+   *   siteContato.valida(form)           true se nome, e-mail, WhatsApp e consentimento estão certos
+   *   siteContato.dados(form, extras)    JSON do cadastro (extras: ferramenta, resultado, respostas, pontos)
+   *   siteContato.envia(dados)           Promise que resolve com a resposta ou em 1,5 s, o que vier antes
+   */
+  var CADASTRO_URL = "https://nwmxltflulqvcxu7bdplodmyjm0yweuc.lambda-url.sa-east-1.on.aws/";
+  var CADASTRO_ESPERA_MS = 1500;
+
+  function cookie(nome) {
+    var m = document.cookie.match(new RegExp("(?:^|; )" + nome + "=([^;]*)"));
+    return m ? decodeURIComponent(m[1]) : "";
+  }
+
+  window.siteContato = {
+    prepara: function (form) {
+      ["nome", "email", "whatsapp", "consentimento"].forEach(function (n) {
+        var el = form.elements[n];
+        if (!el) return;
+        el.addEventListener(el.type === "checkbox" ? "change" : "input", function () {
+          if (el.getAttribute("aria-invalid")) setError(form, n, "");
+        });
+      });
+    },
+    valida: function (form) {
+      var firstInvalid = null;
+      function fail(name, message) {
+        setError(form, name, message);
+        if (!firstInvalid) firstInvalid = form.elements[name];
+      }
+      ["nome", "email", "whatsapp", "consentimento"].forEach(function (n) { setError(form, n, ""); });
+      var letras = form.elements.nome.value.match(/[A-Za-zÀ-ÖØ-öø-ÿ]/g) || [];
+      if (letras.length < 2) fail("nome", "Escreva o seu nome.");
+      if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(form.elements.email.value.trim())) fail("email", "Confira o e-mail.");
+      var d = form.elements.whatsapp.value.replace(/\D/g, "");
+      if (d.length < 10 || d.length > 11) fail("whatsapp", "Informe o WhatsApp com DDD, por exemplo (51) 99999-9999.");
+      if (!form.elements.consentimento.checked) fail("consentimento", "Marque esta opção para continuar.");
+      if (firstInvalid) firstInvalid.focus();
+      return !firstInvalid;
+    },
+    dados: function (form, extras) {
+      var src = visit.get("src") || ["utm_source", "utm_medium", "utm_campaign", "utm_content"]
+        .map(function (k) { return visit.get(k); })
+        .filter(Boolean)
+        .join("|");
+      var dados = {
+        nome: form.elements.nome.value.trim().replace(/\s+/g, " "),
+        email: form.elements.email.value.trim().toLowerCase(),
+        whatsapp: form.elements.whatsapp.value.replace(/\D/g, ""),
+        pagina: pagina,
+        src: src,
+        sck: visit.get("sck") || (src || "direto") + "|" + pagina,
+        utm_source: visit.get("utm_source") || "",
+        utm_medium: visit.get("utm_medium") || "",
+        utm_campaign: visit.get("utm_campaign") || "",
+        utm_content: visit.get("utm_content") || "",
+        utm_term: visit.get("utm_term") || "",
+        url: location.href,
+        consentimento: "sim",
+        fbp: cookie("_fbp"),
+        fbc: cookie("_fbc"),
+        empresa: form.elements.empresa ? form.elements.empresa.value : ""
+      };
+      return Object.assign(dados, extras || {});
+    },
+    envia: function (dados) {
+      var envio;
+      try {
+        envio = fetch(CADASTRO_URL, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(dados),
+          keepalive: true
+        }).catch(function () {});
+      } catch (err) {
+        envio = Promise.resolve();
+      }
+      var espera = new Promise(function (resolve) { setTimeout(resolve, CADASTRO_ESPERA_MS); });
+      return Promise.race([envio, espera]);
+    }
+  };
 
   /* ---------- Formulários enviados ao Google Forms ---------- */
   var WHATSAPP = "5551992597638";

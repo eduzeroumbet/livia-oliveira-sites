@@ -8,7 +8,11 @@ dataLayer, e é isso que o teste confere. Em 390px e 1440px, com e sem UTMs na U
 - Lead (Pixel) e generate_lead (GA4) com content_name calculadora_sessao e content_category calc, uma vez só
   mesmo calculando de novo; nenhum InitiateCheckout / begin_checkout;
 - "Conhecer o curso" leva para curso/b/ com os utm_*; o clique dispara ViewContent / view_offer com
-  content_name calculadora_para_curso.
+  content_name calculadora_para_curso;
+- contato opcional depois do resultado: erros nos 4 campos; envio à Lambda (interceptada, com 200 com UTM e erro 500
+  sem UTM) com pagina pgCalc, ferramenta calculadora e resultado "minimo=40;ideal=145;custo=33"; mensagem de sucesso
+  mesmo com erro; ContatoCalculadora no Pixel e contato_calculadora no GA4, sem segundo Lead;
+- link "Faça também o quiz" para quiz/ com os utm_*.
 
 Uso: /Users/educloud/orquestra/.venv/bin/python tests/calculadora.py
 Requer: playwright + chromium (python -m playwright install chromium).
@@ -22,6 +26,8 @@ from playwright.sync_api import sync_playwright
 ROOT = Path(__file__).resolve().parent.parent
 URL = (ROOT / "calculadora" / "index.html").as_uri()
 UTMS = "utm_source=meta&utm_medium=paid&utm_campaign=ccs_calc&utm_content=V01&fbclid=abc123"
+LAMBDA_HOST = "nwmxltflulqvcxu7bdplodmyjm0yweuc.lambda-url.sa-east-1.on.aws"
+CORS = {"access-control-allow-origin": "*", "access-control-allow-methods": "POST, OPTIONS", "access-control-allow-headers": "content-type"}
 falhas = []
 
 
@@ -50,11 +56,25 @@ def saida(page, nome):
 
 
 with sync_playwright() as p:
-    b = p.chromium.launch()
+    b = p.chromium.launch(args=[f"--host-resolver-rules=MAP {LAMBDA_HOST} ~NOTFOUND"])
     for vp in ({"width": 390, "height": 844}, {"width": 1440, "height": 900}):
         for com_utm in (True, False):
             page = b.new_page(viewport=vp)
-            page.route("**/*", lambda r: r.continue_() if r.request.url.startswith("file:") else r.abort())
+            chamadas = []
+
+            # Lambda interceptada: 200 com UTM, erro 500 sem UTM (o sucesso aparece do mesmo jeito)
+            def rota(r, com_utm=com_utm, chamadas=chamadas):
+                if r.request.url.startswith("file:"):
+                    r.continue_()
+                elif urlsplit(r.request.url).hostname == LAMBDA_HOST:
+                    if r.request.method == "OPTIONS":
+                        r.fulfill(status=204, headers=CORS)
+                        return
+                    chamadas.append(r.request)
+                    r.fulfill(status=200 if com_utm else 500, headers=CORS, content_type="application/json", body="{}")
+                else:
+                    r.abort()
+            page.route("**/*", rota)
             erros_js = []
             page.on("pageerror", lambda e: erros_js.append(str(e)))
             page.goto(URL + ("?" + UTMS if com_utm else ""), wait_until="load")
@@ -103,6 +123,45 @@ with sync_playwright() as p:
                    and all(len(v) == 1 for v in q.values()), "utm_* preservados no link do curso, sem duplicar")
             else:
                 ok(not partes.query, "sem UTM, link do curso sem query")
+
+            quiz = urlsplit(page.get_attribute(".calc-quiz a", "href"))
+            ok(quiz.path.endswith("/quiz/") and page.inner_text(".calc-quiz a") == "Faça também o quiz: você está pronta para viver da clínica?",
+               f"link do quiz ({quiz.path})")
+            if com_utm:
+                ok(parse_qs(quiz.query).get("utm_campaign") == ["ccs_calc"], "link do quiz com os utm_*")
+
+            # contato opcional
+            ok(page.is_visible("#contato") and page.is_hidden("#contato-ok"), "bloco de contato visível no resultado")
+            page.click("#contato button[type=submit]")
+            page.wait_for_timeout(200)
+            erros = {n: page.inner_text(f'#contato [data-error-for="{n}"]') for n in ("nome", "email", "whatsapp", "consentimento")}
+            ok(all(erros.values()) and not chamadas, f"contato vazio: erros nos 4 campos e nada enviado ({erros})")
+            page.fill("#nome", "Maria Teste")
+            page.fill("#email", "Maria.Teste@exemplo.com")
+            page.fill("#whatsapp", "51999998888")
+            ok(page.input_value("#whatsapp") == "(51) 99999-8888", f"máscara do WhatsApp ({page.input_value('#whatsapp')})")
+            page.check("#consentimento")
+            page.click("#contato button[type=submit]")
+            page.wait_for_selector("#contato-ok", state="visible", timeout=2500)
+            ok(page.inner_text("#contato-ok") == "Pronto! A equipe da Lívia vai te chamar no WhatsApp."
+               and page.is_hidden("#contato"), f"mensagem de sucesso (Lambda {'200' if com_utm else '500'})")
+            ok(len(chamadas) == 1, f"uma chamada à Lambda ({len(chamadas)})")
+            if chamadas:
+                dados = chamadas[0].post_data_json
+                esperado = {
+                    "nome": "Maria Teste", "email": "maria.teste@exemplo.com", "whatsapp": "51999998888", "pagina": "pgCalc",
+                    "ferramenta": "calculadora", "resultado": "minimo=40;ideal=145;custo=33", "consentimento": "sim", "empresa": "",
+                    "src": "meta|paid|ccs_calc|V01" if com_utm else "", "sck": "meta|paid|ccs_calc|V01|pgCalc" if com_utm else "direto|pgCalc",
+                    "utm_source": "meta" if com_utm else "", "utm_campaign": "ccs_calc" if com_utm else "",
+                }
+                ok({k: dados.get(k) for k in esperado} == esperado, f"JSON do contato {dados}")
+            estado = page.evaluate(ESTADO)
+            contato = {"content_name": "calculadora_sessao", "content_category": "calc"}
+            ok([c for c in estado["fbq"] if c[:2] == ["trackCustom", "ContatoCalculadora"]] == [["trackCustom", "ContatoCalculadora", contato]],
+               "ContatoCalculadora no Pixel (trackCustom)")
+            ok(eventos_gtag(estado, "contato_calculadora") == [["event", "contato_calculadora", contato]], "contato_calculadora no GA4")
+            ok(eventos_fbq(estado, "Lead") == [["track", "Lead", lead]] and len(eventos_gtag(estado, "generate_lead")) == 1,
+               "contato não dispara segundo Lead")
 
             page.evaluate("document.addEventListener('click', e => e.preventDefault())")
             page.click("#conhecer-curso")

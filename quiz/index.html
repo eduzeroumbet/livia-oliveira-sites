@@ -1,0 +1,140 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<script>if(location.protocol==="http:"&&/(^|\.)liviaoliveira\.me$/.test(location.hostname)){location.replace("https://liviaoliveira.me"+location.pathname+location.search+location.hash)}</script>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Você está pronta para viver da clínica? | Quiz da Lívia Oliveira</title>
+<meta name="description" content="Quiz para psicólogas: 5 perguntas de sim ou não. No fim, você vê em que ponto está a sua clínica e por onde começar. Leva 1 minuto.">
+<link rel="canonical" href="https://liviaoliveira.me/quiz/">
+<meta name="theme-color" content="#FCFAF6">
+<meta property="og:type" content="website">
+<meta property="og:locale" content="pt_BR">
+<meta property="og:site_name" content="Lívia Oliveira">
+<meta property="og:title" content="Você está pronta para viver da clínica? | Quiz da Lívia Oliveira">
+<meta property="og:description" content="5 perguntas de sim ou não. No fim, você vê em que ponto está e por onde começar. Leva 1 minuto.">
+<meta property="og:url" content="https://liviaoliveira.me/quiz/">
+<meta property="og:image" content="https://liviaoliveira.me/assets/img/og-curso.jpg">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="Lívia Oliveira à mesa do consultório, com a mão no queixo">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="/favicon.ico?v=2" sizes="48x48">
+<link rel="icon" href="/assets/img/favicon.svg?v=3" type="image/svg+xml">
+<link rel="icon" href="/assets/img/favicon-32.png?v=2" type="image/png" sizes="32x32">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png?v=2">
+<link rel="manifest" href="/site.webmanifest?v=2">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+Display:ital,wdth,wght@0,62.5,400..700;1,62.5,400..700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../assets/css/site.css?v=10">
+</head>
+<body class="page-quiz no-sticky">
+<a class="skip" href="#conteudo">Pular para o conteúdo</a>
+
+<header class="site-header">
+  <div class="wrap">
+    <a class="brand" href="../">Lívia Oliveira<span>Quiz da carreira</span></a>
+  </div>
+</header>
+
+<main id="conteudo">
+
+<!-- Comportamento em quiz/script.js: perguntas, resultado, contato (Lambda livia-leads pelo site.js) e plano -->
+<section class="hero quiz-capa" id="capa">
+  <div class="wrap wrap-narrow">
+    <span class="eyebrow">Quiz · 1 minuto</span>
+    <h1>Você está pronta para <em>viver da clínica?</em></h1>
+    <p class="sub">5 perguntas de sim ou não. No fim, você vê em que ponto está e por onde começar.</p>
+    <button class="btn btn-cta" type="button" id="comecar">Começar o quiz</button>
+    <p class="assinatura">Feito pela Lívia Oliveira, psicóloga clínica há 15+ anos · CRP 07/18713</p>
+  </div>
+</section>
+
+<section class="quiz-perguntas" id="perguntas" aria-label="Perguntas do quiz" hidden>
+  <div class="wrap wrap-narrow">
+    <div class="form-card quiz-card-pergunta">
+      <p class="quiz-progresso" id="quiz-passo">Pergunta 1 de 5</p>
+      <div class="quiz-barra" role="progressbar" aria-labelledby="quiz-passo" aria-valuemin="1" aria-valuemax="5" aria-valuenow="1"><span></span></div>
+      <h2 class="quiz-pergunta" id="quiz-pergunta" tabindex="-1"></h2>
+      <div class="quiz-opcoes" role="group" aria-labelledby="quiz-pergunta">
+        <button class="btn quiz-op" type="button" data-resposta="S">Sim</button>
+        <button class="btn quiz-op" type="button" data-resposta="N">Não</button>
+      </div>
+      <button class="quiz-voltar" type="button" id="quiz-voltar"><span aria-hidden="true">←</span> Voltar</button>
+    </div>
+  </div>
+</section>
+
+<section class="quiz-resultado" id="resultado" tabindex="-1" aria-labelledby="resultado-titulo" hidden>
+  <div class="wrap wrap-narrow">
+    <div aria-live="polite">
+      <span class="eyebrow">Seu resultado</span>
+      <p class="quiz-placar"><span class="quiz-bolinhas" id="quiz-bolinhas" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></span><span id="quiz-pontos"></span></p>
+      <h2 id="resultado-titulo"></h2>
+      <p class="quiz-resultado__texto" id="resultado-texto"></p>
+    </div>
+
+    <form class="form-card contato-form quiz-captura" id="contato" novalidate>
+      <h3>Veja o seu plano: o que fazer em cada ponto</h3>
+      <div class="field">
+        <label for="nome">Nome</label>
+        <input type="text" id="nome" name="nome" autocomplete="name" required>
+        <span class="error" data-error-for="nome"></span>
+      </div>
+      <div class="field">
+        <label for="email">E-mail</label>
+        <input type="email" id="email" name="email" autocomplete="email" inputmode="email" required>
+        <span class="error" data-error-for="email"></span>
+      </div>
+      <div class="field">
+        <label for="whatsapp">WhatsApp</label>
+        <input type="tel" id="whatsapp" name="whatsapp" data-mask="phone" autocomplete="tel" inputmode="tel" placeholder="(51) 99999-9999" required>
+        <span class="error" data-error-for="whatsapp"></span>
+      </div>
+      <div class="field">
+        <label class="check check-block"><input type="checkbox" id="consentimento" name="consentimento" value="sim" required><span>Aceito receber o meu resultado e mensagens da equipe da Lívia sobre carreira e sobre o curso, por e-mail e WhatsApp. Posso sair quando quiser. <a href="../privacidade/">Política de privacidade</a></span></label>
+        <span class="error" data-error-for="consentimento"></span>
+      </div>
+      <!-- honeypot: invisível para pessoas; robôs preenchem e a Lambda ignora o cadastro -->
+      <div class="campo-hp" aria-hidden="true">
+        <label for="empresa">Empresa</label>
+        <input type="text" id="empresa" name="empresa" tabindex="-1" autocomplete="off">
+      </div>
+      <button class="btn btn-cta" type="submit">Ver o meu plano</button>
+    </form>
+    <p class="quiz-direto" id="quiz-direto"><a id="curso-direto" href="../curso/b/">Prefiro ver o curso agora</a></p>
+
+    <div class="quiz-plano" id="plano" tabindex="-1" aria-labelledby="plano-titulo" hidden>
+      <span class="eyebrow">Seu plano</span>
+      <h2 id="plano-titulo">O que fazer <em>em cada ponto</em></h2>
+      <ul class="quiz-itens" id="plano-itens"></ul>
+
+      <div class="quiz-convite dark">
+        <span class="eyebrow">Carreira com Sentido</span>
+        <h2>O Carreira com Sentido organiza esses pontos em <em>10 módulos, com aula, exemplo e exercício.</em></h2>
+        <p class="preco-linha">12x de R$ 71,67 sem juros ou R$ 860 à vista</p>
+        <p class="garantia">7 dias de garantia</p>
+        <div class="btn-row">
+          <a class="btn btn-light" id="conhecer-curso" href="../curso/b/">Conhecer o curso</a>
+          <a class="btn btn-wa-outline" id="quiz-wa" href="https://wa.me/5551992597638" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2a10 10 0 0 0-8.6 15.1L2 22l5-1.3A10 10 0 1 0 12 2Zm0 18.2a8.2 8.2 0 0 1-4.2-1.2l-.3-.2-3 .8.8-2.9-.2-.3A8.2 8.2 0 1 1 12 20.2Zm4.5-6.1c-.2-.1-1.5-.7-1.7-.8-.2-.1-.4-.1-.6.1l-.8 1c-.1.2-.3.2-.5.1a6.7 6.7 0 0 1-3.3-2.9c-.3-.4.3-.4.7-1.3.1-.2 0-.3 0-.4l-.8-1.8c-.2-.5-.4-.4-.6-.4h-.5a1 1 0 0 0-.7.3 3 3 0 0 0-.9 2.2 5.1 5.1 0 0 0 1.1 2.7 11.7 11.7 0 0 0 4.5 4c1.7.7 2.3.8 3.2.6a2.7 2.7 0 0 0 1.8-1.2 2.2 2.2 0 0 0 .2-1.3c-.1-.1-.3-.2-.5-.3Z"/></svg>Falar com a Thaís no WhatsApp</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+</main>
+
+<footer class="site-footer">
+  <div class="wrap">
+    <p>Lívia Oliveira · Psicóloga clínica · CRP 07/18713 · Criadora do Carreira com Sentido</p>
+    <nav aria-label="Outras páginas"><a href="../">Início</a><a href="../curso/b/">Curso Carreira com Sentido</a><a href="../consultoria/">Consultoria 1:1</a><a href="../terapia/">Terapia</a><a href="https://www.instagram.com/liviaoliveira.psicologa/" target="_blank" rel="noopener">Instagram</a></nav>
+    <p style="margin-top:12px">© 2026 Lívia Oliveira. Todos os direitos reservados.<span class="footer-sep"> · </span><span class="footer-legal"><a href="../privacidade/">Política de privacidade</a> · <a href="../termos/">Termos de uso</a></span></p>
+  </div>
+</footer>
+
+<script src="../assets/js/site.js?v=6" data-pagina="pgQuiz"></script>
+<script src="script.js?v=1"></script>
+</body>
+</html>

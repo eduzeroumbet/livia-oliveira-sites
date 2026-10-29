@@ -10,7 +10,7 @@ from pathlib import Path
 from urllib.parse import unquote, urlsplit
 
 ROOT = Path(__file__).resolve().parent.parent
-PAGES = ["index.html", "curso/index.html", "curso/b/index.html", "curso/versao-b/index.html", "curso/inscricao/index.html", "consultoria/index.html", "terapia/index.html", "terapia/b/index.html", "privacidade/index.html", "termos/index.html", "calculadora/index.html"]
+PAGES = ["index.html", "curso/index.html", "curso/b/index.html", "curso/versao-b/index.html", "curso/inscricao/index.html", "consultoria/index.html", "terapia/index.html", "terapia/b/index.html", "privacidade/index.html", "termos/index.html", "calculadora/index.html", "quiz/index.html"]
 # política de privacidade (URL do app da Meta e dos anúncios) e termos de uso: link no rodapé de todas as páginas e no sitemap
 PRIVACIDADE = "privacidade/index.html"
 TERMOS = "termos/index.html"
@@ -39,6 +39,7 @@ CURSO_ORGANICO = {
     "privacidade/index.html": "../curso/b/",
     "termos/index.html": "../curso/b/",
     "calculadora/index.html": "../curso/b/",
+    "quiz/index.html": "../curso/b/",
 }
 CHECKOUT = "https://pay.hotmart.com/M100028858P?off=n2h6k72h&checkoutMode=10"
 # botões de compra (class="checkout") das 3 versões do curso: vão para a pré-página de inscrição com o pg da versão
@@ -64,6 +65,8 @@ SEM_RASTREAMENTO = {
 }
 # calculadora (isca dos anúncios): site.js com data-pagina="pgCalc", Lead ao mostrar o resultado, sem checkout
 CALCULADORA = "calculadora/index.html"
+# quiz (isca dos anúncios de Lead): site.js com data-pagina="pgQuiz", Lead só no envio do contato, sem checkout
+QUIZ = "quiz/index.html"
 TAGS_RASTREAMENTO = ("fbq(", "gtag(", "googletagmanager.com", "connect.facebook.net", PIXEL_ID, GA4_ID)
 HOTLINK = "r2" + ".dev"  # storage do Scrolltide; montado em partes para o próprio check não conter o literal
 DOMINIO = "liviaoliveira.me"
@@ -79,6 +82,7 @@ EXTRAS = (
     "terapia/script.js",
     "calculadora/script.js",
     "curso/inscricao/script.js",
+    "quiz/script.js",
 )
 # favicons e manifest usam caminho absoluto (site na raiz do domínio)
 REL_ABSOLUTO = {"icon", "apple-touch-icon", "manifest"}
@@ -245,6 +249,34 @@ def check_page(rel):
                 erros.append(f"calculadora/script.js: sem {trecho}")
         if "begin_checkout" in script:
             erros.append("calculadora/script.js: não pode disparar begin_checkout (InitiateCheckout)")
+        if script.count('"generate_lead"') != 1 or '"contato_calculadora"' not in script:
+            erros.append("calculadora/script.js: o contato dispara contato_calculadora; o único generate_lead é o do cálculo")
+        for trecho in ('id="contato"', 'name="consentimento"', 'name="empresa"', 'data-mask="phone"', 'href="../quiz/"'):
+            if trecho not in html:
+                erros.append(f"{rel}: sem {trecho} (contato opcional e link do quiz)")
+    if rel == QUIZ:
+        if not re.search(r'<script src="\.\./assets/js/site\.js(\?v=\d+)?" data-pagina="pgQuiz"></script>', html):
+            erros.append(f"{rel}: sem <script src=\"../assets/js/site.js\" data-pagina=\"pgQuiz\">")
+        if not re.search(r'<script src="script\.js(\?v=\d+)?"></script>', html):
+            erros.append(f"{rel}: sem <script src=\"script.js\"> (perguntas, contato e plano)")
+        if '<link rel="canonical" href="https://liviaoliveira.me/quiz/">' not in html:
+            erros.append(f"{rel}: canonical deve apontar para https://{DOMINIO}/quiz/")
+        if "noindex" in html:
+            erros.append(f"{rel}: o quiz é indexável (sem noindex)")
+        if "https://liviaoliveira.me/quiz/" not in (ROOT / "sitemap.xml").read_text(encoding="utf-8"):
+            erros.append(f"{rel}: não está no sitemap.xml")
+        if "pay.hotmart.com" in html or 'id="oferta"' in html or "checkout" in html:
+            erros.append(f"{rel}: sem checkout nem #oferta (nada de InitiateCheckout nem view_offer automático)")
+        for trecho in ('name="consentimento"', 'name="empresa"', 'tabindex="-1"', 'data-mask="phone"', 'href="../privacidade/"',
+                       "og-curso.jpg", "12x de R$ 71,67 sem juros ou R$ 860 à vista", "7 dias de garantia", 'aria-live="polite"'):
+            if trecho not in html:
+                erros.append(f"{rel}: sem {trecho}")
+        script = (ROOT / "quiz/script.js").read_text(encoding="utf-8")
+        for trecho in ('"quiz_inicio"', '"quiz_completo"', '"generate_lead"', '"view_offer"', '"quiz_para_curso"', 'ferramenta: "quiz"'):
+            if trecho not in script:
+                erros.append(f"quiz/script.js: sem {trecho}")
+        if "begin_checkout" in script:
+            erros.append("quiz/script.js: não pode disparar begin_checkout (InitiateCheckout)")
     if rel == "curso/versao-b/index.html":
         if '<meta name="robots" content="noindex, follow">' not in html:
             erros.append(f"{rel}: sem noindex (é variação de teste)")
@@ -313,6 +345,8 @@ def main():
                 erros.append(f"{extra}: CONFIG sem o GA4 {GA4_ID}")
             if 'hasAttribute("data-sem-rastreamento")' not in texto:
                 erros.append(f"{extra}: não respeita data-sem-rastreamento (terapia sem Pixel/GA4)")
+            if f'CADASTRO_URL = "{LAMBDA_CADASTRO}"' not in texto:
+                erros.append(f"{extra}: sem CADASTRO_URL da Lambda livia-leads (contato do quiz e da calculadora)")
         if extra == "terapia/script.js":
             for tag in TAGS_RASTREAMENTO:
                 if tag in texto:
