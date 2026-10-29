@@ -273,7 +273,7 @@ with sync_playwright() as p:
         ok(eventos_fbq(estado, "Lead") == [["track", "Lead", lead]], "Lead no Pixel, uma vez")
         ok(eventos_gtag(estado, "generate_lead") == [["event", "generate_lead", lead]], "generate_lead no GA4, uma vez")
         ok(["init", PIXEL_ID, {"em": EMAIL, "ph": "5551999998888", "fn": "maria"}] in estado["fbq"], "advanced matching (em, ph, fn) no Pixel")
-        texto_dl = json.dumps(estado["dl"], ensure_ascii=False).lower()
+        texto_dl = json.dumps(estado["dl"], ensure_ascii=False, default=str).lower()
         ok(not any(x in texto_dl for x in ("maria", "exemplo.com", "99999")), "nenhum dado pessoal no dataLayer/GA4")
 
         partes, q = query_de(page.get_attribute("#conhecer-curso", "href"))

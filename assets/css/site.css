@@ -609,6 +609,7 @@ body.has-sticky .wa-float { bottom: calc(var(--sticky-h, 72px) + 12px); }
 .contato-ok { display: flex; gap: 12px; align-items: center; font-size: 17px; font-weight: 600; color: var(--wine); }
 .contato-ok::before { content: "✓"; flex: 0 0 auto; display: grid; place-items: center; width: 36px; height: 36px; border-radius: 50%; background: var(--rose2); }
 .contato-ok:focus { outline: none; }
+.contato-ok[hidden] { display: none; }
 
 /* ========== Quiz "Você está pronta para viver da clínica?" (quiz/) ========== */
 .quiz-capa { padding-bottom: 56px; }

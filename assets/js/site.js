@@ -277,7 +277,8 @@ window.dataLayer = window.dataLayer || [];
       } catch (err) {
         envio = Promise.resolve();
       }
-      var espera = new Promise(function (resolve) { setTimeout(resolve, CADASTRO_ESPERA_MS); });
+      /* a página não muda de endereço (fetch com keepalive): espera no máximo 0,8 s pela Lambda */
+      var espera = new Promise(function (resolve) { setTimeout(resolve, 800); });
       return Promise.race([envio, espera]);
     }
   };
