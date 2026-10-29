@@ -28,7 +28,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+Display:ital,wdth,wght@0,62.5,400..700;1,62.5,400..700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="../../assets/css/site.css?v=8">
+<link rel="stylesheet" href="../../assets/css/site.css?v=9">
 </head>
 <body class="page-inscricao no-sticky">
 <a class="skip" href="#inscricao">Pular para o formulário</a>
@@ -51,38 +51,64 @@
       <p class="insc-pag">Pix, cartão de crédito (até 12x sem juros) ou boleto</p>
     </div>
 
-    <!-- Envio: curso/inscricao/script.js (cadastro na Lambda livia-leads e ida à Hotmart com os dados preenchidos) -->
+    <!-- Envio: curso/inscricao/script.js (escolha da forma de pagamento, cadastro na Lambda livia-leads e ida à Hotmart
+         com os dados preenchidos e só os métodos da forma escolhida). Os campos só abrem depois da escolha. -->
     <form class="form-card insc-form" id="inscricao" novalidate>
-      <div class="field">
-        <label for="nome">Nome</label>
-        <input type="text" id="nome" name="nome" autocomplete="name" required>
-        <span class="error" data-error-for="nome"></span>
+      <h2 class="insc-form__titulo" id="formas-titulo">Como você prefere pagar?</h2>
+      <div class="insc-formas" role="radiogroup" aria-labelledby="formas-titulo" aria-describedby="formas-erro">
+        <label class="insc-forma">
+          <input type="radio" name="forma" value="cartao">
+          <span class="insc-forma__marca"><svg class="insc-forma__check" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M6 12.5l4 4 8-9" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+          <span class="insc-forma__texto"><b>Cartão de crédito</b><span class="insc-forma__preco">12x de R$ 71,67 sem juros</span><span class="insc-forma__sub">Liberação imediata após a aprovação</span></span>
+        </label>
+        <label class="insc-forma">
+          <input type="radio" name="forma" value="pix">
+          <span class="insc-forma__marca"><svg class="insc-forma__check" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M6 12.5l4 4 8-9" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+          <span class="insc-forma__texto"><b>Pix</b><span class="insc-forma__preco">R$ 860 à vista</span><span class="insc-forma__sub">Liberação imediata após o pagamento</span></span>
+        </label>
+        <label class="insc-forma">
+          <input type="radio" name="forma" value="boleto">
+          <span class="insc-forma__marca"><svg class="insc-forma__check" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M6 12.5l4 4 8-9" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+          <span class="insc-forma__texto"><b>Boleto</b><span class="insc-forma__preco">R$ 860 à vista</span><span class="insc-forma__sub">Liberação em até 2 dias úteis após o pagamento</span></span>
+        </label>
       </div>
-      <div class="field">
-        <label for="email">E-mail</label>
-        <input type="email" id="email" name="email" autocomplete="email" inputmode="email" required>
-        <span class="error" data-error-for="email"></span>
+      <span class="error" id="formas-erro" data-error-for="forma"></span>
+
+      <div class="insc-dados" id="insc-dados" hidden>
+        <h2 class="insc-form__titulo">Seus dados para a inscrição</h2>
+        <div class="field">
+          <label for="nome">Nome</label>
+          <input type="text" id="nome" name="nome" autocomplete="name" required>
+          <span class="error" data-error-for="nome"></span>
+        </div>
+        <div class="field">
+          <label for="email">E-mail</label>
+          <input type="email" id="email" name="email" autocomplete="email" inputmode="email" required>
+          <span class="error" data-error-for="email"></span>
+        </div>
+        <div class="field">
+          <label for="whatsapp">WhatsApp</label>
+          <input type="tel" id="whatsapp" name="whatsapp" data-mask="phone" autocomplete="tel" inputmode="tel" placeholder="(51) 99999-9999" required>
+          <span class="error" data-error-for="whatsapp"></span>
+        </div>
+        <!-- honeypot: invisível para pessoas; robôs preenchem e a Lambda ignora o cadastro -->
+        <div class="insc-hp" aria-hidden="true">
+          <label for="empresa">Empresa</label>
+          <input type="text" id="empresa" name="empresa" tabindex="-1" autocomplete="off">
+        </div>
+        <button class="btn btn-cta" type="submit">Continuar para o pagamento</button>
+        <!-- texto trocado pelo script.js conforme a forma escolhida -->
+        <p class="insc-dica" id="insc-dica" aria-live="polite"></p>
+        <p class="form-note">Ao continuar, você concorda em receber mensagens da equipe da Lívia por e-mail e WhatsApp sobre o curso. Seus dados ficam protegidos, veja a <a href="../../privacidade/">Política de privacidade</a>.</p>
       </div>
-      <div class="field">
-        <label for="whatsapp">WhatsApp</label>
-        <input type="tel" id="whatsapp" name="whatsapp" data-mask="phone" autocomplete="tel" inputmode="tel" placeholder="(51) 99999-9999" required>
-        <span class="error" data-error-for="whatsapp"></span>
-      </div>
-      <!-- honeypot: invisível para pessoas; robôs preenchem e a Lambda ignora o cadastro -->
-      <div class="insc-hp" aria-hidden="true">
-        <label for="empresa">Empresa</label>
-        <input type="text" id="empresa" name="empresa" tabindex="-1" autocomplete="off">
-      </div>
-      <button class="btn btn-cta" type="submit">Continuar para o pagamento</button>
-      <p class="form-note">Ao continuar, você concorda em receber mensagens da equipe da Lívia por e-mail e WhatsApp sobre o curso. Seus dados ficam protegidos, veja a <a href="../../privacidade/">Política de privacidade</a>.</p>
     </form>
 
     <div class="insc-passos">
       <h2>Como funciona <em>o próximo passo</em></h2>
       <ol class="steps">
-        <li>Você vai para o pagamento seguro da Hotmart com nome, e-mail e WhatsApp já preenchidos.</li>
-        <li>Lá você escolhe a forma de pagamento: o cartão aparece primeiro, mas Pix e boleto estão logo abaixo.</li>
-        <li>Assim que o pagamento é confirmado, o acesso chega no seu e-mail.</li>
+        <li>Você escolhe aqui como prefere pagar: cartão de crédito em até 12x sem juros, Pix ou boleto.</li>
+        <li>Na página de pagamento seguro da Hotmart, nome, e-mail e WhatsApp já vão preenchidos: falta só o CPF (e, no cartão, os dados do cartão).</li>
+        <li>Assim que o pagamento é confirmado, o acesso chega no seu e-mail: na hora no cartão e no Pix, em até 2 dias úteis no boleto.</li>
       </ol>
       <p class="insc-duvida">Prefere tirar dúvidas antes? <a href="https://wa.me/5551992597638?text=Oi!%20Tenho%20uma%20d%C3%BAvida%20sobre%20o%20curso%20Carreira%20com%20Sentido%20antes%20de%20me%20inscrever." target="_blank" rel="noopener">Fale com a equipe no WhatsApp</a></p>
     </div>
@@ -99,7 +125,7 @@
 </footer>
 
 <!-- pgInsc só identifica esta página; o sck da Hotmart leva o pg da página de origem (pgA, pgB, pgC) -->
-<script src="../../assets/js/site.js?v=4" data-pagina="pgInsc"></script>
-<script src="script.js?v=1"></script>
+<script src="../../assets/js/site.js?v=5" data-pagina="pgInsc"></script>
+<script src="script.js?v=2"></script>
 </body>
 </html>

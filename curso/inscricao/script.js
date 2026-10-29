@@ -1,4 +1,7 @@
-/* Pré-página de inscrição do curso (curso/inscricao/): nome, e-mail e WhatsApp antes da Hotmart.
+/* Pré-página de inscrição do curso (curso/inscricao/): forma de pagamento, nome, e-mail e WhatsApp antes da Hotmart.
+ *
+ * A pessoa escolhe primeiro a forma de pagamento (cartão, Pix ou boleto; escolha_pagamento/EscolhaPagamento pelo
+ * site.js); só então abrem os campos. Os métodos do checkout da Hotmart dependem da escolha (HOTMART_ESCONDE).
  *
  * No envio: valida; guarda o contato na Lambda livia-leads (tabela DynamoDB livia-leads, sa-east-1) sem
  * bloquear a compra (espera no máximo 1,5 s); dispara begin_checkout (InitiateCheckout, o único do funil do
@@ -9,6 +12,28 @@
 var CADASTRO_URL = "https://nwmxltflulqvcxu7bdplodmyjm0yweuc.lambda-url.sa-east-1.on.aws/";
 var CHECKOUT_URL = "https://pay.hotmart.com/M100028858P?off=n2h6k72h&checkoutMode=10";
 var CADASTRO_ESPERA_MS = 1500;
+/* Métodos escondidos no checkout da Hotmart (hide<Metodo>=1). A Hotmart sempre abre com um método marcado, não
+ * aceita pré-selecionar o Pix e bloqueia de propósito o hideCreditCard: o cartão nunca some. Então a escolha é
+ * feita aqui e o link esconde todo o resto: cartão = só a aba do cartão (some também o "usar dois cartões");
+ * pix = cartão + Pix; boleto = cartão + boleto. */
+var HOTMART_ESCONDE = ["hidePix", "hidePixAutomatic", "hideBillet", "hideNupay", "hideMultipleCards", "hidePaypal",
+  "hideApplePay", "hideGooglePay", "hideVirtualCard", "hideMercadoPago", "hideHybrid", "hideDirectDebit",
+  "hideHotmartInstallments"];
+var HOTMART_MOSTRA = { cartao: "", pix: "hidePix", boleto: "hideBillet" };
+var FORMAS = {
+  cartao: {
+    botao: "Continuar para o pagamento no cartão",
+    dica: "Na próxima tela, a Hotmart já mostra só o cartão. Seus dados já vão preenchidos: falta o CPF e os dados do cartão."
+  },
+  pix: {
+    botao: "Continuar para o pagamento com Pix",
+    dica: "Na próxima tela, toque em Pix para gerar o código. Seus dados já vão preenchidos: falta só o CPF."
+  },
+  boleto: {
+    botao: "Continuar para o pagamento com boleto",
+    dica: "Na próxima tela, toque em Boleto para gerar o boleto. Seus dados já vão preenchidos: falta só o CPF."
+  }
+};
 
 (function () {
   "use strict";
@@ -30,6 +55,56 @@ var CADASTRO_ESPERA_MS = 1500;
     .filter(Boolean)
     .join("|");
   var sck = sckPronto || (src || "direto") + "|" + pg;
+
+  /* ---------- Forma de pagamento: os campos só abrem depois da escolha ---------- */
+  var grupo = form.querySelector(".insc-formas");
+  var dadosBloco = document.getElementById("insc-dados");
+  var dica = document.getElementById("insc-dica");
+  var button = form.querySelector('button[type="submit"]');
+  var label = button.textContent;
+  var porToque = false;
+
+  function forma() {
+    var marcada = form.querySelector('input[name="forma"]:checked');
+    return marcada ? marcada.value : "";
+  }
+
+  function setErroForma(message) {
+    form.querySelector('[data-error-for="forma"]').textContent = message || "";
+    if (message) grupo.setAttribute("aria-invalid", "true");
+    else grupo.removeAttribute("aria-invalid");
+  }
+
+  /* só move o foco para o nome quando a escolha é por toque/clique: pelas setas do teclado a pessoa ainda está
+   * navegando entre as opções */
+  grupo.addEventListener("pointerdown", function () { porToque = true; });
+  grupo.addEventListener("keydown", function () { porToque = false; });
+
+  /* mostra os campos e ajusta o botão e a dica; devolve true se os campos estavam fechados */
+  function mostraForma(f) {
+    setErroForma("");
+    label = FORMAS[f].botao;
+    if (!button.disabled) button.textContent = label;
+    dica.textContent = FORMAS[f].dica;
+    var abriu = dadosBloco.hidden;
+    dadosBloco.hidden = false;
+    return abriu;
+  }
+
+  grupo.addEventListener("change", function () {
+    var f = forma();
+    if (!FORMAS[f]) return;
+    if (mostraForma(f) && porToque) {
+      form.elements.nome.focus({ preventScroll: true });
+      var suave = !window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+      dadosBloco.scrollIntoView({ behavior: suave ? "smooth" : "auto", block: "nearest" });
+    }
+    porToque = false;
+    if (window.siteTrack) window.siteTrack("escolha_pagamento", { content_category: pg, payment_type: f });
+  });
+
+  /* navegador que restaura o formulário ao voltar (opção já marcada): abre os campos sem novo evento */
+  if (FORMAS[forma()]) mostraForma(forma());
 
   /* ---------- Validação (mesma marcação e mensagens do site.js) ---------- */
   function setError(name, message) {
@@ -72,7 +147,7 @@ var CADASTRO_ESPERA_MS = 1500;
   }
 
   /* ---------- Link final da Hotmart ---------- */
-  function linkHotmart(nome, email, whats) {
+  function linkHotmart(nome, email, whats, f) {
     var url = new URL(CHECKOUT_URL);
     if (src) url.searchParams.set("src", src);
     url.searchParams.set("sck", sck);
@@ -83,30 +158,38 @@ var CADASTRO_ESPERA_MS = 1500;
     url.searchParams.set("email", email);
     url.searchParams.set("phoneac", whats.slice(0, 2));
     url.searchParams.set("phonenumber", whats.slice(2));
+    HOTMART_ESCONDE.forEach(function (k) {
+      if (k !== HOTMART_MOSTRA[f]) url.searchParams.set(k, "1");
+    });
     /* espaço como %20 (o URLSearchParams usa "+"; um "+" digitado já sai como %2B) */
     return url.toString().replace(/\+/g, "%20");
   }
 
-  var button = form.querySelector('button[type="submit"]');
-  var label = button.textContent;
-
   form.addEventListener("submit", function (e) {
     e.preventDefault();
-    if (button.disabled || !validate()) return;
+    if (button.disabled) return;
+    var f = forma();
+    if (!FORMAS[f]) {
+      /* não deve acontecer (o botão só aparece depois da escolha), mas por segurança */
+      setErroForma("Escolha a forma de pagamento.");
+      form.querySelector('input[name="forma"]').focus();
+      return;
+    }
+    if (!validate()) return;
     button.disabled = true;
     button.textContent = "Abrindo o pagamento...";
 
     var nome = form.elements.nome.value.trim().replace(/\s+/g, " ");
     var email = form.elements.email.value.trim().toLowerCase();
     var whats = digitos(form.elements.whatsapp.value);
-    var destino = linkHotmart(nome, email, whats);
+    var destino = linkHotmart(nome, email, whats, f);
 
     /* Rastreamento: advanced matching só no Pixel; GA4 e dataLayer sem dados pessoais. Sem Lead aqui
      * (Lead é da calculadora, que tem campanha própria otimizando Lead). */
     if (window.siteIdentify) window.siteIdentify({ em: email, ph: "55" + whats, fn: nome.split(" ")[0].toLowerCase() });
     if (window.siteTrack) {
-      window.siteTrack("begin_checkout", { value: 860, currency: "BRL", content_name: "Carreira com Sentido", content_category: pg });
-      window.siteTrack("cadastro_checkout", { content_category: pg });
+      window.siteTrack("begin_checkout", { value: 860, currency: "BRL", content_name: "Carreira com Sentido", content_category: pg, payment_type: f });
+      window.siteTrack("cadastro_checkout", { content_category: pg, payment_type: f });
     }
 
     var dados = {
@@ -114,6 +197,7 @@ var CADASTRO_ESPERA_MS = 1500;
       email: email,
       whatsapp: whats,
       pagina: pg,
+      forma: f,
       src: src,
       sck: sck,
       utm_source: visit.get("utm_source") || "",

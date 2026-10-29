@@ -4,12 +4,20 @@ Nada sai para a internet: a chamada à Lambda de cadastro é interceptada com pa
 Lambda é mapeado para um endereço inexistente no Chromium, então nada é gravado na Lambda real); a navegação para a
 Hotmart é interceptada e respondida com uma página vazia; Pixel e GA4 são bloqueados (os comandos ficam no fbq e no
 dataLayer, registrados pelo teste antes de a página sair). Em 390px e 1440px:
-- formulário (até o botão) visível sem rolar a 390x844; sem rolagem horizontal; sem travessão; honeypot vazio e fora da tela;
+- ao abrir: nenhuma forma de pagamento marcada, campos ocultos (hidden, sem ocupar espaço), as 3 opções visíveis sem
+  rolar a 390x844 e com área de toque >= 48px; sem rolagem horizontal; sem travessão; honeypot vazio e fora da tela;
 - só o PageView ao carregar (sem ViewContent nem InitiateCheckout);
+- cada opção (cartão, Pix, boleto) abre os campos, foco no nome, muda o texto do botão e a dica; EscolhaPagamento no
+  Pixel e escolha_pagamento no GA4 com payment_type, sem InitiateCheckout; trocar de opção preserva o que foi digitado;
+  setas do teclado trocam a opção;
 - envio vazio: erros nos 3 campos, sem cadastro e sem ir à Hotmart;
-- envio com Maria Teste / maria.teste@exemplo.com / (51) 99999-8888: JSON enviado à Lambda, link final da Hotmart
-  (off, checkoutMode, name, email, phoneac, phonenumber, src, sck, utms), advanced matching, InitiateCheckout e
-  CadastroCheckout no Pixel, begin_checkout e cadastro_checkout no GA4, nenhum Lead e nenhum dado pessoal no dataLayer;
+- envio com Maria Teste / maria.teste@exemplo.com / (51) 99999-8888: JSON enviado à Lambda (com forma), link final da
+  Hotmart (off, checkoutMode, name, email, phoneac, phonenumber, src, sck, utms e os hide* da forma escolhida),
+  advanced matching, InitiateCheckout e CadastroCheckout no Pixel, begin_checkout e cadastro_checkout no GA4 (com
+  payment_type), nenhum Lead e nenhum dado pessoal no dataLayer;
+- link da Hotmart para cada forma: cartão com hidePix e hideBillet; Pix sem hidePix; boleto sem hideBillet;
+- envio sem forma (forçado): erro "Escolha a forma de pagamento." e nada é enviado;
+- prints com os campos abertos em _catalogo/prints/curso-inscricao-escolha-{mobile,desktop}.png;
 - Lambda com erro 500 e Lambda que não responde: vai para a Hotmart mesmo assim, em até ~2 s;
 - sem pg nem UTM na URL: sck=direto|pgB e sem src.
 
@@ -33,6 +41,17 @@ LAMBDA_HOST = "nwmxltflulqvcxu7bdplodmyjm0yweuc.lambda-url.sa-east-1.on.aws"
 QUERY = "utm_source=meta&utm_medium=paid&utm_campaign=ccs_teste&utm_content=V01&pg=pgA"
 SRC = "meta|paid|ccs_teste|V01"
 NOME, EMAIL, WHATS = "Maria Teste", "maria.teste@exemplo.com", "(51) 99999-8888"
+# métodos escondidos na Hotmart conforme a forma (ver HOTMART_ESCONDE no script.js)
+ESCONDE = ["hidePix", "hidePixAutomatic", "hideBillet", "hideNupay", "hideMultipleCards", "hidePaypal", "hideApplePay",
+           "hideGooglePay", "hideVirtualCard", "hideMercadoPago", "hideHybrid", "hideDirectDebit", "hideHotmartInstallments"]
+MOSTRA = {"cartao": None, "pix": "hidePix", "boleto": "hideBillet"}
+BOTAO = {
+    "cartao": "Continuar para o pagamento no cartão",
+    "pix": "Continuar para o pagamento com Pix",
+    "boleto": "Continuar para o pagamento com boleto",
+}
+DICA = {"cartao": "só o cartão", "pix": "toque em Pix", "boleto": "toque em Boleto"}
+PRINTS = ROOT / "_catalogo" / "prints"
 CORS = {"access-control-allow-origin": "*", "access-control-allow-methods": "POST, OPTIONS", "access-control-allow-headers": "content-type"}
 falhas = []
 
@@ -103,9 +122,21 @@ def abre(b, vp, lambda_modo="ok", query=QUERY):
     return page, ctx
 
 
-def envia(page, ctx, nome=NOME, email=EMAIL, whats=WHATS):
-    """Preenche, envia e espera a ida à Hotmart. Devolve o tempo do clique até o pedido da Hotmart e o estado do
+def hides(forma):
+    """Parâmetros hide*=1 esperados no link da Hotmart para a forma."""
+    return {k: ["1"] for k in ESCONDE if k != MOSTRA[forma]}
+
+
+def escolhe(page, forma):
+    page.click(f'label.insc-forma:has(input[value="{forma}"])')
+    page.wait_for_timeout(50)
+
+
+def envia(page, ctx, nome=NOME, email=EMAIL, whats=WHATS, forma="cartao"):
+    """Escolhe a forma (se ainda não houver), preenche, envia e espera a ida à Hotmart. Devolve o tempo do clique até o pedido da Hotmart e o estado do
     botão logo depois do clique (None se a página já tiver saído)."""
+    if not page.evaluate("!!document.querySelector('input[name=forma]:checked')"):
+        escolhe(page, forma)
     page.fill("#nome", nome)
     page.fill("#email", email)
     page.fill("#whatsapp", whats)
@@ -132,8 +163,15 @@ with sync_playwright() as p:
         page, ctx = abre(b, vp)
 
         ok("—" not in page.inner_text("body"), "sem travessão no texto")
-        topo = page.evaluate("document.querySelector('button[type=submit]').getBoundingClientRect().bottom")
-        ok(page.evaluate("window.scrollY") == 0 and topo <= vp["height"], f"formulário inteiro (até o botão) sem rolar ({topo:.0f} <= {vp['height']})")
+        inicio = page.evaluate("""() => { const d = document.getElementById('insc-dados');
+          return {marcadas: document.querySelectorAll('input[name=forma]:checked').length, hidden: d.hidden,
+                  altura: d.getBoundingClientRect().height, botao: document.querySelector('button[type=submit]').offsetParent !== null,
+                  grupo: document.querySelector('[role=radiogroup]') !== null, radios: document.querySelectorAll('input[type=radio][name=forma]').length}; }""")
+        ok(inicio == {"marcadas": 0, "hidden": True, "altura": 0, "botao": False, "grupo": True, "radios": 3},
+           f"ao abrir: nenhuma forma marcada, campos ocultos e sem espaço, radiogroup com 3 opções ({inicio})")
+        caixas = page.evaluate("[...document.querySelectorAll('label.insc-forma')].map(l => { const r = l.getBoundingClientRect(); return [r.height, r.bottom]; })")
+        ok(all(h >= 48 for h, _ in caixas), f"opções com área de toque >= 48px ({[round(h) for h, _ in caixas]})")
+        ok(page.evaluate("window.scrollY") == 0 and caixas[-1][1] <= vp["height"], f"as 3 opções visíveis sem rolar ({caixas[-1][1]:.0f} <= {vp['height']})")
         larg = page.evaluate("[document.documentElement.scrollWidth, window.innerWidth]")
         ok(larg[0] <= larg[1], f"sem rolagem horizontal ({larg[0]} <= {larg[1]})")
         hp = page.evaluate("""() => { const e = document.getElementById('empresa'); const r = e.getBoundingClientRect();
@@ -145,6 +183,36 @@ with sync_playwright() as p:
         ok(["init", PIXEL_ID] in estado["fbq"], "Pixel iniciado")
         tracks = [c[1] for c in estado["fbq"] if c[0] in ("track", "trackCustom")]
         ok(tracks == ["PageView"], f"ao carregar só o PageView ({tracks})")
+
+        # escolha da forma: cada opção abre os campos e muda o botão e a dica; trocar preserva o que foi digitado
+        for i, forma in enumerate(("cartao", "pix", "boleto")):
+            escolhe(page, forma)
+            st = page.evaluate("""() => ({hidden: document.getElementById('insc-dados').hidden,
+              botao: document.querySelector('button[type=submit]').textContent, dica: document.getElementById('insc-dica').textContent,
+              marcada: document.querySelector('input[name=forma]:checked').value, foco: document.activeElement.id})""")
+            ok(not st["hidden"] and st["marcada"] == forma and st["botao"] == BOTAO[forma] and DICA[forma] in st["dica"],
+               f"{forma}: campos abertos, botão \"{st['botao']}\" e dica")
+            if i == 0:
+                ok(st["foco"] == "nome", f"foco no nome ao abrir os campos ({st['foco']})")
+                page.fill("#nome", "Ana Digitada")
+                page.fill("#email", "ana@exemplo.com")
+        ok(page.input_value("#nome") == "Ana Digitada" and page.input_value("#email") == "ana@exemplo.com",
+           "trocar de opção preserva o que foi digitado")
+        page.wait_for_timeout(400)
+        page.screenshot(path=str(PRINTS / f"curso-inscricao-escolha-{'mobile' if vp['width'] < 900 else 'desktop'}.png"), full_page=True)
+        page.focus('input[name=forma][value="boleto"]')
+        page.keyboard.press("ArrowUp")
+        ok(page.evaluate("document.querySelector('input[name=forma]:checked').value") == "pix"
+           and page.evaluate("document.activeElement.value") == "pix", "seta do teclado troca a opção sem tirar o foco do grupo")
+        estado = page.evaluate(ESTADO)
+        escolhas = [c[2] for c in estado["fbq"] if c[:2] == ["trackCustom", "EscolhaPagamento"]]
+        ok([e.get("payment_type") for e in escolhas] == ["cartao", "pix", "boleto", "pix"] and all(e.get("content_category") == "pgA" for e in escolhas),
+           f"EscolhaPagamento no Pixel com payment_type ({escolhas})")
+        ok(["event", "escolha_pagamento", {"content_category": "pgA", "payment_type": "cartao"}] in estado["dl"], "escolha_pagamento no GA4")
+        ok(not any(c[1] in ("InitiateCheckout", "Lead") for c in estado["fbq"] if len(c) > 1), "escolher não dispara InitiateCheckout nem Lead")
+        escolhe(page, "cartao")
+        page.fill("#nome", "")
+        page.fill("#email", "")
 
         # envio vazio
         page.click("button[type=submit]")
@@ -171,7 +239,7 @@ with sync_playwright() as p:
             ok(req.method == "POST" and "application/json" in (req.headers.get("content-type") or ""), "POST application/json")
             dados = req.post_data_json
             esperado = {
-                "nome": NOME, "email": EMAIL, "whatsapp": "51999998888", "pagina": "pgA", "src": SRC, "sck": f"{SRC}|pgA",
+                "nome": NOME, "email": EMAIL, "whatsapp": "51999998888", "pagina": "pgA", "forma": "cartao", "src": SRC, "sck": f"{SRC}|pgA",
                 "utm_source": "meta", "utm_medium": "paid", "utm_campaign": "ccs_teste", "utm_content": "V01", "utm_term": "",
                 "url": f"{BASE}/curso/inscricao/?{QUERY}", "consentimento": "sim", "fbp": "", "fbc": "", "empresa": "",
             }
@@ -185,26 +253,57 @@ with sync_playwright() as p:
             esperado = {
                 "off": ["n2h6k72h"], "checkoutMode": ["10"], "name": [NOME], "email": [EMAIL], "phoneac": ["51"],
                 "phonenumber": ["999998888"], "src": [SRC], "sck": [f"{SRC}|pgA"], "utm_source": ["meta"],
-                "utm_medium": ["paid"], "utm_campaign": ["ccs_teste"], "utm_content": ["V01"],
+                "utm_medium": ["paid"], "utm_campaign": ["ccs_teste"], "utm_content": ["V01"], **hides("cartao"),
             }
             ok(partes.netloc == "pay.hotmart.com" and partes.path == "/M100028858P", f"produto M100028858P ({partes.netloc}{partes.path})")
             ok(q == esperado, f"parâmetros da Hotmart {q}")
+            ok("+" not in partes.query and "name=Maria%20Teste" in partes.query, "espaço do nome como %20")
 
         fbq = ctx["fbq"]
-        oferta = {"value": 860, "currency": "BRL", "content_name": "Carreira com Sentido", "content_category": "pgA"}
+        oferta = {"value": 860, "currency": "BRL", "content_name": "Carreira com Sentido", "content_category": "pgA", "payment_type": "cartao"}
         ok(["init", PIXEL_ID, {"em": EMAIL, "ph": "5551999998888", "fn": "maria"}] in fbq, "advanced matching (em, ph, fn) no Pixel")
         ok(["track", "InitiateCheckout", oferta] in fbq, "InitiateCheckout no Pixel")
-        ok(["trackCustom", "CadastroCheckout", {"content_category": "pgA"}] in fbq, "CadastroCheckout no Pixel")
+        ok(["trackCustom", "CadastroCheckout", {"content_category": "pgA", "payment_type": "cartao"}] in fbq, "CadastroCheckout no Pixel")
         ok(fbq.index(["init", PIXEL_ID, {"em": EMAIL, "ph": "5551999998888", "fn": "maria"}]) < fbq.index(["track", "InitiateCheckout", oferta]),
            "advanced matching antes do InitiateCheckout")
         ok(not any("Lead" in c for c in fbq), "nenhum Lead no Pixel")
         ok(["event", "begin_checkout", oferta] in ctx["dl"], "begin_checkout no GA4")
-        ok(["event", "cadastro_checkout", {"content_category": "pgA"}] in ctx["dl"], "cadastro_checkout no GA4")
+        ok(["event", "cadastro_checkout", {"content_category": "pgA", "payment_type": "cartao"}] in ctx["dl"], "cadastro_checkout no GA4")
         ok(not any(isinstance(c, list) and c[:2] == ["event", "generate_lead"] for c in ctx["dl"]), "nenhum generate_lead")
         texto_dl = json.dumps(ctx["dl"], ensure_ascii=False).lower()
         ok(not any(x in texto_dl for x in ("maria", "exemplo.com", "99999")), "nenhum dado pessoal no dataLayer/GA4")
         ok(not ctx["erros_js"], f"sem erros de JS {ctx['erros_js']}")
         page.close()
+
+    # link da Hotmart para cada forma: só os métodos da forma escolhida (o cartão a Hotmart não deixa esconder)
+    for forma in ("cartao", "pix", "boleto"):
+        print(f"--- curso/inscricao/ 390px, forma {forma}")
+        page, ctx = abre(b, {"width": 390, "height": 844})
+        envia(page, ctx, forma=forma)
+        q = parse_qs(urlsplit(ctx["hotmart"][0]).query) if ctx["hotmart"] else {}
+        base = {"name": [NOME], "email": [EMAIL], "phoneac": ["51"], "phonenumber": ["999998888"], "src": [SRC], "sck": [f"{SRC}|pgA"]}
+        ok(all(q.get(k) == v for k, v in base.items()), f"{forma}: mantém name, email, phone, src e sck")
+        ok({k: v for k, v in q.items() if k.startswith("hide")} == hides(forma), f"{forma}: hide* corretos ({sorted(k for k in q if k.startswith('hide'))})")
+        if forma == "cartao":
+            ok(q.get("hidePix") == ["1"] and q.get("hideBillet") == ["1"], "cartao: hidePix=1 e hideBillet=1")
+        else:
+            ok(MOSTRA[forma] not in q and q.get("hidePixAutomatic") == ["1"], f"{forma}: sem {MOSTRA[forma]} e com hidePixAutomatic=1")
+        dados = ctx["lambda"][0].post_data_json if ctx["lambda"] else {}
+        ok(dados.get("forma") == forma, f"{forma}: cadastro com forma={dados.get('forma')}")
+        ok(["trackCustom", "CadastroCheckout", {"content_category": "pgA", "payment_type": forma}] in ctx["fbq"], f"{forma}: CadastroCheckout com payment_type")
+        ok(not ctx["erros_js"], f"sem erros de JS {ctx['erros_js']}")
+        page.close()
+
+    # envio sem forma (não deve acontecer pela interface): erro no grupo
+    print("--- curso/inscricao/ envio sem forma")
+    page, ctx = abre(b, {"width": 390, "height": 844})
+    page.evaluate("document.getElementById('inscricao').requestSubmit()")
+    page.wait_for_timeout(200)
+    ok(page.inner_text('[data-error-for="forma"]') == "Escolha a forma de pagamento." and not ctx["lambda"] and not ctx["hotmart"],
+       "sem forma: \"Escolha a forma de pagamento.\" e não envia")
+    escolhe(page, "pix")
+    ok(page.inner_text('[data-error-for="forma"]') == "", "erro some ao escolher")
+    page.close()
 
     # Lambda com erro ou sem resposta: a compra não pode travar
     for modo in ("erro", "timeout"):
@@ -230,7 +329,7 @@ with sync_playwright() as p:
     ok(q.get("sck") == ["direto|pgB"] and "src" not in q and not any(k.startswith("utm_") for k in q), f"sck=direto|pgB e sem src ({q.get('sck')})")
     dados = ctx["lambda"][0].post_data_json if ctx["lambda"] else {}
     ok(dados.get("pagina") == "pgB" and dados.get("sck") == "direto|pgB" and dados.get("src") == "", f"cadastro com pagina pgB ({dados.get('pagina')})")
-    ok(["trackCustom", "CadastroCheckout", {"content_category": "pgB"}] in ctx["fbq"], "CadastroCheckout com pgB")
+    ok(["trackCustom", "CadastroCheckout", {"content_category": "pgB", "payment_type": "cartao"}] in ctx["fbq"], "CadastroCheckout com pgB")
     page.close()
 
     b.close()
