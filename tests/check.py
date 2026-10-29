@@ -16,7 +16,7 @@ PRIVACIDADE = "privacidade/index.html"
 TERMOS = "termos/index.html"
 LEGAIS = {PRIVACIDADE: "Política de privacidade", TERMOS: "Termos de uso"}
 # data de "Última atualização" de cada página legal
-ATUALIZACAO = {PRIVACIDADE: "28 de outubro de 2026", TERMOS: "20 de outubro de 2026"}
+ATUALIZACAO = {PRIVACIDADE: "29 de outubro de 2026", TERMOS: "20 de outubro de 2026"}
 EXTERNAL = ("http://", "https://", "mailto:", "tel:", "data:", "javascript:", "#")
 
 ENTRIES = {
