@@ -61,7 +61,7 @@ var CADASTRO_ESPERA_MS = 1500;
   }
 
   ["nome", "email", "whatsapp"].forEach(function (n) {
-    form.elements[n].addEventListener("change", function () {
+    form.elements[n].addEventListener("input", function () {
       if (form.elements[n].getAttribute("aria-invalid")) setError(n, "");
     });
   });

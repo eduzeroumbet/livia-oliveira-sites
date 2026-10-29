@@ -118,7 +118,10 @@ def envia(page, ctx, nome=NOME, email=EMAIL, whats=WHATS):
             botao = page.evaluate("(() => { const b = document.querySelector('button[type=submit]'); return [b.disabled, b.textContent]; })()")
         except Exception:
             pass
-    return time.monotonic() - t0, botao
+    tempo = time.monotonic() - t0
+    page.wait_for_url(lambda u: "pay.hotmart.com" in u, timeout=5000)
+    page.wait_for_timeout(100)
+    return tempo, botao
 
 
 with sync_playwright() as p:
@@ -136,7 +139,7 @@ with sync_playwright() as p:
         hp = page.evaluate("""() => { const e = document.getElementById('empresa'); const r = e.getBoundingClientRect();
           return {valor: e.value, tab: e.getAttribute('tabindex'), auto: e.getAttribute('autocomplete'), fora: r.right <= 0 || r.width <= 1}; }""")
         ok(hp == {"valor": "", "tab": "-1", "auto": "off", "fora": True}, f"honeypot vazio, fora da tela, tabindex -1 e autocomplete off ({hp})")
-        ok(page.get_attribute('a[href^="../../privacidade/"]', "href") is not None, "link para a Política de privacidade")
+        ok(page.get_attribute('a[href*="privacidade/"]', "href") is not None, "link para a Política de privacidade")
 
         estado = page.evaluate(ESTADO)
         ok(["init", PIXEL_ID] in estado["fbq"], "Pixel iniciado")
