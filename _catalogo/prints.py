@@ -1,8 +1,10 @@
 """Tira prints das páginas (desktop 1440 e mobile 390) em _catalogo/prints/.
 
-Uso: /Users/educloud/orquestra/.venv/bin/python _catalogo/prints.py
+Uso: /Users/educloud/orquestra/.venv/bin/python _catalogo/prints.py [nome ...]
+     (sem nome, todas as páginas; ex.: prints.py curso-inscricao)
 Requer: playwright + chromium (python -m playwright install chromium).
 """
+import sys
 from pathlib import Path
 
 from playwright.sync_api import sync_playwright
@@ -14,6 +16,7 @@ PAGES = {
     "curso-b": "curso/b/index.html",
     "curso-a": "curso/index.html",
     "curso-versao-b": "curso/versao-b/index.html",
+    "curso-inscricao": "curso/inscricao/index.html",
     "consultoria": "consultoria/index.html",
     "terapia": "terapia/index.html",
     "terapia-b": "terapia/b/index.html",
@@ -25,6 +28,7 @@ VIEWPORTS = {
 
 
 def main():
+    pages = {k: v for k, v in PAGES.items() if not sys.argv[1:] or k in sys.argv[1:]}
     OUT.mkdir(parents=True, exist_ok=True)
     with sync_playwright() as p:
         browser = p.chromium.launch()
@@ -36,7 +40,7 @@ def main():
                 has_touch=vp_name == "mobile",
             )
             page = ctx.new_page()
-            for name, rel in PAGES.items():
+            for name, rel in pages.items():
                 page.goto((ROOT / rel).as_uri(), wait_until="networkidle")
                 # força o carregamento das imagens lazy antes do print de página inteira
                 page.evaluate("document.querySelectorAll('img[loading=lazy]').forEach(i => i.loading = 'eager')")

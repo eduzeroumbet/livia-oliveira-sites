@@ -3,9 +3,10 @@
 Os scripts do Pixel e do GA4 são bloqueados (nada é enviado de verdade): os comandos ficam na fila do fbq e no
 dataLayer, e é isso que o teste confere. Para cada página, com e sem UTMs na URL:
 - Pixel 1197036460960933 iniciado com PageView e GA4 G-XH74VZSNZ2 configurado;
-- links da Hotmart com as UTMs (sem duplicar), src=utm_source|utm_medium|utm_campaign|utm_content e sck com o
-  sufixo da página (|pgA, |pgB, |pgC); sem UTM, sem src e sck=direto|pgX; a oferta off=n2h6k72h (12x sem juros) mantida;
-- clique no link da Hotmart: InitiateCheckout (Pixel) e begin_checkout (GA4), 860 BRL, com content_name e content_category;
+- nenhum link para pay.hotmart.com; os botões de compra (a.checkout) vão para a pré-página curso/inscricao/ com
+  pg=pgA/pgB/pgC e a query da visita (UTMs e fbclid, sem duplicar); sem UTM, só pg;
+- clique no botão de compra: CliqueComprar (Pixel, trackCustom) e clique_comprar (GA4) com content_category, e nenhum
+  InitiateCheckout / begin_checkout (esse sai só no envio da pré-página, ver tests/inscricao.py);
 - seção #oferta na tela: ViewContent e view_offer uma vez só.
 
 Uso: /Users/educloud/orquestra/.venv/bin/python tests/rastreamento_curso.py
@@ -22,8 +23,6 @@ PAGINAS = {"pgA": "curso/index.html", "pgB": "curso/b/index.html", "pgC": "curso
 PIXEL_ID = "1197036460960933"
 GA4_ID = "G-XH74VZSNZ2"
 UTMS = "utm_source=meta&utm_medium=paid&utm_campaign=ccs_frio_criativos&utm_content=V01&fbclid=abc123"
-SRC = "meta|paid|ccs_frio_criativos|V01"
-OFERTA = "n2h6k72h"  # oferta da Hotmart com 12x sem juros
 falhas = []
 
 
@@ -42,8 +41,8 @@ ROLAR_ATE = "el => window.scrollTo({top: el.getBoundingClientRect().top + window
 VIU_OFERTA = "() => window.fbq && window.fbq.queue.some(a => a[0] === 'track' && a[1] === 'ViewContent')"
 
 
-def eventos_fbq(estado, nome):
-    return [c for c in estado["fbq"] if c[:2] == ["track", nome]]
+def eventos_fbq(estado, nome, tipo="track"):
+    return [c for c in estado["fbq"] if c[:2] == [tipo, nome]]
 
 
 def eventos_gtag(estado, nome):
@@ -78,31 +77,38 @@ with sync_playwright() as p:
             ok(any("connect.facebook.net/en_US/fbevents.js" in u for u in externas), "pede o fbevents.js")
             ok(any(f"googletagmanager.com/gtag/js?id={GA4_ID}" in u for u in externas), "pede o gtag.js")
 
-            hrefs = page.eval_on_selector_all('a[href*="pay.hotmart.com"]', "els => els.map(a => a.href)")
-            ok(len(hrefs) > 0, f"{len(hrefs)} links da Hotmart")
+            ok(page.eval_on_selector_all('a[href*="pay.hotmart.com"]', "els => els.length") == 0, "nenhum link para pay.hotmart.com")
+            hrefs = page.eval_on_selector_all("a.checkout", "els => els.map(a => a.href)")
+            ok(len(hrefs) > 0, f"{len(hrefs)} botões de compra (a.checkout)")
+            # "Quero minha vaga" que só rola até a #oferta não é botão de compra
+            textos = page.eval_on_selector_all("a", "els => els.filter(a => /Quero (minha vaga|me inscrever)/.test(a.textContent) && !a.getAttribute('href').startsWith('#')).map(a => a.classList.contains('checkout'))")
+            ok(textos and all(textos), f"todos os {len(textos)} \"Quero minha vaga\"/\"Quero me inscrever\" com class=checkout")
             for h in hrefs:
-                q = parse_qs(urlsplit(h).query)
+                partes = urlsplit(h)
+                q = parse_qs(partes.query)
+                certo = partes.path.endswith("/curso/inscricao/") and q.get("pg") == [pagina] and all(len(v) == 1 for v in q.values())
                 if com_utm:
-                    certo = (q.get("src") == [SRC] and q.get("sck") == [f"{SRC}|{pagina}"]
-                             and q.get("utm_source") == ["meta"] and q.get("utm_content") == ["V01"]
-                             and q.get("fbclid") == ["abc123"] and q.get("checkoutMode") == ["10"]
-                             and q.get("off") == [OFERTA] and all(len(v) == 1 for v in q.values()))
+                    certo = (certo and q.get("utm_source") == ["meta"] and q.get("utm_medium") == ["paid"]
+                             and q.get("utm_campaign") == ["ccs_frio_criativos"] and q.get("utm_content") == ["V01"]
+                             and q.get("fbclid") == ["abc123"])
                 else:
-                    certo = ("src" not in q and q.get("sck") == [f"direto|{pagina}"] and q.get("checkoutMode") == ["10"]
-                             and q.get("off") == [OFERTA])
+                    certo = certo and set(q) == {"pg"}
                 if not certo:
-                    ok(False, f"link da Hotmart: {h}")
+                    ok(False, f"botão de compra: {h}")
                     break
             else:
-                ok(True, "src/sck e UTMs nos links da Hotmart, sem parâmetro duplicado")
+                ok(True, f"botões vão para curso/inscricao/ com pg={pagina}" + (" e as UTMs, sem duplicar" if com_utm else ""))
 
             # clique: o evento sai, a navegação é cancelada
             page.evaluate("document.addEventListener('click', e => e.preventDefault())")
-            page.eval_on_selector('a[href*="pay.hotmart.com"]', "a => a.click()")
+            page.eval_on_selector("a.checkout", "a => a.click()")
             estado = page.evaluate(ESTADO)
+            clique = {"content_category": pagina}
+            ok(eventos_fbq(estado, "CliqueComprar", "trackCustom") == [["trackCustom", "CliqueComprar", clique]], "CliqueComprar no Pixel")
+            ok(eventos_gtag(estado, "clique_comprar") == [["event", "clique_comprar", clique]], "clique_comprar no GA4")
+            ok(not eventos_fbq(estado, "InitiateCheckout") and not eventos_gtag(estado, "begin_checkout"),
+               "clique sem InitiateCheckout / begin_checkout")
             esperado = {"value": 860, "currency": "BRL", "content_name": "Carreira com Sentido", "content_category": pagina}
-            ok(eventos_fbq(estado, "InitiateCheckout") == [["track", "InitiateCheckout", esperado]], "InitiateCheckout no Pixel")
-            ok(eventos_gtag(estado, "begin_checkout") == [["event", "begin_checkout", esperado]], "begin_checkout no GA4")
 
             # oferta na tela (duas vezes): um único ViewContent / view_offer.
             # Rolagem instantânea: as páginas usam scroll-behavior: smooth, e o scrollIntoView() animado era
