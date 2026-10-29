@@ -27,7 +27,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+Display:ital,wdth,wght@0,62.5,400..700;1,62.5,400..700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="../assets/css/site.css?v=7">
+<link rel="stylesheet" href="../assets/css/site.css?v=10">
 </head>
 <body class="page-calculadora no-sticky">
 <a class="skip" href="#conteudo">Pular para o conteúdo</a>
@@ -149,6 +149,40 @@
     </div>
     <p class="calc-aviso">Estimativa para você pensar a sua precificação. Não é promessa de renda.</p>
 
+    <!-- contato opcional: calculadora/script.js envia à Lambda livia-leads pelo site.js (window.siteContato) -->
+    <div class="form-card calc-contato" id="contato-bloco">
+      <h3>Quer ajuda para colocar esse valor em prática?</h3>
+      <p>Deixe o seu contato e a equipe da Lívia te chama no WhatsApp com o próximo passo.</p>
+      <form class="contato-form" id="contato" novalidate>
+        <div class="field">
+          <label for="nome">Nome</label>
+          <input type="text" id="nome" name="nome" autocomplete="name" required>
+          <span class="error" data-error-for="nome"></span>
+        </div>
+        <div class="field">
+          <label for="email">E-mail</label>
+          <input type="email" id="email" name="email" autocomplete="email" inputmode="email" required>
+          <span class="error" data-error-for="email"></span>
+        </div>
+        <div class="field">
+          <label for="whatsapp">WhatsApp</label>
+          <input type="tel" id="whatsapp" name="whatsapp" data-mask="phone" autocomplete="tel" inputmode="tel" placeholder="(51) 99999-9999" required>
+          <span class="error" data-error-for="whatsapp"></span>
+        </div>
+        <div class="field">
+          <label class="check check-block"><input type="checkbox" id="consentimento" name="consentimento" value="sim" required><span>Aceito receber o meu resultado e mensagens da equipe da Lívia sobre carreira e sobre o curso, por e-mail e WhatsApp. Posso sair quando quiser. <a href="../privacidade/">Política de privacidade</a></span></label>
+          <span class="error" data-error-for="consentimento"></span>
+        </div>
+        <!-- honeypot: invisível para pessoas; robôs preenchem e a Lambda ignora o cadastro -->
+        <div class="campo-hp" aria-hidden="true">
+          <label for="empresa">Empresa</label>
+          <input type="text" id="empresa" name="empresa" tabindex="-1" autocomplete="off">
+        </div>
+        <button class="btn btn-cta" type="submit">Quero ajuda</button>
+      </form>
+      <p class="contato-ok" id="contato-ok" tabindex="-1" hidden>Pronto! A equipe da Lívia vai te chamar no WhatsApp.</p>
+    </div>
+
     <div class="calc-oferta callout" id="curso">
       <span class="eyebrow">Carreira com Sentido</span>
       <h2>A conta é o primeiro passo. <em>O difícil é comunicar o valor e reajustar sem perder paciente.</em></h2>
@@ -159,6 +193,7 @@
       </div>
       <p class="preco-linha" style="margin-top:14px">12x de R$ 71,67 sem juros ou R$ 860 à vista</p>
     </div>
+    <p class="calc-quiz"><a href="../quiz/">Faça também o quiz: você está pronta para viver da clínica?</a></p>
   </div>
 </section>
 
@@ -172,7 +207,7 @@
   </div>
 </footer>
 
-<script src="../assets/js/site.js?v=4" data-pagina="pgCalc"></script>
-<script src="script.js?v=1"></script>
+<script src="../assets/js/site.js?v=6" data-pagina="pgCalc"></script>
+<script src="script.js?v=2"></script>
 </body>
 </html>

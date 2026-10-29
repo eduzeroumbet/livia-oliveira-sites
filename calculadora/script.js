@@ -133,6 +133,36 @@
 
   /* "Conhecer o curso": leva as UTMs da visita para curso/b/ (o site.js já repassa a query string; aqui
      garante os utm_* mesmo assim) e registra view_offer / ViewContent */
+  /* Contato opcional depois do resultado: vai para a Lambda livia-leads pelo site.js (pagina pgCalc, ferramenta
+   * calculadora, resultado com mínimo, ideal e custo da última conta). Dispara contato_calculadora
+   * (ContatoCalculadora), não outro Lead. Erro ou demora da Lambda também mostram o sucesso (espera no máximo 1,5 s). */
+  var contatoForm = document.getElementById("contato");
+  var contato = window.siteContato;
+  if (contatoForm && contato) {
+    var contatoBotao = contatoForm.querySelector('button[type="submit"]');
+    var contatoEnviado = false;
+    contato.prepara(contatoForm);
+    contatoForm.addEventListener("submit", function (e) {
+      e.preventDefault();
+      if (contatoEnviado || !ultima || !contato.valida(contatoForm)) return;
+      contatoEnviado = true;
+      contatoBotao.disabled = true;
+      contatoBotao.textContent = "Enviando...";
+      var dados = contato.dados(contatoForm, {
+        ferramenta: "calculadora",
+        resultado: "minimo=" + Math.round(ultima.minimo) + ";ideal=" + Math.round(ultima.ideal) + ";custo=" + Math.ceil(ultima.custo)
+      });
+      if (window.siteIdentify) window.siteIdentify({ em: dados.email, ph: "55" + dados.whatsapp, fn: dados.nome.split(" ")[0].toLowerCase() });
+      track("contato_calculadora", { content_name: "calculadora_sessao", content_category: "calc" });
+      contato.envia(dados).then(function () {
+        var okMsg = document.getElementById("contato-ok");
+        contatoForm.hidden = true;
+        okMsg.hidden = false;
+        okMsg.focus();
+      });
+    });
+  }
+
   if (conhecer) {
     var visita = new URLSearchParams(location.search);
     var url = new URL(conhecer.href);

@@ -591,6 +591,75 @@ body.has-sticky .wa-float { bottom: calc(var(--sticky-h, 72px) + 12px); }
 .calc-oferta .btn-row { flex-direction: column; align-items: stretch; }
 .calc-oferta .btn { width: 100%; }
 .calc-oferta .preco-linha { margin-top: 0; }
+.calc-quiz { margin-top: 18px; font-size: 16px; }
+.calc-quiz a { color: var(--wine); font-weight: 600; text-underline-offset: 3px; }
+/* contato opcional depois do resultado (mesma Lambda do quiz) */
+.calc-contato { margin-top: 28px; }
+.calc-contato h3 { font-size: 30px; margin-bottom: 6px; }
+.calc-contato > p:not(.contato-ok) { color: var(--muted); font-size: 16px; margin-bottom: 16px; }
+
+/* ========== Contato do quiz e da calculadora (nome, e-mail, WhatsApp, consentimento) ========== */
+.contato-form .field { margin-bottom: 12px; }
+.contato-form .field > label:not(.check) { margin-bottom: 4px; }
+.contato-form .check-block { font-size: 14.5px; line-height: 1.45; padding: 12px 14px; background: var(--cream); }
+.contato-form .check-block a { color: var(--wine); font-weight: 600; }
+.contato-form .check:has(input[aria-invalid="true"]) { border-color: #a3123f; }
+.contato-form .btn-cta { max-width: none; min-height: 58px; margin-top: 6px; }
+.contato-form .btn:disabled { opacity: .75; cursor: progress; transform: none; }
+.contato-ok { display: flex; gap: 12px; align-items: center; font-size: 17px; font-weight: 600; color: var(--wine); }
+.contato-ok::before { content: "✓"; flex: 0 0 auto; display: grid; place-items: center; width: 36px; height: 36px; border-radius: 50%; background: var(--rose2); }
+.contato-ok:focus { outline: none; }
+.contato-ok[hidden] { display: none; }
+
+/* ========== Quiz "Você está pronta para viver da clínica?" (quiz/) ========== */
+.quiz-capa { padding-bottom: 56px; }
+.quiz-capa .sub { margin-bottom: 26px; }
+.quiz-capa .assinatura { margin-top: 16px; font-size: 14.5px; font-weight: 600; color: var(--wine); }
+.quiz-capa .btn-cta { max-width: 360px; min-height: 60px; }
+.quiz-perguntas { padding: 28px 0 56px; }
+.quiz-perguntas:focus, .quiz-resultado:focus, .quiz-plano:focus { outline: none; }
+.quiz-card-pergunta { padding: 24px 20px; }
+.quiz-progresso { display: flex; justify-content: space-between; align-items: center; font-size: 14px; font-weight: 600; color: var(--muted); letter-spacing: .02em; }
+.quiz-barra { height: 6px; margin: 8px 0 22px; border-radius: 999px; background: var(--rose2); overflow: hidden; }
+.quiz-barra span { display: block; height: 100%; width: 20%; border-radius: inherit; background: var(--wine); transition: width .3s ease; }
+.quiz-pergunta { font-size: clamp(30px, 7.6vw, 42px); line-height: 1.08; margin: 0 0 24px; min-height: 2.2em; }
+.quiz-pergunta:focus { outline: none; }
+.quiz-opcoes { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.quiz-op { min-height: 64px; font-size: 20px; font-weight: 600; background: var(--cream); color: var(--wine); border: 2px solid rgba(110, 23, 44, .3); box-shadow: none; }
+.quiz-op:hover { background: var(--rose2); border-color: var(--wine); }
+.quiz-op.is-escolhida { background: var(--wine); color: var(--cream); border-color: var(--wine); }
+.quiz-voltar { display: inline-flex; align-items: center; gap: 6px; min-height: 48px; margin-top: 14px; padding: 0 4px; border: 0; background: none; color: var(--muted); font-size: 15px; text-decoration: underline; text-underline-offset: 3px; cursor: pointer; }
+.quiz-voltar:hover { color: var(--wine); }
+.quiz-resultado { padding: 28px 0 56px; }
+.quiz-placar { display: flex; flex-wrap: wrap; align-items: center; gap: 10px 16px; font-size: 16px; font-weight: 600; color: var(--muted); }
+.quiz-bolinhas { display: flex; gap: 8px; }
+.quiz-bolinhas i { width: 18px; height: 18px; border-radius: 50%; border: 2px solid var(--wine); background: transparent; }
+.quiz-bolinhas i.on { background: var(--wine); }
+.quiz-resultado h2 { margin: 14px 0 12px; }
+.quiz-resultado__texto { font-size: 18px; max-width: 640px; }
+.quiz-captura { margin-top: 30px; }
+.quiz-captura h3 { font-size: 30px; margin-bottom: 14px; }
+.quiz-direto { margin-top: 14px; text-align: center; font-size: 15px; }
+.quiz-direto a { display: inline-flex; align-items: center; min-height: 44px; color: var(--muted); text-underline-offset: 3px; }
+.quiz-plano { margin-top: 34px; }
+.quiz-plano > h2 { font-size: clamp(32px, 7.5vw, 46px); margin: 6px 0 16px; }
+.quiz-itens { display: grid; gap: 12px; }
+.quiz-item { background: var(--white); border: 1px solid var(--line); border-left: 4px solid var(--wine); border-radius: var(--radius); padding: 18px 20px; box-shadow: var(--shadow-soft); }
+.quiz-item--forte { border-left-color: var(--petrol); }
+.quiz-item__tipo { font-size: 12.5px; font-weight: 600; letter-spacing: .14em; text-transform: uppercase; color: var(--wine); }
+.quiz-item--forte .quiz-item__tipo { color: var(--petrol); }
+.quiz-item__pergunta { margin-top: 4px; font-size: 14.5px; color: var(--muted); }
+.quiz-item__texto { margin-top: 8px; font-size: 16.5px; }
+.quiz-item__texto a { color: var(--wine); font-weight: 600; text-underline-offset: 3px; }
+.quiz-item__curso { margin-top: 8px; font-size: 14.5px; font-weight: 600; color: var(--wine); }
+.quiz-convite { margin-top: 28px; padding: 28px 22px; border-radius: var(--radius); }
+.quiz-convite h2 { font-size: clamp(30px, 7vw, 42px); margin: 8px 0 12px; }
+.quiz-convite .preco-linha { font-size: 17px; }
+.quiz-convite .garantia { margin-top: 4px; font-size: 15px; }
+.quiz-convite .btn-row { flex-direction: column; align-items: stretch; margin-top: 20px; }
+.quiz-convite .btn-wa-outline { min-height: 52px; color: var(--cream); border-color: rgba(252, 250, 246, .55); }
+.quiz-convite .btn-wa-outline svg { fill: var(--cream); }
+.quiz-convite .btn-wa-outline:hover { background: rgba(252, 250, 246, .1); }
 
 /* ========== Pré-página de inscrição do curso (curso/inscricao/) ==========
    Celular primeiro: título, preço e formulário cabem em 390x844 sem rolar */
@@ -630,7 +699,7 @@ body.has-sticky .wa-float { bottom: calc(var(--sticky-h, 72px) + 12px); }
 .insc-dica { margin-top: 10px; font-size: 14.5px; color: var(--ink); }
 .insc-dica:empty { display: none; }
 /* honeypot fora da tela (não usar display:none, que alguns robôs pulam) */
-.insc-hp { position: absolute; left: -9999px; top: auto; width: 1px; height: 1px; overflow: hidden; }
+.insc-hp, .campo-hp { position: absolute; left: -9999px; top: auto; width: 1px; height: 1px; overflow: hidden; }
 .insc-passos h2 { font-size: clamp(30px, 7.5vw, 40px); margin: 8px 0 4px; }
 .insc-passos .steps { margin-top: 12px; }
 .insc-passos .steps li { font-size: 16px; }
@@ -664,6 +733,10 @@ body.has-sticky .wa-float { bottom: calc(var(--sticky-h, 72px) + 12px); }
   .calc-nums { grid-template-columns: repeat(3, 1fr); }
   .calc-oferta .btn-row { flex-direction: row; align-items: center; }
   .calc-oferta .btn { width: auto; }
+  .quiz-card-pergunta { padding: 34px 32px; }
+  .quiz-itens { grid-template-columns: repeat(2, 1fr); }
+  .quiz-convite { padding: 40px; }
+  .quiz-convite .btn-row { flex-direction: row; align-items: center; }
 }
 
 @media (min-width: 900px) {
