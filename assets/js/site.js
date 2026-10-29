@@ -61,7 +61,7 @@ window.dataLayer = window.dataLayer || [];
 
   var PIXEL_EVENTS = { begin_checkout: "InitiateCheckout", generate_lead: "Lead", view_offer: "ViewContent" };
   /* Eventos personalizados do Pixel (trackCustom) */
-  var PIXEL_CUSTOM = { clique_comprar: "CliqueComprar", cadastro_checkout: "CadastroCheckout" };
+  var PIXEL_CUSTOM = { clique_comprar: "CliqueComprar", cadastro_checkout: "CadastroCheckout", escolha_pagamento: "EscolhaPagamento" };
 
   function track(event, params) {
     var data = Object.assign({ event: event }, params || {});
@@ -73,6 +73,7 @@ window.dataLayer = window.dataLayer || [];
       if (params && params.form) p.content_name = params.form;
       if (params && params.content_name) p.content_name = params.content_name;
       if (params && params.content_category) p.content_category = params.content_category;
+      if (params && params.payment_type) p.payment_type = params.payment_type;
       if (PIXEL_EVENTS[event]) window.fbq("track", PIXEL_EVENTS[event], p);
       else window.fbq("trackCustom", PIXEL_CUSTOM[event], p);
     }
