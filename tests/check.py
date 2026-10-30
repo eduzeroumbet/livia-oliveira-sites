@@ -11,12 +11,17 @@ from urllib.parse import unquote, urlsplit
 
 ROOT = Path(__file__).resolve().parent.parent
 PAGES = ["index.html", "curso/index.html", "curso/b/index.html", "curso/versao-b/index.html", "curso/inscricao/index.html", "consultoria/index.html", "terapia/index.html", "terapia/b/index.html", "privacidade/index.html", "termos/index.html", "calculadora/index.html", "quiz/index.html"]
+# materiais gratuitos (isca dos anúncios de Lead): hub + 6 páginas com site.js data-pagina="pgMat" e materiais/material.js
+MATERIAIS = ["mensagens", "faltas", "etica", "reajuste", "posts", "indicacoes"]
+MATERIAIS_HUB = "materiais/index.html"
+MATERIAIS_PAGINAS = [f"materiais/{m}/index.html" for m in MATERIAIS]
+PAGES += [MATERIAIS_HUB, *MATERIAIS_PAGINAS]
 # política de privacidade (URL do app da Meta e dos anúncios) e termos de uso: link no rodapé de todas as páginas e no sitemap
 PRIVACIDADE = "privacidade/index.html"
 TERMOS = "termos/index.html"
 LEGAIS = {PRIVACIDADE: "Política de privacidade", TERMOS: "Termos de uso"}
 # data de "Última atualização" de cada página legal
-ATUALIZACAO = {PRIVACIDADE: "29 de outubro de 2026", TERMOS: "20 de outubro de 2026"}
+ATUALIZACAO = {PRIVACIDADE: "30 de outubro de 2026", TERMOS: "20 de outubro de 2026"}
 EXTERNAL = ("http://", "https://", "mailto:", "tel:", "data:", "javascript:", "#")
 
 ENTRIES = {
@@ -83,6 +88,8 @@ EXTRAS = (
     "calculadora/script.js",
     "curso/inscricao/script.js",
     "quiz/script.js",
+    "materiais/style.css",
+    "materiais/material.js",
 )
 # favicons e manifest usam caminho absoluto (site na raiz do domínio)
 REL_ABSOLUTO = {"icon", "apple-touch-icon", "manifest"}
@@ -170,6 +177,8 @@ def check_page(rel):
         for trecho in ("Inscrição no curso Carreira com Sentido", "Amazon Web Services", "região São Paulo", "até 12 meses"):
             if trecho not in html:
                 erros.append(f"{rel}: sem \"{trecho}\" (dados da pré-página de inscrição do curso)")
+        if "materiais gratuitos" not in html:
+            erros.append(f"{rel}: sem \"materiais gratuitos\" (ponto de coleta, junto do quiz e da calculadora)")
 
     for entry in ENTRIES.get(rel, []):
         if f'data-entry="{entry}"' not in html:
@@ -277,6 +286,41 @@ def check_page(rel):
                 erros.append(f"quiz/script.js: sem {trecho}")
         if "begin_checkout" in script:
             erros.append("quiz/script.js: não pode disparar begin_checkout (InitiateCheckout)")
+    if rel == MATERIAIS_HUB or rel in MATERIAIS_PAGINAS:
+        pasta = rel.rsplit("/", 1)[0] + "/"
+        site_js = "../" * pasta.count("/") + "assets/js/site.js"
+        if not re.search(rf'<script src="{re.escape(site_js)}(\?v=\d+)?" data-pagina="pgMat"></script>', html):
+            erros.append(f"{rel}: sem <script src=\"{site_js}\" data-pagina=\"pgMat\">")
+        if f'<link rel="canonical" href="https://liviaoliveira.me/{pasta}">' not in html:
+            erros.append(f"{rel}: canonical deve apontar para https://{DOMINIO}/{pasta}")
+        if f"https://liviaoliveira.me/{pasta}" not in (ROOT / "sitemap.xml").read_text(encoding="utf-8"):
+            erros.append(f"{rel}: não está no sitemap.xml")
+        if "noindex" in html:
+            erros.append(f"{rel}: os materiais são indexáveis (sem noindex)")
+        if "pay.hotmart.com" in html or 'id="oferta"' in html or "checkout" in html:
+            erros.append(f"{rel}: sem checkout nem #oferta (nada de InitiateCheckout nem view_offer automático)")
+        if "og-curso.jpg" not in html:
+            erros.append(f"{rel}: sem og:image")
+    if rel == MATERIAIS_HUB:
+        for m in MATERIAIS:
+            if f'href="{m}/"' not in html:
+                erros.append(f"{rel}: sem o card de {m}/")
+    if rel in MATERIAIS_PAGINAS:
+        slug = rel.split("/")[1]
+        if f'data-material="{slug}"' not in html:
+            erros.append(f"{rel}: sem data-material=\"{slug}\" no <main>")
+        if not re.search(r'<script src="\.\./material\.js(\?v=\d+)?"></script>', html):
+            erros.append(f"{rel}: sem <script src=\"../material.js\"> (bloqueio, cadastro, copiar e PDF)")
+        for trecho in ('localStorage.getItem("livia_mat_ok")', 'id="mat-trava"', 'id="contato"', 'name="consentimento"', 'name="empresa"',
+                       'tabindex="-1"', 'data-mask="phone"', 'href="../../privacidade/"', "Libere o material completo, grátis",
+                       "Salvar em PDF", "Cada pílula é um pedaço do", "12x de R$ 71,67 sem juros ou R$ 860 à vista",
+                       f"../../curso/b/?utm_source=material&amp;utm_medium=site&amp;utm_campaign=ccs_material&amp;utm_content=mat_{slug}",
+                       "https://wa.me/5551992597638?text=", "Outros materiais"):
+            if trecho not in html:
+                erros.append(f"{rel}: sem {trecho}")
+        for outro in MATERIAIS:
+            if outro != slug and f'href="../{outro}/"' not in html:
+                erros.append(f"{rel}: \"Outros materiais\" sem o link ../{outro}/")
     if rel == "curso/versao-b/index.html":
         if '<meta name="robots" content="noindex, follow">' not in html:
             erros.append(f"{rel}: sem noindex (é variação de teste)")
@@ -347,6 +391,13 @@ def main():
                 erros.append(f"{extra}: não respeita data-sem-rastreamento (terapia sem Pixel/GA4)")
             if f'CADASTRO_URL = "{LAMBDA_CADASTRO}"' not in texto:
                 erros.append(f"{extra}: sem CADASTRO_URL da Lambda livia-leads (contato do quiz e da calculadora)")
+        if extra == "materiais/material.js":
+            for trecho in ('"livia_mat_ok"', 'ferramenta: "material"', '"generate_lead"', '"material_view"', '"material_copiar"',
+                           '"material_pdf"', '"view_offer"', '"material_para_curso"', "siteIdentify"):
+                if trecho not in texto:
+                    erros.append(f"{extra}: sem {trecho}")
+            if "begin_checkout" in texto:
+                erros.append(f"{extra}: não pode disparar begin_checkout (InitiateCheckout)")
         if extra == "terapia/script.js":
             for tag in TAGS_RASTREAMENTO:
                 if tag in texto:
