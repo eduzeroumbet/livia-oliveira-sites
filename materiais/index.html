@@ -28,9 +28,10 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+Display:ital,wdth,wght@0,62.5,400..700;1,62.5,400..700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="../assets/css/site.css?v=10">
-<link rel="stylesheet" href="style.css?v=1">
+<link rel="stylesheet" href="../assets/css/captacao.css?v=1">
+<link rel="stylesheet" href="style.css?v=2">
 </head>
-<body class="page-mat no-sticky">
+<body class="page-mat no-sticky" data-tema="materiais">
 <a class="skip" href="#conteudo">Pular para o conteúdo</a>
 
 <header class="site-header">
@@ -41,10 +42,23 @@
 
 <main id="conteudo">
 
-<section class="hero mat-topo mat-hub-topo">
+<section class="hero mat-topo mat-hub-topo capa">
   <div class="wrap">
-    <h1>Materiais gratuitos <em>para a sua clínica</em></h1>
-    <p class="sub">Seis pílulas prontas para usar, tiradas do Carreira com Sentido. Copie, adapte e use ainda hoje.</p>
+    <div class="capa__texto">
+      <div class="capa__topo">
+        <div class="capa__media">
+          <picture class="capa__foto">
+            <source media="(min-width: 900px)" srcset="../assets/img/mat-hub-0709.webp" width="640" height="800">
+            <img src="../assets/img/mat-hub-0709-q.webp" width="240" height="240" alt="Lívia Oliveira sorrindo à mesa do consultório" fetchpriority="high" decoding="async">
+          </picture>
+          <span class="tema-ic capa__ic" aria-hidden="true"></span>
+        </div>
+        <p class="capa__contador"><b>6</b> materiais grátis</p>
+      </div>
+      <h1>Materiais gratuitos <em>para a sua clínica</em></h1>
+      <p class="sub">Seis pílulas prontas para usar, tiradas do Carreira com Sentido. Copie, adapte e use ainda hoje.</p>
+      <ul class="capa__chips" aria-label="Como são os materiais"><li>Prontos para copiar</li><li>Salve em PDF</li><li class="is-destaque">Grátis</li></ul>
+    </div>
   </div>
 </section>
 
@@ -52,55 +66,79 @@
   <div class="wrap">
     <ul class="mat-grade mat-grade--hub">
     <li>
-      <article class="mat-card">
+      <article class="mat-card" data-tema="mensagens">
+        <div class="mat-card__topo" aria-hidden="true"><span class="tema-ic mat-card__ic"></span><span class="mat-card__n">01</span></div>
         <span class="eyebrow">Pílula 1 · Módulo 3, Comunicação assertiva</span>
         <h2 class="mat-card__titulo">8 mensagens prontas para o WhatsApp da clínica</h2>
         <p>Primeiro contato, valor, faltas, reajuste e férias. Textos curtos, claros e sem pedir desculpas.</p>
+        <ul class="mat-card__meta"><li>8 mensagens</li><li class="mat-selo">2 abertas</li></ul>
         <a class="btn mat-card__btn" href="mensagens/">Abrir material</a>
       </article>
     </li>
     <li>
-      <article class="mat-card">
+      <article class="mat-card" data-tema="faltas">
+        <div class="mat-card__topo" aria-hidden="true"><span class="tema-ic mat-card__ic"></span><span class="mat-card__n">02</span></div>
         <span class="eyebrow">Pílula 2 · Módulo 2, A base que sustenta o consultório</span>
         <h2 class="mat-card__titulo">Política de faltas e pagamentos: modelo para copiar</h2>
         <p>Nove combinados para colocar no seu contrato terapêutico. Combinado claro é cuidado, não rigidez.</p>
+        <ul class="mat-card__meta"><li>9 cláusulas</li><li class="mat-selo">2 abertas</li></ul>
         <a class="btn mat-card__btn" href="faltas/">Abrir material</a>
       </article>
     </li>
     <li>
-      <article class="mat-card">
+      <article class="mat-card" data-tema="etica">
+        <div class="mat-card__topo" aria-hidden="true"><span class="tema-ic mat-card__ic"></span><span class="mat-card__n">03</span></div>
         <span class="eyebrow">Pílula 3 · Módulo 5, Marketing e vendas éticas</span>
         <h2 class="mat-card__titulo">Posso postar isso? Checklist ético para o Instagram da psicóloga</h2>
         <p>Dez perguntas para fazer antes de publicar, com base no Código de Ética e na Nota Técnica do CFP sobre redes sociais.</p>
+        <ul class="mat-card__meta"><li>10 perguntas</li><li class="mat-selo">2 abertas</li></ul>
         <a class="btn mat-card__btn" href="etica/">Abrir material</a>
       </article>
     </li>
     <li>
-      <article class="mat-card">
+      <article class="mat-card" data-tema="reajuste">
+        <div class="mat-card__topo" aria-hidden="true"><span class="tema-ic mat-card__ic"></span><span class="mat-card__n">04</span></div>
         <span class="eyebrow">Pílula 4 · Módulos 2 e 3, Precificação e comunicação</span>
         <h2 class="mat-card__titulo">Como reajustar o valor da sessão sem culpa: roteiro em 4 passos</h2>
         <p>Da conta à mensagem, para você parar de adiar o reajuste.</p>
+        <ul class="mat-card__meta"><li>4 passos</li><li class="mat-selo">1 aberto</li></ul>
         <a class="btn mat-card__btn" href="reajuste/">Abrir material</a>
       </article>
     </li>
     <li>
-      <article class="mat-card">
+      <article class="mat-card" data-tema="posts">
+        <div class="mat-card__topo" aria-hidden="true"><span class="tema-ic mat-card__ic"></span><span class="mat-card__n">05</span></div>
         <span class="eyebrow">Pílula 5 · Módulo 8, Criação de conteúdo</span>
         <h2 class="mat-card__titulo">30 ideias de posts que aproximam pacientes, sem virar personagem</h2>
         <p>Antes de postar, pergunte: quem é a pessoa que precisa ler isso hoje?</p>
+        <ul class="mat-card__meta"><li>30 ideias</li><li class="mat-selo">5 abertas</li></ul>
         <a class="btn mat-card__btn" href="posts/">Abrir material</a>
       </article>
     </li>
     <li>
-      <article class="mat-card">
+      <article class="mat-card" data-tema="indicacoes">
+        <div class="mat-card__topo" aria-hidden="true"><span class="tema-ic mat-card__ic"></span><span class="mat-card__n">06</span></div>
         <span class="eyebrow">Pílula 6 · Módulo 9, Captação offline</span>
         <h2 class="mat-card__titulo">Mensagens para apresentar seu trabalho a médicos e colegas</h2>
         <p>Indicação também enche a agenda. Um roteiro para começar esta semana.</p>
+        <ul class="mat-card__meta"><li>5 passos</li><li class="mat-selo">2 abertos</li></ul>
         <a class="btn mat-card__btn" href="indicacoes/">Abrir material</a>
       </article>
     </li>
     </ul>
     <p class="mat-hub__nota">Os materiais são gratuitos. Você deixa nome, e-mail e WhatsApp uma vez e libera todos.</p>
+  </div>
+</section>
+
+<section class="mat-como" aria-labelledby="como-titulo">
+  <div class="wrap">
+    <span class="eyebrow">Como funciona</span>
+    <h2 id="como-titulo">Três passos, <em>sem complicação</em></h2>
+    <ol class="mat-passos">
+      <li><span class="mat-passos__ic mat-passos__ic--escolha" aria-hidden="true"></span><h3>Escolha</h3><p>Abra o material que conversa com o seu momento.</p></li>
+      <li><span class="mat-passos__ic mat-passos__ic--contato" aria-hidden="true"></span><h3>Deixe seu contato uma vez</h3><p>Nome, e-mail e WhatsApp liberam os seis materiais.</p></li>
+      <li><span class="mat-passos__ic mat-passos__ic--usar" aria-hidden="true"></span><h3>Use hoje</h3><p>Copie, adapte e salve em PDF para usar na clínica.</p></li>
+    </ol>
   </div>
 </section>
 

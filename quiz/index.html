@@ -28,8 +28,9 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+Display:ital,wdth,wght@0,62.5,400..700;1,62.5,400..700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="../assets/css/site.css?v=10">
+<link rel="stylesheet" href="../assets/css/captacao.css?v=1">
 </head>
-<body class="page-quiz no-sticky">
+<body class="page-quiz no-sticky" data-tema="quiz">
 <a class="skip" href="#conteudo">Pular para o conteúdo</a>
 
 <header class="site-header">
@@ -41,13 +42,25 @@
 <main id="conteudo">
 
 <!-- Comportamento em quiz/script.js: perguntas, resultado, contato (Lambda livia-leads pelo site.js) e plano -->
-<section class="hero quiz-capa" id="capa">
-  <div class="wrap wrap-narrow">
-    <span class="eyebrow">Quiz · 1 minuto</span>
-    <h1>Você está pronta para <em>viver da clínica?</em></h1>
-    <p class="sub">5 perguntas de sim ou não. No fim, você vê em que ponto está e por onde começar.</p>
-    <button class="btn btn-cta" type="button" id="comecar">Começar o quiz</button>
-    <p class="assinatura">Feito pela Lívia Oliveira, psicóloga clínica há 15+ anos · CRP 07/18713</p>
+<section class="hero quiz-capa capa" id="capa">
+  <div class="wrap">
+    <div class="capa__texto">
+      <div class="capa__topo">
+        <div class="capa__media">
+          <picture class="capa__foto">
+            <source media="(min-width: 900px)" srcset="../assets/img/quiz-0906.webp" width="640" height="800">
+            <img src="../assets/img/quiz-0906-q.webp" width="240" height="240" alt="Lívia Oliveira sentada na poltrona do consultório, com a mão no queixo" fetchpriority="high" decoding="async">
+          </picture>
+          <span class="tema-ic capa__ic" aria-hidden="true"></span>
+        </div>
+        <span class="eyebrow">Quiz · 1 minuto</span>
+      </div>
+      <h1>Você está pronta para <em>viver da clínica?</em></h1>
+      <p class="sub">5 perguntas de sim ou não. No fim, você vê em que ponto está e por onde começar.</p>
+      <ul class="capa__chips" aria-label="Como é o quiz"><li>5 perguntas</li><li>Resultado na hora</li><li class="is-destaque">Grátis</li></ul>
+      <button class="btn btn-cta" type="button" id="comecar">Começar o quiz</button>
+      <p class="assinatura">Feito pela Lívia Oliveira, psicóloga clínica há 15+ anos · CRP 07/18713</p>
+    </div>
   </div>
 </section>
 
@@ -68,7 +81,7 @@
 
 <section class="quiz-resultado" id="resultado" tabindex="-1" aria-labelledby="resultado-titulo" hidden>
   <div class="wrap wrap-narrow">
-    <div aria-live="polite">
+    <div class="quiz-destaque" aria-live="polite">
       <span class="eyebrow">Seu resultado</span>
       <p class="quiz-placar"><span class="quiz-bolinhas" id="quiz-bolinhas" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></span><span id="quiz-pontos"></span></p>
       <h2 id="resultado-titulo"></h2>
