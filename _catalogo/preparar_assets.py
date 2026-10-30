@@ -38,6 +38,26 @@ WEBP = [
     ("terapia-sessoes-1289.webp", "2L2A1289", (0, 180, 1067, 1514), (800, 1000)),
     ("terapia-sobre-0858.webp", "2L2A0858", (0, 200, 1067, 1534), (800, 1000)),
     ("terapia-sobre-1110.webp", "2L2A1110", (0, 150, 1067, 1484), (800, 1000)),
+    # Capas das páginas de captação (um tema por página): 4:5 para a coluna do desktop e "-q" quadrada,
+    # centrada no rosto, para o círculo do celular (<picture> com <source media="(min-width: 900px)">)
+    ("mat-hub-0709.webp", "2L2A0709", (80, 240, 1040, 1440), (640, 800)),
+    ("mat-hub-0709-q.webp", "2L2A0709", (250, 330, 870, 950), (240, 240)),
+    ("mat-mensagens-0730.webp", "2L2A0730", (0, 120, 1067, 1454), (640, 800)),
+    ("mat-mensagens-0730-q.webp", "2L2A0730", (245, 160, 905, 820), (240, 240)),
+    ("mat-faltas-0760.webp", "2L2A0760", (0, 266, 1067, 1600), (640, 800)),
+    ("mat-faltas-0760-q.webp", "2L2A0760", (300, 470, 920, 1090), (240, 240)),
+    ("mat-etica-0739.webp", "2L2A0739", (0, 266, 1067, 1600), (640, 800)),
+    ("mat-etica-0739-q.webp", "2L2A0739", (220, 540, 860, 1180), (240, 240)),
+    ("mat-reajuste-0720.webp", "2L2A0720", (0, 230, 1067, 1564), (640, 800)),
+    ("mat-reajuste-0720-q.webp", "2L2A0720", (130, 500, 750, 1120), (240, 240)),
+    ("mat-posts-0799.webp", "2L2A0799", (0, 200, 1067, 1534), (640, 800)),
+    ("mat-posts-0799-q.webp", "2L2A0799", (340, 300, 980, 940), (240, 240)),
+    ("mat-indicacoes-0745.webp", "2L2A0745", (0, 266, 1067, 1600), (640, 800)),
+    ("mat-indicacoes-0745-q.webp", "2L2A0745", (220, 460, 860, 1100), (240, 240)),
+    ("quiz-0906.webp", "2L2A0906", (0, 150, 1067, 1484), (640, 800)),
+    ("quiz-0906-q.webp", "2L2A0906", (220, 400, 860, 1040), (240, 240)),
+    ("calc-0718.webp", "2L2A0718", (0, 266, 1067, 1600), (640, 800)),
+    ("calc-0718-q.webp", "2L2A0718", (170, 580, 790, 1200), (240, 240)),
 ]
 
 # Open Graph 1200x630 (proporção 1,905): faixa de 1067x560 na foto vertical, sem texto.

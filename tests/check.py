@@ -78,6 +78,7 @@ DOMINIO = "liviaoliveira.me"
 URL_ANTIGA = "github.io" + "/livia-oliveira-sites"  # endereço antigo; em partes pelo mesmo motivo
 EXTRAS = (
     "assets/css/site.css",
+    "assets/css/captacao.css",
     "assets/js/site.js",
     "curso/style.css",
     "curso/script.js",

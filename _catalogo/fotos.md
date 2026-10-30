@@ -468,3 +468,22 @@ Reservas para anúncio: 1301 e 1296 (topo com faixas de luz), 1102-2 (topo e dir
 
 0686, 0688, 0701-2, 0709, 0718, 0720, 0730, 0745, 0760, 0823, 0855, 0858, 0902, 0906, 0922, 0973, 0981, 1102-2, 1110, 1120, 1127, 1132, 1140, 1166, 1204, 1244-2, 1253, 1289, 1301, 1340.
 Todas estão com foco correto e olhos abertos, exceto a 0902 (olho semicerrado), que foi descartada das recomendações.
+
+### (f) Capas das páginas de captação (materiais, quiz e calculadora)
+
+Uma foto por tema, com os recortes em `_catalogo/preparar_assets.py` (4:5 para o desktop e quadrada, no rosto, para o
+círculo do celular). Todas foram abertas em 1600px para conferir o recorte: rosto inteiro, sem cortar a cabeça.
+
+| Página | Foto | Por quê |
+|---|---|---|
+| `materiais/` (hub) | **0709** | sorriso à mesa, estante ao fundo |
+| `materiais/mensagens/` | **0730** | sorri para a câmera com as mãos no notebook; preferida à 0676 (celular na mesa), que olha para o lado e tem nota 3 |
+| `materiais/faltas/` | **0760** | escrevendo no caderno |
+| `materiais/etica/` | **0739** | lendo livro à mesa |
+| `materiais/reajuste/` | **0720** | escutando, olhar para cima |
+| `materiais/posts/` | **0799** | gravando, com a câmera desfocada em primeiro plano |
+| `materiais/indicacoes/` | **0745** | close sorrindo, com livro |
+| `quiz/` | **0906** | poltrona, mão no queixo |
+| `calculadora/` | **0718** | notebook, gesticulando como em atendimento online |
+
+Abertas em 1600px nesta tarefa, além das da lista acima: 0676, 0739 e 0799 (foco e olhos corretos).

@@ -62,6 +62,15 @@ Identidade do site da Lívia, https://carreiracomsentido.com.br/ (cores converti
 - Texto: Helvetica Neue (fonte do sistema, sem download), com `letter-spacing: -.015em`.
 - Favicon (`assets/img/favicon.svg`): vinho com o monograma em creme. Os PNG e o ICO não têm script de geração.
 
+### Páginas de captação: sistema de temas (materiais, quiz e calculadora)
+
+- CSS comum em `assets/css/captacao.css` (carregado depois do `site.css`); o que é só dos materiais fica em `materiais/style.css`.
+- Cada página tem `data-tema` no `<body>` (`materiais`, `mensagens`, `faltas`, `etica`, `reajuste`, `posts`, `indicacoes`, `quiz`, `calculadora`). O tema define a cor (`--tema`, `--tema-grad`, `--tema-suave`): vinho para materiais, mensagens, etica, posts e quiz; petróleo para faltas, reajuste, indicacoes e calculadora. Rosé é sempre o acento.
+- Ícones de traço em SVG (variáveis `--ic-*` no topo do `captacao.css`), aplicados por máscara em `.tema-ic`: balão (mensagens), calendário (faltas), escudo com check (etica), gráfico (reajuste), câmera (posts), pessoas (indicacoes), interrogação (quiz) e calculadora.
+- Capa (`.capa`): gradiente do tema, foto da Lívia em círculo no celular e em arco à direita a partir de 900px (`<picture>` com a versão `-q` quadrada e a 4:5), chips de resumo (`.capa__chips`).
+- Fotos (geradas por `_catalogo/preparar_assets.py`): hub 0709, mensagens 0730, faltas 0760, etica 0739, reajuste 0720, posts 0799, indicacoes 0745, quiz 0906, calculadora 0718.
+- Cards do hub e "Outros materiais" levam o `data-tema` de cada material (faixa e ícone na cor dele).
+
 ## Rastreamento (GTM, Pixel da Meta, GA4)
 
 No topo de `assets/js/site.js`:

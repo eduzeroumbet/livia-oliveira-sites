@@ -28,8 +28,9 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+Display:ital,wdth,wght@0,62.5,400..700;1,62.5,400..700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="../assets/css/site.css?v=10">
+<link rel="stylesheet" href="../assets/css/captacao.css?v=1">
 </head>
-<body class="page-calculadora no-sticky">
+<body class="page-calculadora no-sticky" data-tema="calculadora">
 <a class="skip" href="#conteudo">Pular para o conteúdo</a>
 
 <header class="site-header">
@@ -40,19 +41,31 @@
 
 <main id="conteudo">
 
-<section class="hero calc-hero">
-  <div class="wrap wrap-narrow">
-    <span class="eyebrow">Calculadora para psicólogas</span>
-    <h1>Quanto deveria custar <em>a sua sessão?</em></h1>
-    <p class="sub">Faça a conta que eu ensino no curso: custos, impostos, faltas e quanto você quer ganhar. Leva 1 minuto.</p>
-    <p class="assinatura">Lívia Oliveira · psicóloga clínica há 15+ anos · CRP 07/18713</p>
+<section class="hero calc-hero capa">
+  <div class="wrap">
+    <div class="capa__texto">
+      <div class="capa__topo">
+        <div class="capa__media">
+          <picture class="capa__foto">
+            <source media="(min-width: 900px)" srcset="../assets/img/calc-0718.webp" width="640" height="800">
+            <img src="../assets/img/calc-0718-q.webp" width="240" height="240" alt="Lívia Oliveira em atendimento online pelo notebook" fetchpriority="high" decoding="async">
+          </picture>
+          <span class="tema-ic capa__ic" aria-hidden="true"></span>
+        </div>
+        <span class="eyebrow">Calculadora para psicólogas</span>
+      </div>
+      <h1>Quanto deveria custar <em>a sua sessão?</em></h1>
+      <p class="sub">Faça a conta que eu ensino no curso: custos, impostos, faltas e quanto você quer ganhar. Leva 1 minuto.</p>
+      <ul class="capa__chips" aria-label="Como é a calculadora"><li>Custos e impostos</li><li>Faltas e meta</li><li class="is-destaque">Grátis</li></ul>
+      <p class="assinatura">Lívia Oliveira · psicóloga clínica há 15+ anos · CRP 07/18713</p>
+    </div>
   </div>
 </section>
 
 <section class="calc-form-sec">
   <div class="wrap wrap-narrow">
-    <form class="form-card calc-form" id="calc" novalidate>
-      <fieldset class="fieldset">
+    <form class="calc-form" id="calc" novalidate>
+      <fieldset class="fieldset calc-grupo calc-grupo--custos">
         <legend>Custos mensais</legend>
         <div class="calc-grid">
           <div class="field">
@@ -88,7 +101,7 @@
         </div>
       </fieldset>
 
-      <fieldset class="fieldset">
+      <fieldset class="fieldset calc-grupo calc-grupo--meta">
         <legend>Imposto e meta</legend>
         <div class="field">
           <label for="imposto">Imposto sobre o que você recebe</label>
@@ -103,7 +116,7 @@
         </div>
       </fieldset>
 
-      <fieldset class="fieldset">
+      <fieldset class="fieldset calc-grupo calc-grupo--agenda">
         <legend>Agenda</legend>
         <div class="calc-grid">
           <div class="field">

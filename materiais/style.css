@@ -1,51 +1,103 @@
-/* Lívia Oliveira: materiais gratuitos (materiais/ e materiais/<slug>/). Vem depois do site.css e usa as mesmas
-   cores, fontes e componentes (form-card, contato-form, btn, dark); aqui só o que é dos materiais. Mobile-first. */
+/* Lívia Oliveira: materiais gratuitos (materiais/ e materiais/<slug>/). Vem depois do site.css e do
+   assets/css/captacao.css e usa as mesmas cores, fontes e componentes (form-card, contato-form, btn, dark, capa);
+   aqui só o que é dos materiais. As cores e ícones vêm do tema (data-tema no <body> ou no card). Mobile-first.
+   Ritmo das páginas: capa no gradiente do tema, corpo creme, convite do curso na outra cor escura e
+   "Outros materiais" em realce. */
 
 /* ========== Topo ========== */
-.mat-topo { padding-bottom: 30px; }
 .mat-topo h1 { font-size: clamp(40px, 10.5vw, 66px); }
-.mat-topo .sub { margin-bottom: 22px; }
-.mat-pdf { min-height: 48px; padding: 10px 22px; font-size: 15.5px; }
-.mat-hub-topo { padding-bottom: 8px; }
+.mat-topo .sub { margin-bottom: 0; }
+.mat-pdf { flex-direction: row; gap: 10px; min-height: 48px; padding: 10px 22px; font-size: 15.5px; }
+.mat-pdf::before { content: ""; flex: 0 0 auto; width: 20px; height: 20px; background: currentColor; -webkit-mask: var(--ic-pdf) center / contain no-repeat; mask: var(--ic-pdf) center / contain no-repeat; }
+/* Salvar em PDF sobre o gradiente: contorno creme */
+.capa .mat-pdf { color: var(--cream); border-color: rgba(252, 250, 246, .5); }
+.capa .mat-pdf:hover { background: rgba(252, 250, 246, .12); border-color: var(--cream); }
+/* contador do hub: "6 materiais grátis" */
+.capa__contador { display: flex; align-items: baseline; gap: 8px; color: var(--cream); font-size: 15px; font-weight: 600; letter-spacing: .02em; line-height: 1.2; }
+.capa__contador b { font-family: var(--serif); font-stretch: 62.5%; font-weight: 500; font-size: 52px; line-height: .9; color: var(--rose); }
+
+/* Barra de leitura sob o cabeçalho, na cor do tema (só CSS, onde o navegador tem animation-timeline) */
+@supports (animation-timeline: scroll()) {
+  @media (prefers-reduced-motion: no-preference) {
+    .page-mat:not([data-tema="materiais"]) .site-header::after {
+      content: "";
+      position: absolute;
+      left: 0;
+      right: 0;
+      bottom: -1px;
+      height: 3px;
+      background: var(--tema);
+      transform-origin: 0 50%;
+      transform: scaleX(0);
+      animation: mat-leitura linear both;
+      animation-timeline: scroll(root);
+    }
+  }
+}
+@keyframes mat-leitura { to { transform: scaleX(1); } }
 
 /* ========== Itens (mensagens, cláusulas, passos) ========== */
-.mat-corpo { padding: 0 0 56px; }
-.mat-itens, .mat-trava { display: grid; gap: 14px; }
-.mat-trava { margin-top: 14px; }
-.mat-item { background: var(--white); border: 1px solid var(--line); border-radius: var(--radius); padding: 20px 18px; box-shadow: var(--shadow-soft); }
-.mat-item__titulo { font-size: 26px; margin: 0 0 12px; }
-.mat-item__num { display: block; margin-bottom: 4px; font: 600 12.5px/1.3 var(--sans); letter-spacing: .14em; text-transform: uppercase; color: var(--petrol); }
+.mat-corpo { padding: 32px 0 56px; counter-reset: mat-item; }
+.mat-itens, .mat-trava { display: grid; gap: 18px; }
+.mat-trava { margin-top: 18px; }
+.mat-item { position: relative; counter-increment: mat-item; background: var(--white); border: 1px solid var(--line); border-top: 3px solid var(--tema); border-radius: var(--radius); padding: 22px 18px 20px; box-shadow: var(--shadow-soft); }
+/* número grande em serif no canto (01, 02...), decorativo: o "/ ''" tira do leitor de tela */
+.mat-item::before {
+  content: counter(mat-item, decimal-leading-zero);
+  content: counter(mat-item, decimal-leading-zero) / "";
+  position: absolute;
+  top: 12px;
+  right: 16px;
+  font-family: var(--serif);
+  font-stretch: 62.5%;
+  font-weight: 500;
+  font-size: 54px;
+  line-height: 1;
+  letter-spacing: -.02em;
+  color: var(--tema);
+  opacity: .9;
+}
+/* selo "Aberto" nos itens que já estão liberados antes do cadastro */
+html:not(.mat-ok) .mat-itens > .mat-item::after { content: "Aberto"; position: absolute; top: -12px; left: 16px; padding: 2px 10px; border-radius: 999px; background: var(--rose); color: var(--wine); font: 600 12px/1.6 var(--sans); letter-spacing: .1em; text-transform: uppercase; }
+.mat-item__titulo { font-size: 27px; margin: 0 0 14px; padding-right: 56px; }
+.mat-item__num { display: block; margin-bottom: 6px; font: 600 12.5px/1.3 var(--sans); letter-spacing: .14em; text-transform: uppercase; color: var(--tema); }
 .mat-item > p { font-size: 16.5px; }
-.mat-item > p + .mat-msg { margin-top: 12px; }
-.mat-item a { color: var(--wine); font-weight: 600; text-underline-offset: 3px; }
-/* mensagem copiável: caixa creme com o botão grande embaixo */
-.mat-msg { background: var(--cream); border: 1px solid var(--line); border-left: 4px solid var(--rose); border-radius: var(--radius); padding: 14px 14px 14px 16px; }
-.mat-msg__texto { font-size: 16.5px; line-height: 1.6; }
+.mat-item > p + .mat-msg { margin-top: 14px; }
+.mat-item a { color: var(--tema); font-weight: 600; text-underline-offset: 3px; }
+/* texto copiável: papel creme com a margem na cor do tema (cláusulas do contrato) */
+.mat-msg { background: var(--cream); border: 1px solid var(--line); border-left: 4px solid var(--tema); border-radius: var(--radius); padding: 16px 16px 16px 18px; }
+.mat-msg__texto { font-size: 16.5px; line-height: 1.6; color: var(--ink); }
+/* mensagens de WhatsApp: balão de conversa claro, com rabinho à esquerda */
+:is([data-tema="mensagens"], [data-tema="reajuste"], [data-tema="indicacoes"]) .mat-msg { position: relative; margin-left: 9px; background: var(--tema-suave); border: 0; border-radius: 4px 18px 18px 18px; padding: 16px 16px 16px 18px; }
+:is([data-tema="mensagens"], [data-tema="reajuste"], [data-tema="indicacoes"]) .mat-msg::before { content: ""; position: absolute; top: 0; left: -9px; width: 10px; height: 14px; background: var(--tema-suave); clip-path: polygon(0 0, 100% 0, 100% 100%); }
 /* [campos] para preencher: fundo rosé suave, texto vinho (acima de 7:1) */
 .mat-campo { padding: 1px 4px; border-radius: 4px; background: rgba(219, 168, 173, .38); color: var(--wine); font-weight: 600; -webkit-box-decoration-break: clone; box-decoration-break: clone; }
-.mat-copiar { display: flex; align-items: center; justify-content: center; width: 100%; min-height: 52px; margin-top: 12px; padding: 0 24px; border: 2px solid var(--wine); border-radius: 999px; background: var(--white); color: var(--wine); font-size: 16.5px; font-weight: 600; cursor: pointer; transition: background-color .15s ease, color .15s ease; }
-.mat-copiar:hover { background: var(--rose2); }
-.mat-copiar.is-copiado { background: var(--wine); color: var(--cream); }
+/* Copiar: pílula com ícone (o texto troca no material.js; o ícone vira check em .is-copiado) */
+.mat-copiar { --ic: var(--ic-copiar); display: flex; align-items: center; justify-content: center; gap: 10px; width: 100%; min-height: 52px; margin-top: 14px; padding: 0 24px; border: 2px solid var(--tema); border-radius: 999px; background: var(--white); color: var(--tema); font-size: 16.5px; font-weight: 600; cursor: pointer; transition: background-color .15s ease, color .15s ease; }
+.mat-copiar::before { content: ""; flex: 0 0 auto; width: 20px; height: 20px; background: currentColor; -webkit-mask: var(--ic) center / contain no-repeat; mask: var(--ic) center / contain no-repeat; }
+.mat-copiar:hover { background: var(--tema-suave); }
+.mat-copiar.is-copiado { --ic: var(--ic-check); background: var(--tema); color: var(--cream); }
 
 /* ========== Checklist ético ========== */
 .mat-checklist { display: grid; gap: 10px; }
 .mat-trava .mat-checklist { margin-top: 0; }
-.mat-check { display: flex; gap: 14px; align-items: flex-start; min-height: 56px; padding: 16px; background: var(--white); border: 1.5px solid var(--line); border-radius: var(--radius); font-size: 16.5px; line-height: 1.5; cursor: pointer; }
-.mat-check input { flex: 0 0 auto; width: 24px; height: 24px; margin-top: 1px; accent-color: var(--wine); cursor: pointer; }
-.mat-check:has(input:checked) { border-color: var(--wine); background: var(--rose2); }
-.mat-check:has(input:focus-visible) { outline: 3px solid var(--wine); outline-offset: 2px; }
-.mat-check__num { color: var(--wine); }
+.mat-check { display: flex; gap: 14px; align-items: flex-start; min-height: 56px; padding: 16px; background: var(--white); border: 1.5px solid var(--line); border-radius: var(--radius); font-size: 16.5px; line-height: 1.5; cursor: pointer; transition: border-color .15s ease, background-color .15s ease; }
+.mat-check input { flex: 0 0 auto; width: 24px; height: 24px; margin-top: 1px; accent-color: var(--tema); cursor: pointer; }
+.mat-check:hover { border-color: var(--tema-linha); }
+.mat-check:has(input:checked) { border-color: var(--tema); background: var(--tema-suave); }
+.mat-check:has(input:focus-visible) { outline: 3px solid var(--tema); outline-offset: 2px; }
+.mat-check__num { color: var(--tema); }
 .mat-check__ref { display: block; margin-top: 4px; font-size: 14px; color: var(--muted); }
-.mat-pode { margin-top: 18px; padding: 22px 22px; border-radius: var(--radius); background: var(--petrol); background-image: var(--grad-petrol); color: var(--cream); font-family: var(--serif); font-stretch: 62.5%; font-size: 28px; line-height: 1.15; letter-spacing: var(--titulo-ls-pequeno); }
+.mat-pode { margin-top: 18px; padding: 22px 22px; border-radius: var(--radius); background: var(--tema); background-image: var(--tema-grad); color: var(--cream); font-family: var(--serif); font-stretch: 62.5%; font-size: 28px; line-height: 1.15; letter-spacing: var(--titulo-ls-pequeno); }
 .mat-pode[hidden] { display: none; }
 
 /* ========== Ideias de posts ========== */
-.mat-bloco { font-size: 28px; margin: 6px 0 4px; }
-.mat-trava .mat-bloco { margin-top: 18px; }
+.mat-bloco { font-size: 30px; margin: 6px 0 6px; }
+.mat-trava .mat-bloco { margin-top: 22px; }
 .mat-bloco__sub { display: block; margin-top: 4px; font: 400 15px/1.4 var(--sans); letter-spacing: 0; word-spacing: 0; color: var(--muted); }
 .mat-posts { display: grid; gap: 8px; }
-.mat-posts li { display: flex; gap: 10px; padding: 12px 16px; background: var(--white); border: 1px solid var(--line); border-radius: var(--radius); font-size: 16.5px; line-height: 1.45; }
-.mat-posts__n { flex: 0 0 2ch; font-weight: 600; color: var(--wine); }
+.mat-posts li { display: flex; align-items: baseline; gap: 12px; padding: 12px 16px; background: var(--white); border: 1px solid var(--line); border-radius: var(--radius); font-size: 16.5px; line-height: 1.45; }
+.mat-posts__n { flex: 0 0 2.2ch; font-family: var(--serif); font-stretch: 62.5%; font-weight: 500; font-size: 24px; line-height: 1; color: var(--tema); }
 
 /* ========== Bloqueio: borrado, esmaecido e não selecionável até o cadastro ==========
    html.mat-ok vem do localStorage "livia_mat_ok" (script no <head>, sem piscar) ou do envio do formulário */
@@ -60,23 +112,39 @@ html:not(.mat-ok) .mat-trava {
   -webkit-mask-image: linear-gradient(#000 30%, transparent 92%);
   mask-image: linear-gradient(#000 30%, transparent 92%);
 }
-/* cartão do cadastro sobe por cima do fim do trecho borrado */
-.mat-libera { position: relative; z-index: 2; margin-top: -190px; }
+/* cartão do cadastro sobe por cima do fim do trecho borrado: borda do tema, cadeado e o que libera */
+.mat-libera { position: relative; z-index: 2; margin-top: -190px; border: 2px solid var(--tema); }
+.mat-libera__ic { display: grid; place-items: center; width: 52px; height: 52px; margin-bottom: 12px; border-radius: 50%; background: var(--tema); background-image: var(--tema-grad); color: var(--rose); box-shadow: 0 0 0 5px var(--tema-suave); }
+.mat-libera__ic::before { content: ""; width: 26px; height: 26px; background: currentColor; -webkit-mask: var(--ic-cadeado) center / contain no-repeat; mask: var(--ic-cadeado) center / contain no-repeat; }
 .mat-libera h2 { font-size: clamp(30px, 7.5vw, 40px); margin: 0 0 6px; }
-.mat-libera__nota { margin-bottom: 16px; font-size: 16px; color: var(--muted); }
+.mat-libera__nota { margin-bottom: 14px; font-size: 16px; color: var(--muted); }
+.mat-libera__rotulo { margin-bottom: 8px; font-size: 12.5px; font-weight: 600; letter-spacing: .14em; text-transform: uppercase; color: var(--tema); }
+.mat-libera__lista { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 6px 14px; margin-bottom: 20px; padding: 14px 16px; border-radius: var(--radius); background: var(--tema-suave); }
+.mat-libera__lista li { display: flex; align-items: center; gap: 8px; font-size: 14.5px; font-weight: 600; line-height: 1.3; color: var(--ink); }
+.mat-libera__lista li::before { content: ""; flex: 0 0 auto; width: 18px; height: 18px; background: var(--tema); -webkit-mask: var(--tema-icone) center / contain no-repeat; mask: var(--tema-icone) center / contain no-repeat; }
+.mat-libera .btn-cta { background: var(--tema); background-image: var(--tema-grad); }
+.mat-libera .btn-cta:hover { background: var(--tema); }
 html.mat-ok .mat-libera { display: none; }
 
 /* ========== Notas, dica e ponte para o curso ========== */
 .mat-nota { margin-top: 22px; font-size: 16.5px; }
-.mat-nota b { color: var(--wine); }
+.mat-nota b { color: var(--tema); }
 .mat-nota--aviso { margin-top: 10px; font-size: 14.5px; color: var(--muted); }
-.mat-fontes a { color: var(--wine); text-underline-offset: 3px; }
-.mat-dica { margin-top: 30px; padding: 22px 22px; border-radius: var(--radius); background: var(--rose2); border-left: 4px solid var(--wine); }
-.mat-dica p { margin-top: 6px; font-family: var(--serif); font-stretch: 62.5%; font-size: 28px; line-height: 1.15; letter-spacing: var(--titulo-ls-pequeno); color: var(--wine); }
-.mat-ponte { margin-top: 22px; padding-left: 16px; border-left: 3px solid var(--petrol); font-size: 17px; color: var(--ink); }
+.mat-fontes a { color: var(--tema); text-underline-offset: 3px; }
+/* dica e ponte: blocos de realce com ícone */
+.mat-dica { margin-top: 30px; padding: 22px 22px 24px; border-radius: var(--radius); background: var(--tema-suave); border-left: 4px solid var(--tema); }
+.mat-dica .eyebrow { display: flex; align-items: center; gap: 10px; color: var(--tema); }
+.mat-dica .eyebrow::before { content: ""; flex: 0 0 auto; width: 24px; height: 24px; background: currentColor; -webkit-mask: var(--ic-dica) center / contain no-repeat; mask: var(--ic-dica) center / contain no-repeat; }
+.mat-dica p { margin-top: 8px; font-family: var(--serif); font-stretch: 62.5%; font-size: 29px; line-height: 1.15; letter-spacing: var(--titulo-ls-pequeno); color: var(--tema); }
+.mat-ponte { display: flex; gap: 14px; align-items: flex-start; margin-top: 16px; padding: 18px 20px; border-radius: var(--radius); background: var(--tema-suave); font-size: 16.5px; color: var(--ink); }
+.mat-ponte::before { content: ""; flex: 0 0 auto; width: 28px; height: 28px; margin-top: 1px; background: var(--tema); -webkit-mask: var(--ic-curso) center / contain no-repeat; mask: var(--ic-curso) center / contain no-repeat; }
 
-/* ========== CTA do curso ========== */
-.mat-cta { padding: 48px 0; }
+/* ========== CTA do curso: escuro na outra cor do tema, com a foto pequena e a assinatura da Lívia ========== */
+.mat-cta { padding: 52px 0; background-color: var(--tema-oposto); background-image: var(--tema-oposto-grad); }
+.mat-cta__autora { display: flex; align-items: center; gap: 14px; margin-bottom: 18px; }
+.mat-cta__avatar { flex: 0 0 auto; width: 64px; height: 64px; border-radius: 50%; object-fit: cover; border: 3px solid var(--cream); box-shadow: 0 0 0 2px var(--rose); }
+.mat-cta .mat-cta__assinatura { font-size: 14px; line-height: 1.35; color: rgba(252, 250, 246, .88); }
+.mat-cta__assinatura b { display: block; font-family: var(--serif); font-stretch: 62.5%; font-style: italic; font-weight: 500; font-size: 24px; letter-spacing: var(--titulo-ls-pequeno); color: var(--rose); }
 .mat-cta h2 { font-size: clamp(32px, 7.5vw, 48px); margin: 8px 0 12px; }
 .mat-cta .preco-linha { font-size: 17px; }
 .mat-cta .btn-row { flex-direction: column; align-items: stretch; margin-top: 20px; }
@@ -84,50 +152,93 @@ html.mat-ok .mat-libera { display: none; }
 .mat-cta .btn-wa-outline svg { fill: var(--cream); }
 .mat-cta .btn-wa-outline:hover { background: rgba(252, 250, 246, .1); }
 
-/* ========== Grades: cards do hub e "Outros materiais" ========== */
-.mat-outros { padding: 48px 0 64px; }
+/* ========== Grades: cards do hub e "Outros materiais", cada um com o seu tema ========== */
+.mat-outros { padding: 48px 0 64px; background: var(--rose2); }
 .mat-outros h2 { font-size: clamp(32px, 7.5vw, 44px); margin: 0 0 18px; }
-.mat-grade { display: grid; gap: 12px; }
+.mat-grade { display: grid; gap: 14px; }
 .mat-grade > li { display: flex; }
-.mat-card { display: flex; flex-direction: column; width: 100%; padding: 22px 20px; background: var(--white); border: 1px solid var(--line); border-radius: var(--radius); box-shadow: var(--shadow-soft); }
-.mat-card .eyebrow { font-size: 12px; letter-spacing: .12em; line-height: 1.4; }
-.mat-card__titulo { font-size: 30px; margin: 8px 0 10px; }
-.mat-card p { font-size: 16px; color: var(--muted); margin-bottom: 18px; }
-.mat-card__btn { margin-top: auto; width: 100%; min-height: 52px; box-shadow: none; }
-.mat-outro { display: flex; flex-direction: column; gap: 6px; width: 100%; min-height: 64px; padding: 16px 18px; background: var(--white); border: 1px solid var(--line); border-radius: var(--radius); text-decoration: none; transition: border-color .15s ease, transform .15s ease; }
-.mat-outro:hover { border-color: var(--rose); transform: translateY(-2px); }
-.mat-outro__etiqueta { font-size: 12px; font-weight: 600; letter-spacing: .12em; text-transform: uppercase; color: var(--petrol); line-height: 1.4; }
+.mat-outro { display: grid; grid-template-columns: auto 1fr; gap: 4px 14px; align-content: start; width: 100%; min-height: 64px; padding: 18px; background: var(--white); border: 1px solid var(--line); border-top: 4px solid var(--tema); border-radius: var(--radius); text-decoration: none; transition: border-color .15s ease, transform .15s ease, box-shadow .15s ease; }
+.mat-outro:hover { transform: translateY(-2px); box-shadow: var(--shadow-soft); }
+.mat-outro__ic { grid-row: span 3; }
+.mat-outro__etiqueta { font-size: 12px; font-weight: 600; letter-spacing: .12em; text-transform: uppercase; color: var(--tema); line-height: 1.4; }
 .mat-outro b { font-family: var(--serif); font-stretch: 62.5%; font-weight: 500; font-size: 24px; line-height: 1.1; letter-spacing: var(--titulo-ls-pequeno); color: var(--wine); }
-.mat-outro__abrir { margin-top: auto; font-size: 15px; font-weight: 600; color: var(--wine); }
-.mat-hub { padding: 8px 0 64px; }
-.mat-hub__nota { margin-top: 22px; font-size: 16px; color: var(--muted); text-align: center; text-wrap: balance; }
+.mat-outro__abrir { margin-top: 6px; font-size: 15px; font-weight: 600; color: var(--tema); }
+
+/* hub: card com faixa no gradiente do tema, ícone grande, número de itens e selo do que já abre */
+.mat-hub { padding: 40px 0 64px; }
+.mat-card { display: flex; flex-direction: column; width: 100%; overflow: hidden; padding: 0 20px 22px; background: var(--white); border: 1px solid var(--line); border-radius: var(--radius); box-shadow: var(--shadow-soft); transition: transform .15s ease, box-shadow .15s ease; }
+.mat-card:hover { transform: translateY(-3px); box-shadow: var(--shadow); }
+.mat-card__topo { position: relative; display: flex; align-items: center; justify-content: space-between; margin: 0 -20px 18px; padding: 18px 20px; background: var(--tema); background-image: var(--tema-grad); }
+.mat-card__ic { width: 60px; height: 60px; background: var(--rose); color: var(--wine); }
+.mat-card__n { font-family: var(--serif); font-stretch: 62.5%; font-weight: 500; font-size: 46px; line-height: 1; color: rgba(252, 250, 246, .9); }
+.mat-card .eyebrow { font-size: 12px; letter-spacing: .12em; line-height: 1.4; color: var(--tema); }
+.mat-card__titulo { font-size: 30px; margin: 8px 0 10px; }
+.mat-card p { font-size: 16px; color: var(--muted); margin-bottom: 14px; }
+.mat-card__meta { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 18px; }
+.mat-card__meta li { display: inline-flex; align-items: center; min-height: 28px; padding: 3px 12px; border-radius: 999px; background: var(--tema-suave); font-size: 13.5px; font-weight: 600; color: var(--tema); }
+.mat-card__meta .mat-selo { background: var(--rose); color: var(--wine); }
+.mat-card__btn { margin-top: auto; width: 100%; min-height: 52px; box-shadow: none; background: var(--tema); background-image: var(--tema-grad); }
+.mat-card__btn:hover { background: var(--tema); }
+.mat-hub__nota { margin-top: 26px; font-size: 16px; color: var(--muted); text-align: center; text-wrap: balance; }
+
+/* hub: como funciona (3 passos) */
+.mat-como { padding: 52px 0 60px; background: var(--rose2); }
+.mat-como h2 { font-size: clamp(34px, 8vw, 48px); margin: 8px 0 22px; }
+.mat-passos { display: grid; gap: 12px; counter-reset: passo; }
+.mat-passos li { position: relative; display: grid; grid-template-columns: auto 1fr; gap: 2px 16px; align-items: start; padding: 20px; background: var(--white); border: 1px solid var(--line); border-radius: var(--radius); counter-increment: passo; }
+.mat-passos__ic { grid-row: span 2; display: grid; place-items: center; width: 52px; height: 52px; border-radius: 50%; background: var(--wine); background-image: var(--grad-wine); color: var(--rose); }
+.mat-passos__ic::before { content: ""; width: 26px; height: 26px; background: currentColor; -webkit-mask: var(--ic) center / contain no-repeat; mask: var(--ic) center / contain no-repeat; }
+.mat-passos li:nth-child(2) .mat-passos__ic { background: var(--petrol); background-image: var(--grad-petrol); }
+.mat-passos__ic--escolha { --ic: var(--ic-escolha); }
+.mat-passos__ic--contato { --ic: var(--ic-contato); }
+.mat-passos__ic--usar { --ic: var(--ic-check); }
+.mat-passos h3 { font-size: 26px; }
+.mat-passos h3::before { content: counter(passo) ". "; content: counter(passo) ". " / ""; color: var(--muted); }
+.mat-passos p { font-size: 16px; color: var(--muted); }
 
 @media (min-width: 640px) {
-  .mat-item { padding: 26px 26px; }
-  .mat-copiar { width: auto; min-width: 160px; }
-  .mat-cta { padding: 64px 0; }
+  .mat-item { padding: 28px 28px 26px; }
+  .mat-item::before { top: 16px; right: 24px; font-size: 64px; }
+  .mat-item__titulo { padding-right: 72px; font-size: 30px; }
+  .mat-copiar { width: auto; min-width: 170px; }
+  .mat-cta { padding: 72px 0; }
   .mat-cta .btn-row { flex-direction: row; align-items: center; }
   .mat-grade { grid-template-columns: repeat(2, 1fr); }
+  .mat-passos { grid-template-columns: repeat(3, 1fr); }
+  .mat-passos li { grid-template-columns: 1fr; gap: 10px; }
+  .mat-passos__ic { grid-row: auto; }
+  .mat-libera { padding: 34px 32px; }
 }
 @media (min-width: 900px) {
   .mat-grade { grid-template-columns: repeat(3, 1fr); }
-  .mat-corpo { padding-bottom: 80px; }
+  .mat-corpo { padding: 56px 0 88px; }
   .mat-outros { padding: 72px 0 88px; }
+  .mat-hub { padding: 64px 0 88px; }
+  .mat-como { padding: 72px 0 88px; }
+  .capa__contador b { font-size: 64px; }
 }
 
 /* ========== Salvar em PDF (impressão): só o material, sem cabeçalho, rodapé, formulário nem botões ==========
-   Bloqueado: imprime só a parte aberta. Liberado: tudo aberto. */
+   Bloqueado: imprime só a parte aberta. Liberado: tudo aberto. A capa sai sem fundo, sem foto e sem chips. */
 @media print {
   @page { margin: 16mm 14mm; }
   body { background: #fff; font-size: 12pt; }
-  .skip, .site-header, .site-footer, .mat-libera, .mat-pdf, .mat-copiar, .mat-outros, .mat-cta .btn-row { display: none !important; }
+  .skip, .site-header, .site-footer, .mat-libera, .mat-pdf, .mat-copiar, .mat-outros, .mat-cta .btn-row, .capa__media, .capa__chips, .mat-cta__autora { display: none !important; }
   html:not(.mat-ok) .mat-trava { display: none; }
   .mat-trava { margin-top: 10px; }
   section, .hero { padding: 0; }
+  .capa { background: none; color: var(--ink); }
+  .capa::before, html:not(.mat-ok) .mat-itens > .mat-item::after { display: none; }
+  .capa .wrap { display: block; min-height: 0; padding: 0; }
+  .capa h1 { color: var(--wine); }
+  .capa h1 em { color: var(--petrol); }
+  .capa .eyebrow { color: var(--wine); }
+  .capa .sub { color: var(--muted); }
   .mat-topo { padding-bottom: 16px; }
   .mat-topo h1 { font-size: 30pt; }
+  .mat-corpo { padding-top: 0; }
   .mat-item, .mat-check, .mat-posts li { box-shadow: none; break-inside: avoid; }
-  .mat-msg, .mat-campo, .mat-dica { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  .mat-item, .mat-msg, .mat-msg::before, .mat-campo, .mat-dica, .mat-ponte { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
   .mat-cta { margin-top: 18px; padding: 0; background: none; color: var(--ink); break-inside: avoid; }
   .mat-cta h2, .mat-cta h2 em { color: var(--wine); font-size: 22pt; }
   .mat-cta p, .mat-cta .preco-linha { color: var(--ink); }
