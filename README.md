@@ -67,8 +67,9 @@ Identidade do site da Lívia, https://carreiracomsentido.com.br/ (cores converti
 - CSS comum em `assets/css/captacao.css` (carregado depois do `site.css`); o que é só dos materiais fica em `materiais/style.css`.
 - Cada página tem `data-tema` no `<body>` (`materiais`, `mensagens`, `faltas`, `etica`, `reajuste`, `posts`, `indicacoes`, `quiz`, `calculadora`). O tema define a cor (`--tema`, `--tema-grad`, `--tema-suave`): vinho para materiais, mensagens, etica, posts e quiz; petróleo para faltas, reajuste, indicacoes e calculadora. Rosé é sempre o acento.
 - Ícones de traço em SVG (variáveis `--ic-*` no topo do `captacao.css`), aplicados por máscara em `.tema-ic`: balão (mensagens), calendário (faltas), escudo com check (etica), gráfico (reajuste), câmera (posts), pessoas (indicacoes), interrogação (quiz) e calculadora.
-- Capa (`.capa`): gradiente do tema, foto da Lívia em círculo no celular e em arco à direita a partir de 900px (`<picture>` com a versão `-q` quadrada e a 4:5), chips de resumo (`.capa__chips`).
-- Fotos (geradas por `_catalogo/preparar_assets.py`): hub 0709, mensagens 0730, faltas 0760, etica 0739, reajuste 0720, posts 0799, indicacoes 0745, quiz 0906, calculadora 0718.
+- Capa (`.capa`): gradiente do tema, foto da Lívia em arco de 120x140px acima do título no celular (selo do ícone fora da foto, só na borda) e em arco à direita a partir de 900px (`<picture>` com a versão `-q` quadrada de 320x320 e a 4:5), resumo em itens com check (`.capa__chips`, sem formato de pílula). O hub tem a linha de confiança (`.capa__confianca`) e o botão "Ver os 6 materiais" (âncora `#materiais`).
+- Fotos (geradas por `_catalogo/preparar_assets.py`): hub 0709, mensagens 0730, faltas 0760, etica 0739 no desktop e 0745 no celular (na 0739 ela olha para baixo e o rosto some no arco pequeno), reajuste 0720, posts 0799, indicacoes 0692, quiz 0906, calculadora 0718.
+- Cartão de cadastro dos materiais (`.mat-libera`): linha da autora com o avatar (`avatar-1204.webp`) no topo e "Sem spam" abaixo do botão. O trecho borrado (`.mat-trava`) some em creme antes do topo do cartão.
 - Cards do hub e "Outros materiais" levam o `data-tema` de cada material (faixa e ícone na cor dele).
 
 ## Rastreamento (GTM, Pixel da Meta, GA4)

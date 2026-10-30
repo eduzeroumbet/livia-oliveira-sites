@@ -72,9 +72,10 @@
 .tema-ic::before { content: ""; width: 54%; height: 54%; background: currentColor; -webkit-mask: var(--tema-icone) center / contain no-repeat; mask: var(--tema-icone) center / contain no-repeat; }
 
 /* ========== Capa (hero) com o gradiente do tema, foto da Lívia e ícone ==========
-   Celular: foto em círculo ao lado da etiqueta, o título logo abaixo (fica acima da dobra).
+   Celular: foto em arco (cabeça aos ombros) acima do título, com a etiqueta ao lado e o selo do ícone fora da
+   foto, só encostando na borda; título e botão principal ficam na primeira tela (390x844).
    Desktop: foto em arco numa coluna à direita. Uma <picture> só: quadrada no celular, 4:5 a partir de 900px. */
-.capa { position: relative; overflow: hidden; padding: 22px 0 40px; background: var(--tema); background-image: var(--tema-grad); color: var(--cream); }
+.capa { position: relative; overflow: hidden; padding: 16px 0 32px; background: var(--tema); background-image: var(--tema-grad); color: var(--cream); }
 /* brilho rosé sutil no canto */
 .capa::before { content: ""; position: absolute; right: -30%; bottom: -45%; width: 90%; aspect-ratio: 1; border-radius: 50%; background: radial-gradient(closest-side, rgba(219, 168, 173, .2), rgba(219, 168, 173, 0)); pointer-events: none; }
 .capa .wrap { position: relative; }
@@ -83,22 +84,27 @@
 .capa .eyebrow { color: var(--rose); font-size: 12.5px; letter-spacing: .13em; line-height: 1.45; }
 .capa .sub { color: rgba(252, 250, 246, .88); }
 .capa :focus-visible { outline-color: var(--rose); }
-.capa__topo { display: flex; align-items: center; gap: 16px; }
-.capa__media { position: relative; flex: 0 0 auto; width: 76px; height: 76px; }
-.capa__foto img { width: 76px; height: 76px; border-radius: 50%; object-fit: cover; border: 3px solid var(--cream); box-shadow: 0 0 0 2px var(--rose); background-color: var(--rose); }
-.capa__ic { position: absolute; right: -8px; bottom: -6px; width: 34px; height: 34px; background: var(--rose); color: var(--wine); box-shadow: 0 0 0 3px rgba(252, 250, 246, .9); }
-/* resumo em chips: creme translúcido; o destaque em rosé com texto vinho (6:1) */
-.capa__chips { display: flex; flex-wrap: wrap; gap: 8px; margin: 18px 0 22px; }
-.capa__chips li { display: inline-flex; align-items: center; min-height: 34px; padding: 5px 14px; border-radius: 999px; background: rgba(252, 250, 246, .1); border: 1px solid rgba(252, 250, 246, .28); font-size: 14.5px; font-weight: 600; line-height: 1.2; color: var(--cream); }
-.capa__chips li.is-destaque { background: var(--rose); border-color: var(--rose); color: var(--wine); }
+/* o gap deixa espaço para o selo, que fica à direita da foto */
+.capa__topo { display: flex; align-items: center; gap: 34px; }
+.capa__media { position: relative; flex: 0 0 auto; width: 120px; height: 140px; }
+.capa__foto img { width: 120px; height: 140px; border-radius: 60px 60px 18px 18px; object-fit: cover; border: 3px solid var(--cream); box-shadow: 0 0 0 2px var(--rose); background-color: var(--rose); }
+/* selo do ícone fora da foto: só encosta na borda direita, na altura dos ombros, sem cobrir o rosto */
+.capa__ic { position: absolute; right: -26px; bottom: 10px; width: 40px; height: 40px; background: var(--rose); color: var(--wine); box-shadow: 0 0 0 3px rgba(252, 250, 246, .9); }
+.capa .capa__confianca { margin-top: 10px; font-size: 14px; font-weight: 600; line-height: 1.4; color: rgba(252, 250, 246, .8); }
+/* resumo em itens de texto com check (sem pílula, para não parecer botão); o destaque em rosé */
+.capa__chips { display: flex; flex-wrap: wrap; gap: 6px 18px; margin: 16px 0 20px; }
+.capa__chips li { display: inline-flex; align-items: center; gap: 7px; font-size: 15px; font-weight: 600; line-height: 1.3; color: var(--cream); }
+.capa__chips li::before { content: ""; flex: 0 0 auto; width: 17px; height: 17px; background: var(--rose); -webkit-mask: var(--ic-check) center / contain no-repeat; mask: var(--ic-check) center / contain no-repeat; }
+.capa__chips li.is-destaque { color: var(--rose); }
 .capa .assinatura { margin-top: 16px; font-size: 14.5px; font-weight: 600; color: rgba(252, 250, 246, .88); }
 /* botão principal sobre o gradiente: rosé com texto vinho, hover creme */
 .capa .btn-cta { background: var(--rose); color: var(--wine); font-weight: 600; box-shadow: 0 16px 36px -18px rgba(0, 0, 0, .5); }
 .capa .btn-cta:hover { background: var(--cream); }
 
 @media (min-width: 640px) {
-  .capa__media, .capa__foto img { width: 96px; height: 96px; }
-  .capa__ic { width: 40px; height: 40px; }
+  .capa__media, .capa__foto img { width: 128px; height: 150px; }
+  .capa__foto img { border-radius: 64px 64px 20px 20px; }
+  .capa__ic { width: 44px; height: 44px; right: -28px; }
 }
 @media (min-width: 900px) {
   .capa { padding: 56px 0 64px; }

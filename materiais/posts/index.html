@@ -29,8 +29,8 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+Display:ital,wdth,wght@0,62.5,400..700;1,62.5,400..700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="../../assets/css/site.css?v=10">
-<link rel="stylesheet" href="../../assets/css/captacao.css?v=1">
-<link rel="stylesheet" href="../style.css?v=2">
+<link rel="stylesheet" href="../../assets/css/captacao.css?v=2">
+<link rel="stylesheet" href="../style.css?v=3">
 </head>
 <body class="page-mat no-sticky" data-tema="posts">
 <a class="skip" href="#conteudo">Pular para o conteúdo</a>
@@ -51,7 +51,7 @@
         <div class="capa__media">
           <picture class="capa__foto">
             <source media="(min-width: 900px)" srcset="../../assets/img/mat-posts-0799.webp" width="640" height="800">
-            <img src="../../assets/img/mat-posts-0799-q.webp" width="240" height="240" alt="Lívia Oliveira gravando um vídeo no consultório" fetchpriority="high" decoding="async">
+            <img src="../../assets/img/mat-posts-0799-q.webp" width="320" height="320" alt="Lívia Oliveira gravando um vídeo no consultório" fetchpriority="high" decoding="async">
           </picture>
           <span class="tema-ic capa__ic" aria-hidden="true"></span>
         </div>
@@ -118,6 +118,10 @@
     </div>
 
     <form class="form-card contato-form mat-libera" id="contato" novalidate>
+      <div class="mat-libera__autora">
+        <img class="mat-libera__avatar" src="../../assets/img/avatar-1204.webp" width="480" height="480" alt="" loading="lazy" decoding="async">
+        <p>Material da Lívia Oliveira, psicóloga clínica há 15+ anos</p>
+      </div>
       <span class="mat-libera__ic" aria-hidden="true"></span>
       <h2>Libere o material completo, grátis</h2>
       <p class="mat-libera__nota">Você deixa nome, e-mail e WhatsApp uma vez e libera todos.</p>
@@ -155,6 +159,7 @@
         <input type="text" id="empresa" name="empresa" tabindex="-1" autocomplete="off">
       </div>
       <button class="btn btn-cta" type="submit">Liberar o material</button>
+      <p class="form-note mat-libera__spam">Sem spam. Você pode sair quando quiser.</p>
     </form>
 
     <aside class="mat-dica">
