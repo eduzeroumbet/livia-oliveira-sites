@@ -471,19 +471,21 @@ Todas estão com foco correto e olhos abertos, exceto a 0902 (olho semicerrado),
 
 ### (f) Capas das páginas de captação (materiais, quiz e calculadora)
 
-Uma foto por tema, com os recortes em `_catalogo/preparar_assets.py` (4:5 para o desktop e quadrada, no rosto, para o
-círculo do celular). Todas foram abertas em 1600px para conferir o recorte: rosto inteiro, sem cortar a cabeça.
+Uma foto por tema, com os recortes em `_catalogo/preparar_assets.py` (4:5 para o desktop e quadrada "-q" de 320x320,
+do topo da cabeça aos ombros e centrada no rosto, para o arco de ~140px do celular). Todas foram abertas em 1600px para
+conferir o recorte: rosto inteiro, de frente, sem cortar a cabeça.
 
 | Página | Foto | Por quê |
 |---|---|---|
 | `materiais/` (hub) | **0709** | sorriso à mesa, estante ao fundo |
 | `materiais/mensagens/` | **0730** | sorri para a câmera com as mãos no notebook; preferida à 0676 (celular na mesa), que olha para o lado e tem nota 3 |
 | `materiais/faltas/` | **0760** | escrevendo no caderno |
-| `materiais/etica/` | **0739** | lendo livro à mesa |
+| `materiais/etica/` | **0739** (desktop) e **0745** (celular) | lendo livro à mesa; no arco pequeno do celular a 0739 não mostra o rosto (olha para baixo), então a "-q" usa a 0745, close olhando a câmera |
 | `materiais/reajuste/` | **0720** | escutando, olhar para cima |
 | `materiais/posts/` | **0799** | gravando, com a câmera desfocada em primeiro plano |
-| `materiais/indicacoes/` | **0745** | close sorrindo, com livro |
+| `materiais/indicacoes/` | **0692** | mesa, sorrindo para a câmera; troca da 0745, que passou para o celular da ética |
 | `quiz/` | **0906** | poltrona, mão no queixo |
 | `calculadora/` | **0718** | notebook, gesticulando como em atendimento online |
 
 Abertas em 1600px nesta tarefa, além das da lista acima: 0676, 0739 e 0799 (foco e olhos corretos).
+No ajuste dos recortes "-q" (30/10/2026) foram reabertas 0709, 0730, 0760, 0745, 0720, 0799, 0692, 0906 e 0718.

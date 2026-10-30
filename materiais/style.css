@@ -12,9 +12,6 @@
 /* Salvar em PDF sobre o gradiente: contorno creme */
 .capa .mat-pdf { color: var(--cream); border-color: rgba(252, 250, 246, .5); }
 .capa .mat-pdf:hover { background: rgba(252, 250, 246, .12); border-color: var(--cream); }
-/* contador do hub: "6 materiais grátis" */
-.capa__contador { display: flex; align-items: baseline; gap: 8px; color: var(--cream); font-size: 15px; font-weight: 600; letter-spacing: .02em; line-height: 1.2; }
-.capa__contador b { font-family: var(--serif); font-stretch: 62.5%; font-weight: 500; font-size: 52px; line-height: .9; color: var(--rose); }
 
 /* Barra de leitura sob o cabeçalho, na cor do tema (só CSS, onde o navegador tem animation-timeline) */
 @supports (animation-timeline: scroll()) {
@@ -109,11 +106,17 @@ html:not(.mat-ok) .mat-trava {
   pointer-events: none;
   -webkit-user-select: none;
   user-select: none;
-  -webkit-mask-image: linear-gradient(#000 30%, transparent 92%);
-  mask-image: linear-gradient(#000 30%, transparent 92%);
+  /* some por completo (fundo creme) 10px antes do topo do cartão de cadastro (margin-top: -190px), para
+     nenhuma borda de card aparecer cortada entre o borrado e o cartão */
+  -webkit-mask-image: linear-gradient(#000 120px, transparent calc(100% - 200px));
+  mask-image: linear-gradient(#000 120px, transparent calc(100% - 200px));
 }
-/* cartão do cadastro sobe por cima do fim do trecho borrado: borda do tema, cadeado e o que libera */
+/* cartão do cadastro sobe por cima do fim do trecho borrado: autora, borda do tema, cadeado e o que libera */
 .mat-libera { position: relative; z-index: 2; margin-top: -190px; border: 2px solid var(--tema); }
+.mat-libera__autora { display: flex; align-items: center; gap: 12px; margin-bottom: 18px; padding-bottom: 16px; border-bottom: 1px solid var(--line); }
+.mat-libera__avatar { flex: 0 0 auto; width: 48px; height: 48px; border-radius: 50%; object-fit: cover; }
+.mat-libera__autora p { font-size: 14.5px; font-weight: 600; line-height: 1.35; color: var(--ink); }
+.mat-libera__spam { text-align: center; }
 .mat-libera__ic { display: grid; place-items: center; width: 52px; height: 52px; margin-bottom: 12px; border-radius: 50%; background: var(--tema); background-image: var(--tema-grad); color: var(--rose); box-shadow: 0 0 0 5px var(--tema-suave); }
 .mat-libera__ic::before { content: ""; width: 26px; height: 26px; background: currentColor; -webkit-mask: var(--ic-cadeado) center / contain no-repeat; mask: var(--ic-cadeado) center / contain no-repeat; }
 .mat-libera h2 { font-size: clamp(30px, 7.5vw, 40px); margin: 0 0 6px; }
@@ -164,8 +167,13 @@ html.mat-ok .mat-libera { display: none; }
 .mat-outro b { font-family: var(--serif); font-stretch: 62.5%; font-weight: 500; font-size: 24px; line-height: 1.1; letter-spacing: var(--titulo-ls-pequeno); color: var(--wine); }
 .mat-outro__abrir { margin-top: 6px; font-size: 15px; font-weight: 600; color: var(--tema); }
 
-/* hub: card com faixa no gradiente do tema, ícone grande, número de itens e selo do que já abre */
-.mat-hub { padding: 40px 0 64px; }
+/* hub: card com faixa no gradiente do tema, ícone grande, número de itens e selo do que já abre.
+   No celular a capa e o topo da grade ficam mais justos para o primeiro card aparecer na primeira tela;
+   o "Ver os 6 materiais" da capa leva até aqui (#materiais, rolagem suave do site.css) */
+.mat-hub { padding: 28px 0 64px; }
+@media (max-width: 899px) {
+  .mat-hub-topo { padding-bottom: 28px; }
+}
 .mat-card { display: flex; flex-direction: column; width: 100%; overflow: hidden; padding: 0 20px 22px; background: var(--white); border: 1px solid var(--line); border-radius: var(--radius); box-shadow: var(--shadow-soft); transition: transform .15s ease, box-shadow .15s ease; }
 .mat-card:hover { transform: translateY(-3px); box-shadow: var(--shadow); }
 .mat-card__topo { position: relative; display: flex; align-items: center; justify-content: space-between; margin: 0 -20px 18px; padding: 18px 20px; background: var(--tema); background-image: var(--tema-grad); }
@@ -215,7 +223,6 @@ html.mat-ok .mat-libera { display: none; }
   .mat-outros { padding: 72px 0 88px; }
   .mat-hub { padding: 64px 0 88px; }
   .mat-como { padding: 72px 0 88px; }
-  .capa__contador b { font-size: 64px; }
 }
 
 /* ========== Salvar em PDF (impressão): só o material, sem cabeçalho, rodapé, formulário nem botões ==========
