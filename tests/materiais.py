@@ -268,9 +268,9 @@ with sync_playwright() as p:
         sem_rolagem(page, "material liberado")
 
         # PDF, CTA, WhatsApp, outros materiais
-        page.evaluate("window.print = () => { window.__imprimiu = (window.__imprimiu || 0) + 1; }")
+        page.evaluate("() => { window.print = () => { window.__imprimiu = (window.__imprimiu || 0) + 1; }; }")
         page.click("#mat-pdf")
-        ok(page.evaluate("window.__imprimiu") == 1, "Salvar em PDF chama window.print")
+        n_imp = page.evaluate("window.__imprimiu"); ok(n_imp == 1, f"Salvar em PDF chama window.print ({n_imp})")
         estado = page.evaluate(ESTADO)
         ok(len(eventos_fbq(estado, "MaterialPDF", "trackCustom")) == 1 and len(eventos_gtag(estado, "material_pdf")) == 1, "MaterialPDF no Pixel e material_pdf no GA4")
         page.emulate_media(media="print")
