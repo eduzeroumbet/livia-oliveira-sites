@@ -7,8 +7,8 @@
  *   ga4Id:       "G-XH74VZSNZ2"  (GA4 direto, propriedade 559914633: config com page_view em toda página)
  * As páginas do curso dizem qual versão são no atributo data-pagina da tag <script> (pgA = curso/,
  * pgB = curso/b/, pgC = curso/versao-b/); o valor vai no pg do link da pré-página de inscrição (e dali no sck
- * da Hotmart) e no content_category dos eventos. Calculadora (pgCalc) e quiz (pgQuiz) usam o data-pagina no
- * pagina e no sck do contato enviado à Lambda (window.siteContato).
+ * da Hotmart) e no content_category dos eventos. Calculadora (pgCalc), quiz (pgQuiz) e materiais gratuitos (pgMat)
+ * usam o data-pagina no pagina e no sck do contato enviado à Lambda (window.siteContato).
  * Páginas com data-sem-rastreamento na tag <script> (as de terapia: conteúdo de saúde) não carregam GTM, GA4
  * nem Pixel; o resto (UTMs, máscara, validação e envio dos formulários) funciona igual.
  */
@@ -60,11 +60,12 @@ window.dataLayer = window.dataLayer || [];
     window.fbq("track", "PageView");
   }
 
-  var PIXEL_EVENTS = { begin_checkout: "InitiateCheckout", generate_lead: "Lead", view_offer: "ViewContent" };
+  var PIXEL_EVENTS = { begin_checkout: "InitiateCheckout", generate_lead: "Lead", view_offer: "ViewContent", material_view: "ViewContent" };
   /* Eventos personalizados do Pixel (trackCustom) */
   var PIXEL_CUSTOM = {
     clique_comprar: "CliqueComprar", cadastro_checkout: "CadastroCheckout", escolha_pagamento: "EscolhaPagamento",
-    quiz_inicio: "QuizInicio", quiz_completo: "QuizCompleto", contato_calculadora: "ContatoCalculadora"
+    quiz_inicio: "QuizInicio", quiz_completo: "QuizCompleto", contato_calculadora: "ContatoCalculadora",
+    material_copiar: "MaterialCopiar", material_pdf: "MaterialPDF"
   };
 
   function track(event, params) {
@@ -80,6 +81,7 @@ window.dataLayer = window.dataLayer || [];
       if (params && params.payment_type) p.payment_type = params.payment_type;
       if (params && params.pontos !== undefined) p.pontos = params.pontos;
       if (params && params.faixa) p.faixa = params.faixa;
+      if (params && params.material) p.material = params.material;
       if (PIXEL_EVENTS[event]) window.fbq("track", PIXEL_EVENTS[event], p);
       else window.fbq("trackCustom", PIXEL_CUSTOM[event], p);
     }

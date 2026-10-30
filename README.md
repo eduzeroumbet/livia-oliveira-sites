@@ -9,7 +9,7 @@ redireciona automaticamente para o domínio. `robots.txt` aponta para o `sitemap
 
 | Arquivo | Para quem | O que faz |
 |---|---|---|
-| `index.html` | Bio do Instagram | Página de links: curso, quiz, calculadora, consultoria, terapia, WhatsApp da Thaís e Instagram |
+| `index.html` | Bio do Instagram | Página de links: curso, quiz, calculadora, materiais gratuitos, consultoria, terapia, WhatsApp da Thaís e Instagram |
 | `curso/index.html` | Psicólogas (anúncios) | Versão A (`pgA`) da página de vendas do Carreira com Sentido (checkout Hotmart), com o vídeo da árvore. Página de destino dos anúncios da Meta e a página indexada (sitemap) |
 | `curso/b/index.html` | Psicólogas (bio, links internos e anúncios) | Versão B (`pgB`): página do curso para a bio, os links internos do site e também anúncios (https://liviaoliveira.me/curso/b/). `noindex`, canonical para `/curso/` e fora do sitemap |
 | `curso/versao-b/index.html` | Psicólogas (anúncios, teste A/B/C) | Versão C (`pgC`), hero "Fios que se organizam" (canvas em `curso/versao-b/hero-fios.js` e `hero-fios.css`). Usada nos anúncios do teste A/B/C; nenhuma página do site aponta para ela e o "Curso" do rodapé dela leva para `curso/b/`. `noindex`, canonical para `/curso/` e fora do sitemap |
@@ -18,6 +18,7 @@ redireciona automaticamente para o domínio. `robots.txt` aponta para o `sitemap
 | `terapia/index.html` | Pacientes adultos | Psicoterapia com agenda completa: lista de interesse (formulário que envia ao Google Forms, o mesmo de `terapia/b/`) e indicação de profissionais pelo WhatsApp da Thaís. Não há conversa inicial |
 | `calculadora/index.html` | Psicólogas (anúncios) | Calculadora do valor da sessão (`pgCalc`), isca dos anúncios: custos, imposto, faltas e meta dão o custo por sessão, o valor mínimo e o ideal (conta em `calculadora/script.js`). No resultado, o contato opcional ("Quer ajuda para colocar esse valor em prática?", enviado à Lambda `livia-leads`), o convite para o curso (`curso/b/`, com as UTMs), o WhatsApp e o link para o quiz. No sitemap |
 | `quiz/index.html` | Psicólogas (anúncios de Lead) | Quiz "Você está pronta para viver da clínica?" (`pgQuiz`): 5 perguntas de sim ou não, resultado na hora (faixa `base` com 0 ou 1 sim, `meio` com 2 ou 3, `pronta` com 4 ou 5), contato (nome, e-mail, WhatsApp e consentimento, enviado à Lambda `livia-leads`) e, depois do envio, o plano por pergunta e o convite para o curso (`curso/b/`) e o WhatsApp. Perguntas, textos e envio em `quiz/script.js`. No sitemap |
+| `materiais/index.html` e `materiais/<slug>/index.html` | Psicólogas (anúncios de Lead) | Materiais gratuitos (`pgMat`): hub com 6 cards e as páginas `mensagens`, `faltas`, `etica`, `reajuste`, `posts` e `indicacoes`. Texto estático no HTML; os itens além dos abertos ficam borrados até o cadastro (nome, e-mail, WhatsApp e consentimento, enviado à Lambda `livia-leads`), que libera os 6 materiais (localStorage `livia_mat_ok`). Botões Copiar, Salvar em PDF, checklist ético, convite para o curso (`curso/b/`) e WhatsApp. Comportamento em `materiais/material.js`, visual em `materiais/style.css`. No sitemap |
 | `privacidade/index.html` | Todos (app da Meta e anúncios) | Política de Privacidade (LGPD), linkada no rodapé de todas as páginas. Carrega o `site.js` normalmente (com rastreamento) |
 | `termos/index.html` | Todos | Termos de Uso (curso, consultoria, lista da terapia, uso do site), linkados no rodapé de todas as páginas ao lado da Política de privacidade. Carrega o `site.js` normalmente (com rastreamento) |
 
@@ -72,9 +73,9 @@ const CONFIG = { gtmId: "", metaPixelId: "1197036460960933", ga4Id: "G-XH74VZSNZ
 Cada script só é carregado se o ID estiver preenchido (Pixel da Meta da conta de anúncios da Lívia e GA4 da propriedade
 559914633; sem GTM). Os eventos vão para o `dataLayer` (`begin_checkout`, `view_offer`, `generate_lead`), para o GA4 e,
 no Pixel, viram `InitiateCheckout`, `ViewContent` e `Lead`. Os eventos `clique_comprar`, `cadastro_checkout`,
-`escolha_pagamento`, `quiz_inicio`, `quiz_completo` e `contato_calculadora` viram os eventos personalizados
-(`trackCustom`) `CliqueComprar`, `CadastroCheckout`, `EscolhaPagamento`, `QuizInicio`, `QuizCompleto` e
-`ContatoCalculadora`.
+`escolha_pagamento`, `quiz_inicio`, `quiz_completo`, `contato_calculadora`, `material_copiar` e `material_pdf` viram
+os eventos personalizados (`trackCustom`) `CliqueComprar`, `CadastroCheckout`, `EscolhaPagamento`, `QuizInicio`,
+`QuizCompleto`, `ContatoCalculadora`, `MaterialCopiar` e `MaterialPDF`; `material_view` vira `ViewContent`.
 
 As 3 versões do curso carregam o `site.js` com `data-pagina` na tag `<script>`, que diz qual versão vendeu:
 
@@ -85,6 +86,7 @@ As 3 versões do curso carregam o `site.js` com `data-pagina` na tag `<script>`,
 | `pgC` | `curso/versao-b/` | C (anúncios, teste A/B/C) |
 | `pgCalc` | `calculadora/` | Calculadora do valor da sessão (sem checkout) |
 | `pgQuiz` | `quiz/` | Quiz "Você está pronta para viver da clínica?" (sem checkout) |
+| `pgMat` | `materiais/` | Materiais gratuitos, hub e as 6 páginas (sem checkout) |
 | `pgInsc` | `curso/inscricao/` | Pré-página de inscrição. Só identifica a página: não é sufixo de `sck` |
 
 ### Funil do curso: página do curso, inscrição, Hotmart preenchida
@@ -156,6 +158,24 @@ da Lambda nunca travam a página). Campos enviados: os mesmos da pré-página (`
 | `respostas` | `S` ou `N` por pergunta, na ordem (ex.: `S,N,S,N,S`) | não vai |
 | `pontos` | número de "sim", como texto (`"0"` a `"5"`) | não vai |
 
+### Materiais gratuitos
+
+As páginas `materiais/<slug>/` não têm link da Hotmart nem `#oferta`. O cadastro usa o mesmo `window.siteContato`
+(espera de no máximo 0,8 s; o material abre mesmo se a Lambda falhar) com `pagina` `pgMat`, `ferramenta` `material`
+e `resultado` igual ao slug (`mensagens`, `faltas`, `etica`, `reajuste`, `posts` ou `indicacoes`). O envio grava
+`localStorage` `livia_mat_ok` = `1`, e um script no `<head>` abre liberadas as próximas páginas (o cadastro libera os 6).
+O `materiais/material.js` chama o `window.siteTrack`:
+
+| Momento | GA4 / `dataLayer` | Pixel |
+|---|---|---|
+| Carregamento (`content_name` "material_<slug>") | `material_view` | `ViewContent` |
+| Envio do contato válido (`content_name` "material_<slug>", com advanced matching) | `generate_lead` | `Lead` |
+| Clique em Copiar (`material` = slug) | `material_copiar` | `MaterialCopiar` (`trackCustom`) |
+| Clique em Salvar em PDF (`material` = slug) | `material_pdf` | `MaterialPDF` (`trackCustom`) |
+| Clique em "Conhecer o curso" (`content_name` "material_para_curso") | `view_offer` | `ViewContent` |
+
+"Conhecer o curso" leva para `curso/b/?utm_source=material&utm_medium=site&utm_campaign=ccs_material&utm_content=mat_<slug>`.
+
 ## Verificar
 
 ```sh
@@ -166,6 +186,7 @@ da Lambda nunca travam a página). Campos enviados: os mesmos da pré-página (`
 /Users/educloud/orquestra/.venv/bin/python tests/inscricao.py              # pré-página: erros, cadastro (Lambda interceptada), link da Hotmart e eventos, no Chromium
 /Users/educloud/orquestra/.venv/bin/python tests/calculadora.py            # conta, erros, Lead, contato, UTMs e 390px da calculadora, no Chromium
 /Users/educloud/orquestra/.venv/bin/python tests/quiz.py                   # quiz: perguntas, Voltar, faixas, contato (Lambda interceptada), plano, eventos e prints, no Chromium
+/Users/educloud/orquestra/.venv/bin/python tests/materiais.py              # materiais: hub, bloqueio, cadastro (Lambda interceptada), copiar, PDF, checklist, eventos e prints, no Chromium
 /Users/educloud/orquestra/.venv/bin/python _catalogo/prints.py             # prints em _catalogo/prints/
 ```
 
