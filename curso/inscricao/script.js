@@ -115,7 +115,8 @@ var FORMAS = {
     else el.removeAttribute("aria-invalid");
   }
 
-  function digitos(v) { return v.replace(/\D/g, ""); }
+  /* mesma normalização da máscara (window.normalizarFone, no site.js): tira +55 e 0 de operadora/DDD */
+  function digitos(v) { return window.normalizarFone ? window.normalizarFone(v) : v.replace(/\D/g, "").slice(0, 11); }
 
   function validate() {
     var firstInvalid = null;
