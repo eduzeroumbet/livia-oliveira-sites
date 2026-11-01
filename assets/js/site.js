@@ -185,9 +185,24 @@ window.dataLayer = window.dataLayer || [];
     window.addEventListener("resize", update);
   }
 
-  /* ---------- Máscara de WhatsApp: (51) 99999-9999 ---------- */
+  /* ---------- Máscara de WhatsApp: (51) 99999-9999 ----------
+   * normalizarFone tira o que não é dígito, o +55 (só com mais de 11 dígitos: 55 sozinho é o DDD de Santa Maria)
+   * e o 0 de operadora/DDD (0 51…, 0 15 51…) antes de cortar em 11, para o autopreenchimento e o colar
+   * "+55 (51) 99999-8888" não perderem os últimos dígitos. Usada na máscara, na validação e no envio.
+   */
+  function normalizarFone(valor) {
+    var d = String(valor || "").replace(/\D/g, "");
+    if (d.length > 11 && d.slice(0, 2) === "55") d = d.slice(2);
+    if (d.charAt(0) === "0") {
+      d = d.replace(/^0+/, "");
+      if (d.length === 12 || d.length === 13) d = d.slice(2);
+    }
+    return d.slice(0, 11);
+  }
+  window.normalizarFone = normalizarFone;
+
   function maskPhone(value) {
-    var d = value.replace(/\D/g, "").slice(0, 11);
+    var d = normalizarFone(value);
     if (d.length === 0) return "";
     if (d.length < 3) return "(" + d;
     var ddd = d.slice(0, 2), rest = d.slice(2);
@@ -236,7 +251,7 @@ window.dataLayer = window.dataLayer || [];
       var letras = form.elements.nome.value.match(/[A-Za-zÀ-ÖØ-öø-ÿ]/g) || [];
       if (letras.length < 2) fail("nome", "Escreva o seu nome.");
       if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(form.elements.email.value.trim())) fail("email", "Confira o e-mail.");
-      var d = form.elements.whatsapp.value.replace(/\D/g, "");
+      var d = normalizarFone(form.elements.whatsapp.value);
       if (d.length < 10 || d.length > 11) fail("whatsapp", "Informe o WhatsApp com DDD, por exemplo (51) 99999-9999.");
       if (!form.elements.consentimento.checked) fail("consentimento", "Marque esta opção para continuar.");
       if (firstInvalid) firstInvalid.focus();
@@ -250,7 +265,7 @@ window.dataLayer = window.dataLayer || [];
       var dados = {
         nome: form.elements.nome.value.trim().replace(/\s+/g, " "),
         email: form.elements.email.value.trim().toLowerCase(),
-        whatsapp: form.elements.whatsapp.value.replace(/\D/g, ""),
+        whatsapp: normalizarFone(form.elements.whatsapp.value),
         pagina: pagina,
         src: src,
         sck: visit.get("sck") || (src || "direto") + "|" + pagina,
@@ -311,7 +326,7 @@ window.dataLayer = window.dataLayer || [];
 
     var whats = form.elements.whatsapp;
     if (whats) {
-      var digits = whats.value.replace(/\D/g, "");
+      var digits = normalizarFone(whats.value);
       if (digits.length < 10 || digits.length > 11) fail("whatsapp", "Informe o WhatsApp com DDD, por exemplo (51) 99999-9999.");
     }
 
