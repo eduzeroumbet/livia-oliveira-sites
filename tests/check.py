@@ -278,7 +278,7 @@ def check_page(rel):
         if "pay.hotmart.com" in html or 'id="oferta"' in html or "checkout" in html:
             erros.append(f"{rel}: sem checkout nem #oferta (nada de InitiateCheckout nem view_offer automático)")
         for trecho in ('name="consentimento"', 'name="empresa"', 'tabindex="-1"', 'data-mask="phone"', 'href="../privacidade/"',
-                       "og-curso.jpg", "12x de R$ 71,67 sem juros ou R$ 860 à vista", "7 dias de garantia", 'aria-live="polite"'):
+                       "assets/img/og-quiz.jpg", "12x de R$ 71,67 sem juros ou R$ 860 à vista", "7 dias de garantia", 'aria-live="polite"'):
             if trecho not in html:
                 erros.append(f"{rel}: sem {trecho}")
         script = (ROOT / "quiz/script.js").read_text(encoding="utf-8")
@@ -300,8 +300,12 @@ def check_page(rel):
             erros.append(f"{rel}: os materiais são indexáveis (sem noindex)")
         if "pay.hotmart.com" in html or 'id="oferta"' in html or "checkout" in html:
             erros.append(f"{rel}: sem checkout nem #oferta (nada de InitiateCheckout nem view_offer automático)")
-        if "og-curso.jpg" not in html:
-            erros.append(f"{rel}: sem og:image")
+        # og:image própria de cada página (prévia do link no WhatsApp), gerada por _catalogo/og.py
+        og = "og-materiais.jpg" if rel == MATERIAIS_HUB else f"og-mat-{rel.split('/')[1]}.jpg"
+        if f'<meta property="og:image" content="https://liviaoliveira.me/assets/img/{og}">' not in html:
+            erros.append(f"{rel}: og:image deve ser https://{DOMINIO}/assets/img/{og}")
+        if not (ROOT / "assets/img" / og).exists():
+            erros.append(f"{rel}: falta assets/img/{og} (rode _catalogo/og.py)")
     if rel == MATERIAIS_HUB:
         for m in MATERIAIS:
             if f'href="{m}/"' not in html:

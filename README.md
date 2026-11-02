@@ -33,7 +33,7 @@ redireciona automaticamente para o domínio. `robots.txt` aponta para o `sitemap
   (`inscricao/?pg=pgA` em `curso/`, `../inscricao/?pg=pgB` em `curso/b/`, `../inscricao/?pg=pgC` em
   `curso/versao-b/`). Não crie links para `pay.hotmart.com` nas páginas do curso: só a pré-página monta o link.
 - Formulários: cada campo enviado ao Google Forms tem `data-entry="entry.XXXX"`; campos sem `data-entry` não são enviados.
-- Imagens: `_catalogo/preparar_assets.py` gera os WebP e as imagens Open Graph a partir do ensaio (recortes e tamanhos no topo do arquivo) e copia os vídeos.
+- Imagens: `_catalogo/preparar_assets.py` gera os WebP e as imagens Open Graph sem texto (`og-curso.jpg`, `og-consultoria.jpg`, `og-terapia.jpg`) a partir do ensaio (recortes e tamanhos no topo do arquivo) e copia os vídeos. As imagens de prévia com título vêm do `_catalogo/og.py` (veja "Prévia dos links" abaixo).
 - Página de terapia: siga o Código de Ética e a resolução do CFP sobre publicidade (sem preço, sem promessa de resultado, sem depoimento de paciente).
 
 ## Visual
@@ -71,6 +71,40 @@ Identidade do site da Lívia, https://carreiracomsentido.com.br/ (cores converti
 - Fotos (geradas por `_catalogo/preparar_assets.py`): hub 0709, mensagens 0730, faltas 0760, etica 0739 no desktop e 0745 no celular (na 0739 ela olha para baixo e o rosto some no arco pequeno), reajuste 0720, posts 0799, indicacoes 0692, quiz 0906, calculadora 0718.
 - Cartão de cadastro dos materiais (`.mat-libera`): linha da autora com o avatar (`avatar-1204.webp`) no topo e "Sem spam" abaixo do botão. O trecho borrado (`.mat-trava`) some em creme antes do topo do cartão.
 - Cards do hub e "Outros materiais" levam o `data-tema` de cada material (faixa e ícone na cor dele).
+
+### Prévia dos links (og:image no WhatsApp)
+
+Cada página tem a própria imagem de prévia (1200x630, JPEG, menos de 200 KB) em `assets/img/`: fundo da cor do tema
+(creme na página inicial), foto do ensaio em arco e título em Noto Serif Display, com o trecho final em itálico rosé.
+Foto e título ficam no quadrado central de 630x630, porque o WhatsApp às vezes recorta a prévia para quadrado ou mostra
+em miniatura. As tags usam URL absoluta (`https://liviaoliveira.me/assets/img/...`) com `og:image`,
+`og:image:secure_url`, `og:image:type`, `og:image:width`, `og:image:height`, `og:image:alt` e `twitter:image`.
+
+| Página | og:image | Foto |
+|---|---|---|
+| `index.html` | `og-home.jpg` | 1204 |
+| `curso/`, `curso/b/`, `curso/versao-b/` e `curso/inscricao/` | `og-curso-v2.jpg` | 0688 |
+| `materiais/` | `og-materiais.jpg` | 0709 |
+| `materiais/mensagens/` | `og-mat-mensagens.jpg` | 0730 |
+| `materiais/faltas/` | `og-mat-faltas.jpg` | 0760 |
+| `materiais/etica/` | `og-mat-etica.jpg` | 0745 |
+| `materiais/reajuste/` | `og-mat-reajuste.jpg` | 1340 |
+| `materiais/posts/` | `og-mat-posts.jpg` | 1301 |
+| `materiais/indicacoes/` | `og-mat-indicacoes.jpg` | 0692 |
+| `quiz/` | `og-quiz.jpg` | 0906 |
+| `calculadora/` | `og-calculadora.jpg` | 0686 |
+| `consultoria/` | `og-consultoria.jpg` (sem texto) | 0730 |
+| `terapia/` e `terapia/b/` | `og-terapia.jpg` (sem texto) | 0973 |
+
+- `og-curso.jpg` (sem texto) não é usada pelas páginas, mas fica no site para os anúncios.
+- Regenerar: `/Users/educloud/orquestra/.venv/bin/python _catalogo/og.py` (ou só uma: `og.py og-quiz.jpg`). Títulos,
+  fotos e recortes ficam na lista `OG` no topo do arquivo; precisa de internet (fonte do Google Fonts) e do Chromium do
+  playwright. O script para com erro se o texto não couber no quadrado central. Depois de gerar, abra cada imagem e confira
+  o rosto inteiro, o título sem cortar e os acentos.
+- O WhatsApp e o Facebook guardam a prévia em cache pela URL da imagem: ao trocar uma imagem, gere com outro nome
+  (ex.: `og-curso-v3.jpg`) e atualize as tags, em vez de sobrescrever o arquivo.
+- O mesmo script gera `_catalogo/whatsapp-perfil-640.jpg` (640x640, sem texto, foto 1204 com folga para o recorte
+  redondo do WhatsApp), que não é publicado no site.
 
 ## Rastreamento (GTM, Pixel da Meta, GA4)
 
