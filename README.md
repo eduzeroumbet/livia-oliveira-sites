@@ -32,6 +32,13 @@ redireciona automaticamente para o domínio. `robots.txt` aponta para o `sitemap
 - Botões de compra do curso: têm a classe `checkout` e apontam para a pré-página com o `pg` da versão
   (`inscricao/?pg=pgA` em `curso/`, `../inscricao/?pg=pgB` em `curso/b/`, `../inscricao/?pg=pgC` em
   `curso/versao-b/`). Não crie links para `pay.hotmart.com` nas páginas do curso: só a pré-página monta o link.
+- WhatsApp de destino: as páginas para psicólogas (`curso/`, `curso/b/`, `curso/versao-b/`, `curso/inscricao/`,
+  `calculadora/`, `quiz/`, `materiais/` e `consultoria/`) mandam para a Lia, assistente da equipe
+  (`https://wa.me/5511910607651`), que tira as dúvidas e depois passa para a Thaís. O número da Thaís
+  (`https://wa.me/5551992597638`) só aparece em links que dizem "Thaís" (como o "WhatsApp da Thaís" dos rodapés), na
+  home (`index.html`), na terapia (`terapia/` e `terapia/b/`) e nas páginas legais (`termos/` e `privacidade/`). No
+  `site.js`, `WHATSAPP_LIA` e `WHATSAPP_THAIS`: o formulário da consultoria (`data-lead="consultoria"`) usa a Lia, a
+  lista da terapia usa a Thaís. O `tests/check.py` confere essa regra em todos os `index.html`.
 - Formulários: cada campo enviado ao Google Forms tem `data-entry="entry.XXXX"`; campos sem `data-entry` não são enviados.
 - Imagens: `_catalogo/preparar_assets.py` gera os WebP e as imagens Open Graph sem texto (`og-curso.jpg`, `og-consultoria.jpg`, `og-terapia.jpg`) a partir do ensaio (recortes e tamanhos no topo do arquivo) e copia os vídeos. As imagens de prévia com título vêm do `_catalogo/og.py` (veja "Prévia dos links" abaixo).
 - Página de terapia: siga o Código de Ética e a resolução do CFP sobre publicidade (sem preço, sem promessa de resultado, sem depoimento de paciente).

@@ -282,9 +282,9 @@ with sync_playwright() as p:
            and q.get("utm_content") == ["V01_quiz_meio"] and all(len(v) == 1 for v in q.values()),
            f"Conhecer o curso com utm_content V01_quiz_meio, sem duplicar ({q})")
         wa = page.get_attribute("#quiz-wa", "href")
-        ok(wa.startswith("https://wa.me/5551992597638?text=")
+        ok(wa.startswith("https://wa.me/5511910607651?text=")
            and unquote(wa.split("text=", 1)[1]) == "Oi! Fiz o quiz da Lívia e respondi sim para 3 de 5. Quero saber mais sobre o Carreira com Sentido.",
-           f"WhatsApp da Thaís com a mensagem do quiz ({unquote(wa)})")
+           f"WhatsApp da Lia (equipe) com a mensagem do quiz ({unquote(wa)})")
         larg = page.evaluate("[document.documentElement.scrollWidth, window.innerWidth]")
         ok(larg[0] <= larg[1], f"plano sem rolagem horizontal ({larg[0]} <= {larg[1]})")
         page.wait_for_timeout(600)

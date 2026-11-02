@@ -95,6 +95,11 @@ EXTRAS = (
 # favicons e manifest usam caminho absoluto (site na raiz do domínio)
 REL_ABSOLUTO = {"icon", "apple-touch-icon", "manifest"}
 MANIFEST = "site.webmanifest"
+# WhatsApp: a Lia (assistente da equipe) atende as psicólogas; o da Thaís só em links que dizem "Thaís", na home, na terapia e nas páginas legais
+WHATSAPP_LIA = "5511910607651"
+WHATSAPP_THAIS = "5551992597638"
+WA_LIA = ("curso/", "calculadora/", "quiz/", "materiais/", "consultoria/")
+WA_THAIS = ("terapia/", "termos/", "privacidade/")
 
 erros = []
 
@@ -113,6 +118,58 @@ class Refs(HTMLParser):
                 self.refs.append((tag, attr, a[attr], a.get("rel") or ""))
         if tag == "a" and "checkout" in (a.get("class") or "").split():
             self.checkouts.append(a.get("href"))
+
+
+class WaLinks(HTMLParser):
+    """Links wa.me de uma página, com o texto de cada um."""
+    def __init__(self):
+        super().__init__()
+        self.links = []  # [href, texto]
+        self.atual = None
+
+    def handle_starttag(self, tag, attrs):
+        href = dict(attrs).get("href") or ""
+        if tag == "a" and "wa.me/" in href:
+            self.atual = [href, ""]
+            self.links.append(self.atual)
+
+    def handle_endtag(self, tag):
+        if tag == "a":
+            self.atual = None
+
+    def handle_data(self, data):
+        if self.atual is not None:
+            self.atual[1] += data
+
+
+def check_whatsapp():
+    for p in sorted(ROOT.glob("**/index.html")):
+        if ".git" in p.parts:
+            continue
+        rel = p.relative_to(ROOT).as_posix()
+        if rel.startswith(WA_LIA):
+            esperado, regra = WHATSAPP_LIA, "páginas de psicólogas vão para a Lia, exceto links que dizem Thaís"
+        elif rel == "index.html" or rel.startswith(WA_THAIS):
+            esperado, regra = WHATSAPP_THAIS, "home, terapia e páginas legais vão para a Thaís"
+        else:
+            continue
+        parser = WaLinks()
+        parser.feed(p.read_text(encoding="utf-8"))
+        for href, texto in parser.links:
+            texto = " ".join(texto.split())
+            numero = re.match(r"https://wa\.me/(\d+)", href)
+            numero = numero.group(1) if numero else href
+            if esperado == WHATSAPP_LIA and "Thaís" in texto:
+                if numero != WHATSAPP_THAIS:
+                    erros.append(f"{rel}: link \"{texto}\" diz Thaís e deve ir para {WHATSAPP_THAIS} ({href})")
+            elif numero != esperado:
+                erros.append(f"{rel}: wa.me deve ir para {esperado} ({regra}): \"{texto}\" {href}")
+    site = (ROOT / "assets/js/site.js").read_text(encoding="utf-8")
+    for trecho in (f'WHATSAPP_LIA = "{WHATSAPP_LIA}"', f'WHATSAPP_THAIS = "{WHATSAPP_THAIS}"'):
+        if trecho not in site:
+            erros.append(f"assets/js/site.js: sem {trecho}")
+    if f'WHATSAPP = "{WHATSAPP_LIA}"' not in (ROOT / "quiz/script.js").read_text(encoding="utf-8"):
+        erros.append(f"quiz/script.js: WHATSAPP deve ser {WHATSAPP_LIA} (Lia)")
 
 
 def check_page(rel):
@@ -215,7 +272,7 @@ def check_page(rel):
         for trecho in ('autocomplete="name"', 'type="email"', 'autocomplete="email"', 'inputmode="email"', 'type="tel"',
                        'data-mask="phone"', 'autocomplete="tel"', 'inputmode="tel"', 'placeholder="(51) 99999-9999"',
                        'name="empresa"', 'tabindex="-1"', "Continuar para o pagamento", 'href="../../privacidade/"',
-                       "12x de R$ 71,67 sem juros", "R$ 860 à vista", "https://wa.me/5551992597638?text="):
+                       "12x de R$ 71,67 sem juros", "R$ 860 à vista", "https://wa.me/5511910607651?text="):
             if trecho not in html:
                 erros.append(f"{rel}: sem {trecho}")
         for proibido in ("pay.hotmart.com", "sticky-bar", "garantia", "depoimento", "<nav"):
@@ -320,7 +377,7 @@ def check_page(rel):
                        'tabindex="-1"', 'data-mask="phone"', 'href="../../privacidade/"', "Libere o material completo, grátis",
                        "Salvar em PDF", "Cada pílula é um pedaço do", "12x de R$ 71,67 sem juros ou R$ 860 à vista",
                        f"../../curso/b/?utm_source=material&amp;utm_medium=site&amp;utm_campaign=ccs_material&amp;utm_content=mat_{slug}",
-                       "https://wa.me/5551992597638?text=", "Outros materiais"):
+                       "https://wa.me/5511910607651?text=", "Outros materiais"):
             if trecho not in html:
                 erros.append(f"{rel}: sem {trecho}")
         for outro in MATERIAIS:
@@ -377,6 +434,7 @@ def check_page(rel):
 def main():
     for rel in PAGES:
         check_page(rel)
+    check_whatsapp()
     for extra in EXTRAS:
         p = ROOT / extra
         if not p.exists():
