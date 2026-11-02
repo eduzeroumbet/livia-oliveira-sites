@@ -48,7 +48,7 @@
     meio: { titulo: "Você já começou. Falta organizar.", texto: "Parte da estrutura já existe. Organizar o que falta é o que transforma atendimentos em carreira." },
     pronta: { titulo: "Você está pronta. Agora é crescer com estratégia.", texto: "A base está de pé. O próximo passo é posicionamento e presença para atrair os pacientes certos." }
   };
-  var WHATSAPP = "5551992597638";
+  var WHATSAPP = "5511910607651";
 
   var capa = document.getElementById("capa");
   var perguntas = document.getElementById("perguntas");

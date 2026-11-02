@@ -286,7 +286,7 @@ with sync_playwright() as p:
            and q.get("utm_campaign") == ["ccs_material"] and q.get("utm_content") == ["mat_mensagens"] and all(len(v) == 1 for v in q.values()),
            f"Conhecer o curso com as utm de material ({q})")
         wa = page.get_attribute("#mat-wa", "href")
-        ok(wa.startswith("https://wa.me/5551992597638?text=")
+        ok(wa.startswith("https://wa.me/5511910607651?text=")
            and unquote(wa.split("text=", 1)[1]) == "Oi! Baixei o material 8 mensagens prontas para o WhatsApp da clínica e quero saber mais sobre o Carreira com Sentido.",
            f"WhatsApp da equipe com o título do material ({unquote(wa)})")
         outros = page.evaluate("[...document.querySelectorAll('.mat-outros .mat-outro')].map(a => new URL(a.href).pathname)")

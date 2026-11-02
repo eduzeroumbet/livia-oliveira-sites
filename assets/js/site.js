@@ -301,8 +301,11 @@ window.dataLayer = window.dataLayer || [];
   };
 
   /* ---------- Formulários enviados ao Google Forms ---------- */
-  var WHATSAPP = "5551992597638";
-  function waLink(text) { return "https://wa.me/" + WHATSAPP + "?text=" + encodeURIComponent(text); }
+  /* Lia (assistente da equipe) atende as psicólogas; Thaís atende os pacientes da terapia */
+  var WHATSAPP_LIA = "5511910607651";
+  var WHATSAPP_THAIS = "5551992597638";
+  function waLink(text, numero) { return "https://wa.me/" + numero + "?text=" + encodeURIComponent(text); }
+  function leadNumero(form) { return form.getAttribute("data-lead") === "consultoria" ? WHATSAPP_LIA : WHATSAPP_THAIS; }
 
   function setError(form, name, message) {
     var out = form.querySelector('[data-error-for="' + name + '"]');
@@ -364,8 +367,8 @@ window.dataLayer = window.dataLayer || [];
     var nome = form.elements.nome ? form.elements.nome.value.trim() : "";
     if (type === "consultoria") {
       var tema = form.elements.tema ? form.elements.tema.value.trim() : "";
-      return "Oi, Thaís! Sou " + nome + " e acabei de me inscrever na Consultoria Carreira com Sentido. " +
-        (tema ? "Quero levar para a consultoria: " + tema : "Gostaria de marcar o meu horário.");
+      return "Oi! Sou " + nome + " e acabei de me inscrever na Consultoria 1:1. " +
+        (tema ? "Quero levar para a consultoria: " + tema : "Quero marcar o meu horário.");
     }
     return "Oi, Thaís! Sou " + nome + " e gostaria de entrar na lista de interesse para terapia com a Lívia.";
   }
@@ -391,7 +394,7 @@ window.dataLayer = window.dataLayer || [];
           track("generate_lead", { form: form.getAttribute("data-lead") });
           var success = document.getElementById(form.getAttribute("data-success"));
           var wa = success && success.querySelector('[data-wa="lead"]');
-          if (wa) wa.href = waLink(leadMessage(form));
+          if (wa) wa.href = waLink(leadMessage(form), leadNumero(form));
           form.hidden = true;
           if (success) {
             success.hidden = false;
@@ -405,14 +408,15 @@ window.dataLayer = window.dataLayer || [];
             status.innerHTML = "";
             var p = document.createElement("p");
             p.className = "error";
-            p.textContent = "Não conseguimos enviar agora (verifique a sua conexão). Você pode tentar de novo ou falar direto com a Thaís:";
+            var lia = leadNumero(form) === WHATSAPP_LIA;
+            p.textContent = "Não conseguimos enviar agora (verifique a sua conexão). Você pode tentar de novo ou falar direto com a " + (lia ? "equipe" : "Thaís") + ":";
             var a = document.createElement("a");
             a.className = "btn btn-wa";
             a.style.marginTop = "12px";
-            a.href = waLink(leadMessage(form));
+            a.href = waLink(leadMessage(form), leadNumero(form));
             a.target = "_blank";
             a.rel = "noopener";
-            a.textContent = "Falar com a Thaís no WhatsApp";
+            a.textContent = lia ? "Falar com a equipe no WhatsApp" : "Falar com a Thaís no WhatsApp";
             status.appendChild(p);
             status.appendChild(a);
           }
