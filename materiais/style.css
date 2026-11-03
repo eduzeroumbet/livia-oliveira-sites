@@ -128,6 +128,9 @@ html:not(.mat-ok) .mat-trava {
 .mat-libera .btn-cta { background: var(--tema); background-image: var(--tema-grad); }
 .mat-libera .btn-cta:hover { background: var(--tema); }
 html.mat-ok .mat-libera { display: none; }
+/* aviso do "Salvar em PDF" antes do cadastro (criado pelo material.js perto do botão de envio) */
+.mat-libera__pdf { margin-bottom: 12px; font-size: 15.5px; font-weight: 600; line-height: 1.4; color: var(--tema); text-align: center; }
+.mat-libera__pdf:empty { margin: 0; }
 
 /* ========== Notas, dica e ponte para o curso ========== */
 .mat-nota { margin-top: 22px; font-size: 16.5px; }
@@ -226,11 +229,22 @@ html.mat-ok .mat-libera { display: none; }
 }
 
 /* ========== Salvar em PDF (impressão): só o material, sem cabeçalho, rodapé, formulário nem botões ==========
-   Bloqueado: imprime só a parte aberta. Liberado: tudo aberto. A capa sai sem fundo, sem foto e sem chips. */
+   Bloqueado: imprime só a parte aberta e o aviso de que falta o resto (o material.js nem chama o print nesse estado).
+   Liberado: tudo aberto. A capa sai sem fundo, sem foto e sem chips. A identificação vem dos blocos .so-print
+   (linha da Lívia no topo; curso, WhatsApp da Lia e materiais no fim) e da assinatura do convite do curso.
+   Os PDFs estáticos de materiais/pdf/ saem desta mesma folha (_catalogo/pdfs.py). */
+.so-print { display: none; }
 @media print {
   @page { margin: 16mm 14mm; }
   body { background: #fff; font-size: 12pt; }
-  .skip, .site-header, .site-footer, .mat-libera, .mat-pdf, .mat-copiar, .mat-outros, .mat-cta .btn-row, .capa__media, .capa__chips, .mat-cta__autora { display: none !important; }
+  .skip, .site-header, .site-footer, .mat-libera, .mat-pdf, .mat-copiar, .mat-outros, .mat-cta .btn-row, .capa__media, .capa__chips { display: none !important; }
+  .so-print { display: block; }
+  html.mat-ok .mat-print-aviso { display: none; }
+  .mat-print-topo { margin-bottom: 12px; padding-bottom: 6px; border-bottom: 1px solid var(--line); font-size: 9.5pt; letter-spacing: .02em; color: var(--muted); }
+  .mat-print-aviso { margin-top: 14px; padding: 10px 14px; border: 1.5px solid var(--wine); border-radius: var(--radius); font-size: 12pt; font-weight: 600; color: var(--wine); break-inside: avoid; }
+  .mat-print-aviso a, .mat-print-fim a { color: var(--wine); font-weight: 600; text-decoration: underline; text-underline-offset: 2px; }
+  .mat-print-fim { margin-top: 16px; padding-top: 10px; border-top: 1px solid var(--line); }
+  .mat-print-fim p { margin: 0 0 4px; font-size: 11.5pt; color: var(--ink); }
   html:not(.mat-ok) .mat-trava { display: none; }
   .mat-trava { margin-top: 10px; }
   section, .hero { padding: 0; }
@@ -250,4 +264,9 @@ html.mat-ok .mat-libera { display: none; }
   .mat-cta h2, .mat-cta h2 em { color: var(--wine); font-size: 22pt; }
   .mat-cta p, .mat-cta .preco-linha { color: var(--ink); }
   .mat-cta .eyebrow { color: var(--wine); }
+  /* assinatura da Lívia: avatar pequeno, sem moldura, texto escuro no papel branco */
+  .mat-cta__autora { gap: 10px; margin-bottom: 12px; }
+  .mat-cta__avatar { width: 36px; height: 36px; border: 0; box-shadow: none; }
+  .mat-cta .mat-cta__assinatura { font-size: 10.5pt; color: var(--ink); }
+  .mat-cta__assinatura b { font-size: 15pt; color: var(--wine); }
 }
