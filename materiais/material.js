@@ -6,9 +6,10 @@
  * próximas visitas. O envio vai para a Lambda livia-leads (pagina pgMat, ferramenta material, resultado = slug)
  * e espera no máximo 0,8 s: o material abre mesmo com erro ou demora.
  * Eventos: material_view (ViewContent, content_name "material_<slug>") ao carregar; generate_lead (Lead, com
- * advanced matching) só no envio; material_copiar (MaterialCopiar, {material}) a cada cópia; material_pdf
- * (MaterialPDF) no "Salvar em PDF"; view_offer (ViewContent, content_name "material_para_curso") no clique em
- * "Conhecer o curso". Sem InitiateCheckout.
+ * advanced matching) só no envio; material_copiar (MaterialCopiar, {material}) a cada cópia; no "Salvar em PDF",
+ * material_pdf (MaterialPDF, {material, modo: "arquivo" | "print"}) com o material liberado ou
+ * material_pdf_bloqueado ({material}) quando ainda falta o cadastro; view_offer (ViewContent, content_name
+ * "material_para_curso") no clique em "Conhecer o curso". Sem InitiateCheckout.
  */
 (function () {
   "use strict";
@@ -133,12 +134,44 @@
     confere();
   }
 
-  /* ---------- Salvar em PDF ---------- */
+  /* ---------- Salvar em PDF ----------
+   * Bloqueado: não imprime; leva ao cadastro com o aviso de que o PDF completo vem depois dele.
+   * Liberado: no navegador do Instagram/Facebook (e outros embutidos) e no celular a impressão não funciona ou não
+   * salva PDF, então abre o PDF pronto de materiais/pdf/ (_catalogo/pdfs.py); no computador, imprime. */
+  var EMBUTIDO = /FBAN|FBAV|FB_IAB|FBIOS|Instagram|; wv\)|Line\//i;
+
+  function semPrint() {
+    var celular = window.matchMedia("(pointer: coarse)").matches && window.innerWidth < 900;
+    return EMBUTIDO.test(navigator.userAgent) || celular;
+  }
+
+  function pedeCadastro() {
+    if (!form) return;
+    var aviso = form.querySelector(".mat-libera__pdf");
+    if (!aviso) {
+      aviso = document.createElement("p");
+      aviso.className = "mat-libera__pdf";
+      var envio = form.querySelector('button[type="submit"]');
+      envio.parentNode.insertBefore(aviso, envio);
+    }
+    aviso.textContent = "Cadastre-se grátis para baixar o material completo em PDF.";
+    form.scrollIntoView({ behavior: reduz ? "auto" : "smooth", block: "start" });
+    var campo = form.querySelector("input");
+    if (campo) campo.focus({ preventScroll: true });
+  }
+
   var pdf = document.getElementById("mat-pdf");
   if (pdf) {
     pdf.addEventListener("click", function () {
-      track("material_pdf", { material: slug });
-      window.print();
+      if (!raiz.classList.contains("mat-ok")) {
+        track("material_pdf_bloqueado", { material: slug });
+        pedeCadastro();
+        return;
+      }
+      var arquivo = semPrint();
+      track("material_pdf", { material: slug, modo: arquivo ? "arquivo" : "print" });
+      if (arquivo) location.href = "../pdf/" + slug + ".pdf";
+      else window.print();
     });
   }
 
