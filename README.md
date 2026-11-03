@@ -248,6 +248,12 @@ aparece com o material bloqueado) e, no fim do convite do curso, os links do cur
 `utm_medium=material`, `utm_campaign=<slug>`), do WhatsApp da Lia e do hub de materiais (`.mat-print-fim`). Os links
 desses blocos são absolutos (`https://liviaoliveira.me/...`) porque precisam funcionar dentro do PDF.
 
+Diagramação da folha: A4 com margens de 18 mm nas laterais (18 mm em cima, 20 mm embaixo) e todo o conteúdo na mesma
+linha de margem (o `.wrap` perde o recuo da tela na impressão). Rodapé de cada página pelas caixas do `@page`:
+"Lívia Oliveira · Psicóloga clínica · CRP 07/18713" à esquerda e "liviaoliveira.me/materiais  N de T" à direita.
+Corpo em 10,5 pt, títulos dos itens em 14 pt, cards sem sombra e sem quebra no meio, convite do curso inteiro num bloco
+só no fim. Depois de mexer na folha de impressão ou no texto de um material, rode `_catalogo/pdfs.py` e commite os PDFs.
+
 Os 6 PDFs estáticos de `materiais/pdf/` saem dessa mesma folha de impressão, pelo `_catalogo/pdfs.py` (Playwright e
 Chromium; abre cada material liberado num servidor local, sem Pixel, GA4 nem Lambda, e confere o texto de cada PDF).
 **Sempre que o texto de um material mudar, rode o script de novo e commite os PDFs junto**, senão quem baixa pelo
