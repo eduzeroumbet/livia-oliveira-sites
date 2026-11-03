@@ -383,6 +383,21 @@ def check_page(rel):
         for outro in MATERIAIS:
             if outro != slug and f'href="../{outro}/"' not in html:
                 erros.append(f"{rel}: \"Outros materiais\" sem o link ../{outro}/")
+        # Salvar em PDF: blocos só de impressão (identificação no topo, aviso do bloqueio, curso e WhatsApp no fim)
+        for classe in ("mat-print-topo", "mat-print-aviso", "mat-print-fim"):
+            if not re.search(rf'class="so-print {classe}"', html):
+                erros.append(f"{rel}: sem o bloco de impressão .so-print.{classe}")
+        if "CRP 07/18713" not in (re.search(r'<p class="so-print mat-print-topo">(.*?)</p>', html) or [""])[0]:
+            erros.append(f"{rel}: .mat-print-topo sem o CRP 07/18713")
+        if f'href="https://liviaoliveira.me/materiais/{slug}/"' not in (re.search(r'<p class="so-print mat-print-aviso">(.*?)</p>', html) or [""])[0]:
+            erros.append(f"{rel}: .mat-print-aviso sem o link https://liviaoliveira.me/materiais/{slug}/")
+        fim = (re.search(r'<div class="so-print mat-print-fim">(.*?)</div>', html, re.S) or [""])[0]
+        for trecho in ("liviaoliveira.me/curso/b/", f"utm_campaign={slug}", 'href="https://wa.me/5511910607651"', "liviaoliveira.me/materiais/"):
+            if trecho not in fim:
+                erros.append(f"{rel}: .mat-print-fim sem {trecho}")
+        pdf = ROOT / "materiais" / "pdf" / f"{slug}.pdf"
+        if not pdf.is_file() or pdf.stat().st_size == 0:
+            erros.append(f"materiais/pdf/{slug}.pdf: não existe ou está vazio (rode _catalogo/pdfs.py)")
     if rel == "curso/versao-b/index.html":
         if '<meta name="robots" content="noindex, follow">' not in html:
             erros.append(f"{rel}: sem noindex (é variação de teste)")
@@ -461,6 +476,15 @@ def main():
                     erros.append(f"{extra}: sem {trecho}")
             if "begin_checkout" in texto:
                 erros.append(f"{extra}: não pode disparar begin_checkout (InitiateCheckout)")
+            # Salvar em PDF: bloqueado não imprime (pede o cadastro); liberado imprime ou abre materiais/pdf/<slug>.pdf
+            botao = texto.find('getElementById("mat-pdf")')
+            checa = texto.find('classList.contains("mat-ok")', botao)
+            imprime = texto.find("window.print()", botao)
+            if botao < 0 or texto.count("window.print()") != 1 or not 0 <= checa < imprime:
+                erros.append(f"{extra}: window.print() só pode ser chamado no #mat-pdf, depois de checar html.mat-ok")
+            for trecho in ('"material_pdf_bloqueado"', '"../pdf/" + slug + ".pdf"', "mat-libera__pdf"):
+                if trecho not in texto:
+                    erros.append(f"{extra}: sem {trecho}")
         if extra == "terapia/script.js":
             for tag in TAGS_RASTREAMENTO:
                 if tag in texto:
