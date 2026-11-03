@@ -56,6 +56,19 @@ def confere(destino):
     return not faltando and not sobrando
 
 
+def enxuga(destino):
+    """O avatar da assinatura (480x480) vai inteiro para o PDF e passa de 400 KB; reduz para 150 dpi em JPEG."""
+    try:
+        import fitz
+    except ImportError:
+        return
+    doc = fitz.open(destino)
+    doc.rewrite_images(dpi_threshold=160, dpi_target=150, quality=82)
+    doc.save(str(destino) + ".tmp", garbage=4, deflate=True)
+    doc.close()
+    Path(str(destino) + ".tmp").replace(destino)
+
+
 def main():
     slugs = [s for s in SLUGS if not sys.argv[1:] or s in sys.argv[1:]]
     OUT.mkdir(parents=True, exist_ok=True)
@@ -79,6 +92,7 @@ def main():
                 destino = OUT / f"{slug}.pdf"
                 # page.pdf já usa a mídia de impressão (@media print); não emular "screen" aqui
                 page.pdf(path=str(destino), format="A4", prefer_css_page_size=True, print_background=False)
+                enxuga(destino)
                 kb = destino.stat().st_size / 1024
                 print(f"{destino.relative_to(ROOT)}  {kb:.0f} KB" + ("  (ATENÇÃO: passou de 1 MB)" if kb > 1024 else ""))
                 certo = confere(destino) and certo
