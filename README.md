@@ -215,11 +215,19 @@ As páginas `materiais/<slug>/` não têm link da Hotmart nem `#oferta`. O cadas
 (espera de no máximo 0,8 s; o material abre mesmo se a Lambda falhar) com `pagina` `pgMat`, `ferramenta` `material`
 e `resultado` igual ao slug (`mensagens`, `faltas`, `etica`, `reajuste`, `posts` ou `indicacoes`). O envio grava
 `localStorage` `livia_mat_ok` = `1`, e um script no `<head>` abre liberadas as próximas páginas (o cadastro libera os 6).
+
+Liberação por link: com `?acesso=wa` (ou `&acesso=wa`) na URL, a página já abre liberada, com o mesmo efeito do
+cadastro (o script do `<head>` aplica `html.mat-ok` na hora e grava `livia_mat_ok` = `1` quando o `localStorage`
+funciona; em modo privado ou no navegador do Instagram vale só para aquela visita). É o link que a Lia manda pelo
+WhatsApp para quem já se cadastrou e abre o material em outro navegador, por exemplo
+`https://liviaoliveira.me/materiais/mensagens/?acesso=wa`. O hub `materiais/` não tem bloqueio.
+
 O `materiais/material.js` chama o `window.siteTrack`:
 
 | Momento | GA4 / `dataLayer` | Pixel |
 |---|---|---|
 | Carregamento (`content_name` "material_<slug>") | `material_view` | `ViewContent` |
+| Carregamento com `?acesso=wa` (`material` = slug) | `material_liberado_link` | (não vai) |
 | Envio do contato válido (`content_name` "material_<slug>", com advanced matching) | `generate_lead` | `Lead` |
 | Clique em Copiar (`material` = slug) | `material_copiar` | `MaterialCopiar` (`trackCustom`) |
 | Clique em Salvar em PDF com o material liberado (`material` = slug, `modo` = `arquivo` ou `print`) | `material_pdf` | `MaterialPDF` (`trackCustom`) |

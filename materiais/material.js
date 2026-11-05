@@ -5,6 +5,9 @@
  * grava localStorage "livia_mat_ok" = "1" e o script do <head> já abre a página liberada (html.mat-ok) nas
  * próximas visitas. O envio vai para a Lambda livia-leads (pagina pgMat, ferramenta material, resultado = slug)
  * e espera no máximo 0,8 s: o material abre mesmo com erro ou demora.
+ * Liberação por link: com ?acesso=wa na URL (link que a Lia manda pelo WhatsApp para quem já se cadastrou e abre
+ * em outro navegador), o script do <head> já aplica html.mat-ok e tenta gravar o localStorage; aqui grava de novo
+ * e dispara material_liberado_link ({material}, só GA4/dataLayer).
  * Eventos: material_view (ViewContent, content_name "material_<slug>") ao carregar; generate_lead (Lead, com
  * advanced matching) só no envio; material_copiar (MaterialCopiar, {material}) a cada cópia; no "Salvar em PDF",
  * material_pdf (MaterialPDF, {material, modo: "arquivo" | "print"}) com o material liberado ou
@@ -47,8 +50,13 @@
     if (form) form.hidden = ok;
   }
 
-  aplica(raiz.classList.contains("mat-ok") || lido());
+  /* ?acesso=wa (ou &acesso=wa): libera como o cadastro, mesmo sem localStorage (modo privado, navegador do Instagram) */
+  var porLink = /[?&]acesso=wa(&|$)/.test(location.search);
+  if (porLink) grava();
+
+  aplica(porLink || raiz.classList.contains("mat-ok") || lido());
   track("material_view", { content_name: "material_" + slug });
+  if (porLink) track("material_liberado_link", { material: slug });
 
   /* ---------- Cadastro ---------- */
   if (form && window.siteContato) {

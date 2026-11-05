@@ -380,6 +380,11 @@ def check_page(rel):
                        "https://wa.me/5511910607651?text=", "Outros materiais"):
             if trecho not in html:
                 erros.append(f"{rel}: sem {trecho}")
+        # liberação por link (?acesso=wa, mandado pela Lia no WhatsApp): o script do <head> aplica html.mat-ok
+        # antes de pintar e grava livia_mat_ok, mesmo se o localStorage falhar
+        cabeca = html.split("</head>", 1)[0]
+        if not ("acesso=wa" in cabeca and 'localStorage.setItem("livia_mat_ok","1")' in cabeca):
+            erros.append(f"{rel}: o script do <head> não libera com ?acesso=wa (html.mat-ok + localStorage livia_mat_ok)")
         for outro in MATERIAIS:
             if outro != slug and f'href="../{outro}/"' not in html:
                 erros.append(f"{rel}: \"Outros materiais\" sem o link ../{outro}/")
@@ -482,7 +487,8 @@ def main():
             imprime = texto.find("window.print()", botao)
             if botao < 0 or texto.count("window.print()") != 1 or not 0 <= checa < imprime:
                 erros.append(f"{extra}: window.print() só pode ser chamado no #mat-pdf, depois de checar html.mat-ok")
-            for trecho in ('"material_pdf_bloqueado"', '"../pdf/" + slug + ".pdf"', "mat-libera__pdf"):
+            for trecho in ('"material_pdf_bloqueado"', '"../pdf/" + slug + ".pdf"', "mat-libera__pdf", "acesso=wa",
+                           '"material_liberado_link"'):
                 if trecho not in texto:
                     erros.append(f"{extra}: sem {trecho}")
         if extra == "terapia/script.js":
