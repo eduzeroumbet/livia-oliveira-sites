@@ -221,6 +221,8 @@ cadastro (o script do `<head>` aplica `html.mat-ok` na hora e grava `livia_mat_o
 funciona; em modo privado ou no navegador do Instagram vale só para aquela visita). É o link que a Lia manda pelo
 WhatsApp para quem já se cadastrou e abre o material em outro navegador, por exemplo
 `https://liviaoliveira.me/materiais/mensagens/?acesso=wa`. O hub `materiais/` não tem bloqueio.
+No hub, `https://liviaoliveira.me/materiais/?acesso=wa` grava `livia_mat_ok` = `1` e acrescenta `?acesso=wa` aos
+links dos 6 materiais, para abrirem liberados mesmo onde o `localStorage` falha.
 
 O `materiais/material.js` chama o `window.siteTrack`:
 

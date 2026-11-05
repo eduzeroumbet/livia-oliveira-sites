@@ -367,6 +367,10 @@ def check_page(rel):
         for m in MATERIAIS:
             if f'href="{m}/"' not in html:
                 erros.append(f"{rel}: sem o card de {m}/")
+        # hub com ?acesso=wa: grava livia_mat_ok e repassa acesso=wa aos links dos 6 materiais (vale mesmo sem localStorage)
+        if not ("acesso=wa" in html and 'localStorage.setItem("livia_mat_ok","1")' in html
+                and all(f'a[href="{m}/"]' in html for m in MATERIAIS)):
+            erros.append(f"{rel}: o hub não trata ?acesso=wa (localStorage livia_mat_ok + acesso=wa nos links dos 6 materiais)")
     if rel in MATERIAIS_PAGINAS:
         slug = rel.split("/")[1]
         if f'data-material="{slug}"' not in html:
