@@ -18,7 +18,7 @@ redireciona automaticamente para o domínio. `robots.txt` aponta para o `sitemap
 | `terapia/index.html` | Pacientes adultos | Psicoterapia com agenda completa: lista de interesse (formulário que envia ao Google Forms, o mesmo de `terapia/b/`) e indicação de profissionais pelo WhatsApp da Thaís. Não há conversa inicial |
 | `calculadora/index.html` | Psicólogas (anúncios) | Calculadora do valor da sessão (`pgCalc`), isca dos anúncios: custos, imposto, faltas e meta dão o custo por sessão, o valor mínimo e o ideal (conta em `calculadora/script.js`). No resultado, o contato opcional ("Quer ajuda para colocar esse valor em prática?", enviado à Lambda `livia-leads`), o convite para o curso (`curso/b/`, com as UTMs), o WhatsApp e o link para o quiz. No sitemap |
 | `quiz/index.html` | Psicólogas (anúncios de Lead) | Quiz "Você está pronta para viver da clínica?" (`pgQuiz`): 5 perguntas de sim ou não, resultado na hora (faixa `base` com 0 ou 1 sim, `meio` com 2 ou 3, `pronta` com 4 ou 5), contato (nome, e-mail, WhatsApp e consentimento, enviado à Lambda `livia-leads`) e, depois do envio, o plano por pergunta e o convite para o curso (`curso/b/`) e o WhatsApp. Perguntas, textos e envio em `quiz/script.js`. No sitemap |
-| `materiais/index.html` e `materiais/<slug>/index.html` | Psicólogas (anúncios de Lead) | Materiais gratuitos (`pgMat`): hub com 6 cards e as páginas `mensagens`, `faltas`, `etica`, `reajuste`, `posts` e `indicacoes`. Texto estático no HTML; os itens além dos abertos ficam borrados até o cadastro (nome, e-mail, WhatsApp e consentimento, enviado à Lambda `livia-leads`), que libera os 6 materiais (localStorage `livia_mat_ok`). Botões Copiar, Salvar em PDF (pede o cadastro antes; liberado, imprime no computador e abre o PDF pronto de `materiais/pdf/<slug>.pdf` no celular e no navegador do Instagram/Facebook; PDFs gerados por `_catalogo/pdfs.py`), checklist ético, convite para o curso (`curso/b/`) e WhatsApp. Comportamento em `materiais/material.js`, visual e impressão em `materiais/style.css`. No sitemap |
+| `materiais/index.html` e `materiais/<slug>/index.html` | Psicólogas (anúncios de Lead) | Materiais gratuitos (`pgMat`): hub com 6 cards e as páginas `mensagens`, `faltas`, `etica`, `reajuste`, `posts` e `indicacoes`. Texto estático no HTML; os itens além dos abertos ficam borrados até o cadastro (nome, e-mail, WhatsApp e consentimento, enviado à Lambda `livia-leads`), que libera os 6 materiais (localStorage `livia_mat_ok`). Botões Copiar, Baixar PDF (pede o cadastro antes; liberado, baixa direto o PDF pronto de `materiais/pdf/<slug>.pdf` como `Livia-Oliveira-<slug>.pdf` no computador e no celular, inclusive no navegador do WhatsApp; no navegador do Instagram/Facebook, que não salva arquivos, abre um painel abaixo do botão com receber o PDF no WhatsApp da Lia, abrir no navegador do celular, ver o PDF ali e copiar o link; PDFs gerados por `_catalogo/pdfs.py`), checklist ético, convite para o curso (`curso/b/`) e WhatsApp. Comportamento em `materiais/material.js`, visual e impressão em `materiais/style.css`. No sitemap |
 | `privacidade/index.html` | Todos (app da Meta e anúncios) | Política de Privacidade (LGPD), linkada no rodapé de todas as páginas. Carrega o `site.js` normalmente (com rastreamento) |
 | `termos/index.html` | Todos | Termos de Uso (curso, consultoria, lista da terapia, uso do site), linkados no rodapé de todas as páginas ao lado da Política de privacidade. Carrega o `site.js` normalmente (com rastreamento) |
 
@@ -232,24 +232,31 @@ O `materiais/material.js` chama o `window.siteTrack`:
 | Carregamento com `?acesso=wa` (`material` = slug) | `material_liberado_link` | (não vai) |
 | Envio do contato válido (`content_name` "material_<slug>", com advanced matching) | `generate_lead` | `Lead` |
 | Clique em Copiar (`material` = slug) | `material_copiar` | `MaterialCopiar` (`trackCustom`) |
-| Clique em Salvar em PDF com o material liberado (`material` = slug, `modo` = `arquivo` ou `print`) | `material_pdf` | `MaterialPDF` (`trackCustom`) |
-| Clique em Salvar em PDF antes do cadastro (`material` = slug) | `material_pdf_bloqueado` | (não vai) |
+| Clique em Baixar PDF com o material liberado (`material` = slug, `modo` = `download`) ou, no navegador do Instagram/Facebook, numa opção do painel (`modo` = `whatsapp`, `externo` ou `ver`); o `modo` vai só para o GA4/`dataLayer` | `material_pdf` | `MaterialPDF` (`trackCustom`) |
+| Clique em Baixar PDF antes do cadastro (`material` = slug) | `material_pdf_bloqueado` | (não vai) |
 | Clique em "Conhecer o curso" (`content_name` "material_para_curso") | `view_offer` | `ViewContent` |
 
 "Conhecer o curso" leva para `curso/b/?utm_source=material&utm_medium=site&utm_campaign=ccs_material&utm_content=mat_<slug>`.
 
-#### Salvar em PDF
+#### Baixar PDF
 
-O público dos materiais chega pelos anúncios da Meta, no navegador embutido do Instagram/Facebook, onde o
-`window.print()` não funciona. Por isso o botão `#mat-pdf` (`materiais/material.js`) faz:
+O público dos materiais chega pelos anúncios da Meta, quase sempre no celular e no navegador embutido do
+Instagram/Facebook, onde não dá para salvar arquivos. O botão `#mat-pdf` ("Baixar PDF", `materiais/material.js`) faz:
 
-- **Antes do cadastro** (sem `html.mat-ok`): não imprime. Rola até o cartão de cadastro (`#contato`), foca o primeiro
+- **Antes do cadastro** (sem `html.mat-ok`): não baixa. Rola até o cartão de cadastro (`#contato`), foca o primeiro
   campo e mostra, perto do botão de envio, "Cadastre-se grátis para baixar o material completo em PDF."
   (`.mat-libera__pdf`). Evento `material_pdf_bloqueado`.
-- **Liberado, no navegador embutido** (Instagram, Facebook, Line, WebView do Android) **ou no celular** (toque e tela
-  menor que 900 px): abre na mesma aba o PDF pronto `materiais/pdf/<slug>.pdf`. Evento `material_pdf` com `modo` `arquivo`.
-- **Liberado, no computador**: `window.print()`, com a folha de impressão de `materiais/style.css`. Evento
-  `material_pdf` com `modo` `print`.
+- **Liberado, em qualquer navegador normal** (computador, celular e o navegador do WhatsApp): baixa direto o PDF pronto
+  `materiais/pdf/<slug>.pdf` (link temporário com `download="Livia-Oliveira-<slug>.pdf"`). Evento `material_pdf` com
+  `modo` `download`. O botão não chama mais `window.print()`; a folha de impressão continua para quem usa Ctrl+P.
+- **Liberado, no navegador embutido** (regex `EMBUTIDO`: Instagram, Facebook, Line, WebView do Android): não navega.
+  Abre logo abaixo do botão o painel `#mat-pdf-painel` (foco nele; fecha no X, no Esc ou num novo clique no botão;
+  some na impressão) com o título "O navegador do Instagram não deixa salvar arquivos" e as opções:
+  "Receber o PDF no WhatsApp" (`wa.me/5511910607651` da Lia com "Oi! Quero o PDF do material <título curto>", título
+  pelo mapa `TITULOS` do `material.js`; `modo` `whatsapp`), "Abrir no navegador do celular" (`intent://` do Chrome no
+  Android, com fallback para o PDF; `x-safari-https://` no iPhone/iPad; com a dica dos três pontinhos; `modo`
+  `externo`), "Ver o PDF aqui" (abre `../pdf/<slug>.pdf` na mesma aba, como antes; `modo` `ver`) e "Copiar link do
+  PDF" (copia `https://liviaoliveira.me/materiais/pdf/<slug>.pdf` e mostra "Link copiado. Cole no Safari ou no Chrome.").
 
 A folha de impressão esconde cabeçalho, rodapé, formulário, botões e "Outros materiais", e mostra os blocos `.so-print`
 de cada página (ocultos na tela): a linha "Lívia Oliveira · Psicóloga clínica · CRP 07/18713 · Materiais gratuitos"
@@ -284,7 +291,7 @@ celular recebe a versão antiga:
 /Users/educloud/orquestra/.venv/bin/python tests/inscricao.py              # pré-página: erros, cadastro (Lambda interceptada), link da Hotmart e eventos, no Chromium
 /Users/educloud/orquestra/.venv/bin/python tests/calculadora.py            # conta, erros, Lead, contato, UTMs e 390px da calculadora, no Chromium
 /Users/educloud/orquestra/.venv/bin/python tests/quiz.py                   # quiz: perguntas, Voltar, faixas, contato (Lambda interceptada), plano, eventos e prints, no Chromium
-/Users/educloud/orquestra/.venv/bin/python tests/materiais.py              # materiais: hub, bloqueio, cadastro (Lambda interceptada), copiar, PDF, checklist, eventos e prints, no Chromium
+/Users/educloud/orquestra/.venv/bin/python tests/materiais.py              # materiais: hub, bloqueio, cadastro (Lambda interceptada), copiar, Baixar PDF (download e painel do Instagram), checklist, eventos e prints, no Chromium
 /Users/educloud/orquestra/.venv/bin/python _catalogo/prints.py             # prints em _catalogo/prints/
 /Users/educloud/orquestra/.venv/bin/python _catalogo/pdfs.py               # PDFs dos 6 materiais em materiais/pdf/ (rode quando o texto mudar)
 ```

@@ -12,12 +12,18 @@ fbq e no dataLayer, e é isso que o teste confere). Em 375px e 1440px:
   generate_lead (GA4) uma vez com content_name material_mensagens, advanced matching (em, ph, fn), nenhum dado
   pessoal no dataLayer;
 - Copiar: texto puro com os [campos] na área de transferência, "Copiado", MaterialCopiar {material};
-- Salvar em PDF: window.print e MaterialPDF; CTA do curso com as utm de material e ViewContent material_para_curso;
+- Baixar PDF: sem cadastro não baixa e leva ao cadastro (material_pdf_bloqueado); liberado baixa
+  /materiais/pdf/mensagens.pdf como Livia-Oliveira-mensagens.pdf, sem window.print, MaterialPDF modo download; CTA do curso com as utm de material e ViewContent material_para_curso;
   WhatsApp com o título do material; "Outros materiais" com os outros 5; nenhum InitiateCheckout;
 - faltas/ no mesmo navegador abre já liberada, sem formulário;
 - prints em _catalogo/prints/materiais-{hub,mensagens-bloqueada,mensagens-liberada}-{mobile,desktop}.png.
 Em 375px: etica/ (liberada) mostra a frase final só com os 10 itens marcados; Lambda com erro 500 e sem resposta:
 o material abre mesmo assim, em <= 2 s; sem UTM: sck=direto|pgMat; páginas sem rolagem horizontal.
+Baixar PDF com UA de celular (375px, liberado): iPhone Safari e Android Chrome baixam Livia-Oliveira-faltas.pdf;
+Instagram (Android e iPhone) não baixa nem navega e abre o painel abaixo do botão (foco, título, 4 controles: wa.me
+com "Oi! Quero o PDF do material ...", intent:// no Android ou x-safari-https:// no iPhone, ../pdf/<slug>.pdf e
+Copiar link), eventos modo whatsapp/externo/ver, some na impressão, fecha com Esc e no X; print em
+_catalogo/prints/materiais-mensagens-instagram-mobile.png.
 
 Uso: /Users/educloud/orquestra/.venv/bin/python tests/materiais.py
 Requer: playwright + chromium (python -m playwright install chromium).
@@ -29,7 +35,7 @@ import threading
 import time
 from http.server import SimpleHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
-from urllib.parse import parse_qs, unquote, urlsplit
+from urllib.parse import parse_qs, quote, unquote, urlsplit
 
 from playwright.sync_api import sync_playwright
 
@@ -45,6 +51,14 @@ MSG1 = ("Oi, [nome]! Aqui é a [seu nome], psicóloga. Obrigada por me procurar.
         "para você, me conta qual horário fica melhor que eu já reservo.")
 PODE = "Pode postar. Ética não é freio, é o que faz a paciente confiar em você."
 PRINTS = ROOT / "_catalogo" / "prints"
+UA_IPHONE = ("Mozilla/5.0 (iPhone; CPU iPhone OS 17_5 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.5 "
+             "Mobile/15E148 Safari/604.1")
+UA_ANDROID = "Mozilla/5.0 (Linux; Android 14; SM-S911B) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0.0.0 Mobile Safari/537.36"
+UA_IG_ANDROID = ("Mozilla/5.0 (Linux; Android 14; SM-S911B Build/UP1A.231005.007; wv) AppleWebKit/537.36 (KHTML, like Gecko) "
+                 "Version/4.0 Chrome/130.0.6723.86 Mobile Safari/537.36 Instagram 354.0.0.39.102 Android (34/14; 450dpi; "
+                 "1080x2340; samsung; SM-S911B; dm1q; qcom; pt_BR; 650912345)")
+UA_IG_IPHONE = ("Mozilla/5.0 (iPhone; CPU iPhone OS 17_5 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148 "
+                "Instagram 354.0.0.23.104 (iPhone15,2; iOS 17_5; pt_BR; pt; scale=3.00; 1179x2556; 650912345)")
 CORS = {"access-control-allow-origin": "*", "access-control-allow-methods": "POST, OPTIONS", "access-control-allow-headers": "content-type"}
 falhas = []
 
@@ -135,6 +149,24 @@ def envia(page):
     return time.monotonic() - t0
 
 
+def baixa_pdf(page, espera=3000):
+    """Clica no Baixar PDF e devolve o download (None se nada baixar em `espera` ms)."""
+    try:
+        with page.expect_download(timeout=espera) as info:
+            page.click("#mat-pdf")
+        return info.value
+    except Exception:
+        return None
+
+
+def contexto_ua(b, ua):
+    """Celular de 375px com o user agent dado e o material já liberado."""
+    c = b.new_context(viewport={"width": 375, "height": 812}, user_agent=ua, is_mobile=True, has_touch=True)
+    c.grant_permissions(["clipboard-read", "clipboard-write"], origin=BASE)
+    c.add_init_script("localStorage.setItem('livia_mat_ok', '1')")
+    return c
+
+
 def sem_rolagem(page, onde):
     larg = page.evaluate("[document.documentElement.scrollWidth, window.innerWidth]")
     ok(larg[0] <= larg[1], f"{onde} sem rolagem horizontal ({larg[0]} <= {larg[1]})")
@@ -221,6 +253,16 @@ with sync_playwright() as p:
         page.wait_for_timeout(200)
         page.screenshot(path=str(PRINTS / f"materiais-mensagens-bloqueada-{tela}.png"), full_page=True)
 
+        # Baixar PDF sem cadastro: não baixa, leva ao cadastro
+        baixado = baixa_pdf(page, espera=800)
+        ok(baixado is None, "Baixar PDF bloqueado não baixa nada")
+        ok(page.evaluate("document.activeElement && document.activeElement.closest('#contato') !== null"), "Baixar PDF bloqueado foca o cadastro")
+        ok(page.inner_text("#contato .mat-libera__pdf") == "Cadastre-se grátis para baixar o material completo em PDF.", "aviso do PDF no cadastro")
+        estado = page.evaluate(ESTADO)
+        ok(eventos_gtag(estado, "material_pdf_bloqueado") == [["event", "material_pdf_bloqueado", {"material": "mensagens"}]]
+           and not eventos_gtag(estado, "material_pdf") and not eventos_fbq(estado, "MaterialPDF", "trackCustom"),
+           "material_pdf_bloqueado no GA4, sem MaterialPDF")
+
         # validação
         hp = page.evaluate("""() => { const e = document.getElementById('empresa'); const r = e.getBoundingClientRect();
           return {valor: e.value, tab: e.getAttribute('tabindex'), auto: e.getAttribute('autocomplete'), fora: r.right <= 0 || r.width <= 1}; }""")
@@ -269,10 +311,17 @@ with sync_playwright() as p:
 
         # PDF, CTA, WhatsApp, outros materiais
         page.evaluate("() => { window.print = () => { window.__imprimiu = (window.__imprimiu || 0) + 1; }; }")
-        page.click("#mat-pdf")
-        n_imp = page.evaluate("window.__imprimiu"); ok(n_imp == 1, f"Salvar em PDF chama window.print ({n_imp})")
+        url_antes = page.url
+        baixado = baixa_pdf(page)
+        ok(baixado is not None and urlsplit(baixado.url).path == "/materiais/pdf/mensagens.pdf"
+           and baixado.suggested_filename == "Livia-Oliveira-mensagens.pdf",
+           f"Baixar PDF baixa /materiais/pdf/mensagens.pdf como Livia-Oliveira-mensagens.pdf ({baixado and (baixado.url, baixado.suggested_filename)})")
+        ok(page.url == url_antes and not page.evaluate("window.__imprimiu"), "Baixar PDF não navega nem chama window.print")
+        ok(page.inner_text("#mat-pdf") == "Baixar PDF", "botão com o texto \"Baixar PDF\"")
         estado = page.evaluate(ESTADO)
-        ok(len(eventos_fbq(estado, "MaterialPDF", "trackCustom")) == 1 and len(eventos_gtag(estado, "material_pdf")) == 1, "MaterialPDF no Pixel e material_pdf no GA4")
+        pdf_ev = {"material": "mensagens", "modo": "download"}
+        ok(eventos_fbq(estado, "MaterialPDF", "trackCustom") == [["trackCustom", "MaterialPDF", {"material": "mensagens"}]]
+           and eventos_gtag(estado, "material_pdf") == [["event", "material_pdf", pdf_ev]], "MaterialPDF no Pixel e material_pdf no GA4, modo download")
         page.emulate_media(media="print")
         impresso = page.evaluate("""() => ['.site-header', '.site-footer', '#contato', '.mat-outros', '#mat-pdf']
           .map(s => getComputedStyle(document.querySelector(s)).display)""")
@@ -351,6 +400,91 @@ with sync_playwright() as p:
         ok(not ctx["erros_js"], f"{slug}: sem erros de JS {ctx['erros_js']}")
         page.close()
     cb.close()
+
+    # ---------- Baixar PDF no celular comum: baixa direto ----------
+    for nome_ua, ua in (("iPhone Safari", UA_IPHONE), ("Android Chrome", UA_ANDROID)):
+        print(f"--- materiais/faltas/ 375px, {nome_ua}, liberada")
+        cb = contexto_ua(b, ua)
+        page, ctx = nova_aba(cb)
+        page.goto(f"{BASE}/materiais/faltas/", wait_until="load")
+        url_antes = page.url
+        baixado = baixa_pdf(page)
+        ok(baixado is not None and urlsplit(baixado.url).path == "/materiais/pdf/faltas.pdf"
+           and baixado.suggested_filename == "Livia-Oliveira-faltas.pdf",
+           f"{nome_ua}: Baixar PDF baixa Livia-Oliveira-faltas.pdf ({baixado and (baixado.url, baixado.suggested_filename)})")
+        ok(page.url == url_antes and page.is_hidden("#mat-pdf-painel"), f"{nome_ua}: sem navegar e sem o painel do Instagram")
+        estado = page.evaluate(ESTADO)
+        ok(eventos_gtag(estado, "material_pdf") == [["event", "material_pdf", {"material": "faltas", "modo": "download"}]], f"{nome_ua}: material_pdf modo download")
+        ok(not ctx["erros_js"], f"{nome_ua}: sem erros de JS {ctx['erros_js']}")
+        page.close()
+        cb.close()
+
+    # ---------- Baixar PDF no navegador do Instagram: painel com as opções, sem navegar ----------
+    url_pdf = "https://liviaoliveira.me/materiais/pdf/mensagens.pdf"
+    externos = {
+        "Instagram Android": f"intent://liviaoliveira.me/materiais/pdf/mensagens.pdf#Intent;scheme=https;package=com.android.chrome;S.browser_fallback_url={quote(url_pdf, safe='')};end",
+        "Instagram iPhone": "x-safari-https://liviaoliveira.me/materiais/pdf/mensagens.pdf",
+    }
+    for nome_ua, ua in (("Instagram Android", UA_IG_ANDROID), ("Instagram iPhone", UA_IG_IPHONE)):
+        print(f"--- materiais/mensagens/ 375px, {nome_ua}, liberada")
+        cb = contexto_ua(b, ua)
+        page, ctx = nova_aba(cb)
+        page.goto(f"{BASE}/materiais/mensagens/", wait_until="load")
+        url_antes = page.url
+        baixado = baixa_pdf(page, espera=800)
+        ok(baixado is None and page.url == url_antes, f"{nome_ua}: Baixar PDF não baixa nem navega")
+        ok(page.is_visible("#mat-pdf-painel") and page.get_attribute("#mat-pdf", "aria-expanded") == "true", f"{nome_ua}: painel aberto logo abaixo do botão")
+        ok(page.evaluate("document.getElementById('mat-pdf').nextElementSibling.id") == "mat-pdf-painel", f"{nome_ua}: painel logo depois do botão")
+        ok(page.evaluate("document.activeElement.id") == "mat-pdf-painel", f"{nome_ua}: foco no painel")
+        ok(page.inner_text("#mat-pdf-painel-titulo") == "O navegador do Instagram não deixa salvar arquivos", f"{nome_ua}: título do painel")
+        ok("—" not in page.inner_text("#mat-pdf-painel"), f"{nome_ua}: painel sem travessão")
+        controles = page.evaluate("""[...document.querySelectorAll('#mat-pdf-painel .mat-pdf-op')].map(e => ({
+          tag: e.tagName, texto: e.textContent, href: e.getAttribute('href'), alvo: e.getAttribute('target'), rel: e.getAttribute('rel'),
+          alto: e.getBoundingClientRect().height}))""")
+        ok([c["texto"] for c in controles] == ["Receber o PDF no WhatsApp", "Abrir no navegador do celular", "Ver o PDF aqui", "Copiar link do PDF"],
+           f"{nome_ua}: 4 controles ({[c['texto'] for c in controles]})")
+        ok(all(c["alto"] >= 48 for c in controles), f"{nome_ua}: botões grandes ({[round(c['alto']) for c in controles]})")
+        if len(controles) == 4:
+            wa, externo, ver, copiar = controles
+            ok(wa["href"].startswith("https://wa.me/5511910607651?text=")
+               and unquote(wa["href"].split("text=", 1)[1]) == "Oi! Quero o PDF do material 8 mensagens prontas para o WhatsApp da clínica"
+               and wa["alvo"] == "_blank" and wa["rel"] == "noopener", f"{nome_ua}: WhatsApp da Lia com o título do material ({unquote(wa['href'])})")
+            ok(externo["href"] == externos[nome_ua], f"{nome_ua}: abrir no navegador ({externo['href']})")
+            ok(ver["href"] == "../pdf/mensagens.pdf", f"{nome_ua}: ver o PDF aqui ({ver['href']})")
+            ok(copiar["tag"] == "BUTTON", f"{nome_ua}: Copiar link é botão")
+        ok(page.inner_text(".mat-pdf-painel__dica") == "Se não abrir, toque nos três pontinhos no canto da tela e escolha Abrir no navegador.",
+           f"{nome_ua}: dica dos três pontinhos")
+        sem_rolagem(page, f"{nome_ua} com o painel")
+        page.click("#mat-pdf-painel .mat-pdf-op--copiar")
+        page.wait_for_timeout(150)
+        ok(page.evaluate("navigator.clipboard.readText()") == url_pdf, f"{nome_ua}: Copiar link põe a URL do PDF na área de transferência")
+        ok(page.inner_text(".mat-pdf-painel__copiado") == "Link copiado. Cole no Safari ou no Chrome.", f"{nome_ua}: aviso de link copiado")
+        if nome_ua == "Instagram Android":
+            page.wait_for_timeout(300)
+            page.screenshot(path=str(PRINTS / "materiais-mensagens-instagram-mobile.png"))
+
+        page.evaluate("document.addEventListener('click', e => e.preventDefault())")
+        for sel in ('[data-modo="whatsapp"]', '[data-modo="externo"]', '[data-modo="ver"]'):
+            page.click(f"#mat-pdf-painel {sel}")
+        estado = page.evaluate(ESTADO)
+        modos = [c[2]["modo"] for c in eventos_gtag(estado, "material_pdf")]
+        ok(modos == ["whatsapp", "externo", "ver"], f"{nome_ua}: material_pdf com modo whatsapp, externo e ver ({modos})")
+        ok([c[2] for c in eventos_fbq(estado, "MaterialPDF", "trackCustom")] == [{"material": "mensagens"}] * 3, f"{nome_ua}: MaterialPDF no Pixel")
+        ok(page.url == url_antes, f"{nome_ua}: continua na página")
+
+        page.emulate_media(media="print")
+        ok(page.evaluate("getComputedStyle(document.getElementById('mat-pdf-painel')).display") == "none", f"{nome_ua}: painel some na impressão")
+        page.emulate_media(media="screen")
+        page.focus("#mat-pdf-painel .mat-pdf-op--copiar")
+        page.keyboard.press("Escape")
+        ok(page.is_hidden("#mat-pdf-painel") and page.evaluate("document.activeElement.id") == "mat-pdf"
+           and page.get_attribute("#mat-pdf", "aria-expanded") == "false", f"{nome_ua}: Esc fecha o painel e volta o foco ao botão")
+        page.click("#mat-pdf")
+        page.click("#mat-pdf-painel .mat-pdf-painel__fechar")
+        ok(page.is_hidden("#mat-pdf-painel"), f"{nome_ua}: botão Fechar fecha o painel")
+        ok(not ctx["erros_js"], f"{nome_ua}: sem erros de JS {ctx['erros_js']}")
+        page.close()
+        cb.close()
 
     print("--- etica/ bloqueada: só os itens 1 e 2 marcáveis")
     cb = contexto(b, vp)
