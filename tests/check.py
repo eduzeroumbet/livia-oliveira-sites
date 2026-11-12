@@ -379,7 +379,7 @@ def check_page(rel):
             erros.append(f"{rel}: sem <script src=\"../material.js\"> (bloqueio, cadastro, copiar e PDF)")
         for trecho in ('localStorage.getItem("livia_mat_ok")', 'id="mat-trava"', 'id="contato"', 'name="consentimento"', 'name="empresa"',
                        'tabindex="-1"', 'data-mask="phone"', 'href="../../privacidade/"', "Libere o material completo, grátis",
-                       "Salvar em PDF", "Cada pílula é um pedaço do", "12x de R$ 71,67 sem juros ou R$ 860 à vista",
+                       ">Baixar PDF</button>", "Cada pílula é um pedaço do", "12x de R$ 71,67 sem juros ou R$ 860 à vista",
                        f"../../curso/b/?utm_source=material&amp;utm_medium=site&amp;utm_campaign=ccs_material&amp;utm_content=mat_{slug}",
                        "https://wa.me/5511910607651?text=", "Outros materiais"):
             if trecho not in html:
@@ -392,7 +392,7 @@ def check_page(rel):
         for outro in MATERIAIS:
             if outro != slug and f'href="../{outro}/"' not in html:
                 erros.append(f"{rel}: \"Outros materiais\" sem o link ../{outro}/")
-        # Salvar em PDF: blocos só de impressão (identificação no topo, aviso do bloqueio, curso e WhatsApp no fim)
+        # impressão (Ctrl+P) e PDFs estáticos: blocos só de impressão (identificação no topo, aviso do bloqueio, curso e WhatsApp no fim)
         for classe in ("mat-print-topo", "mat-print-aviso", "mat-print-fim"):
             if not re.search(rf'class="so-print {classe}"', html):
                 erros.append(f"{rel}: sem o bloco de impressão .so-print.{classe}")
@@ -485,14 +485,18 @@ def main():
                     erros.append(f"{extra}: sem {trecho}")
             if "begin_checkout" in texto:
                 erros.append(f"{extra}: não pode disparar begin_checkout (InitiateCheckout)")
-            # Salvar em PDF: bloqueado não imprime (pede o cadastro); liberado imprime ou abre materiais/pdf/<slug>.pdf
+            # Baixar PDF: bloqueado pede o cadastro; liberado baixa materiais/pdf/<slug>.pdf (no navegador embutido,
+            # painel com WhatsApp, navegador externo, ver e copiar o link); nunca chama window.print()
             botao = texto.find('getElementById("mat-pdf")')
             checa = texto.find('classList.contains("mat-ok")', botao)
-            imprime = texto.find("window.print()", botao)
-            if botao < 0 or texto.count("window.print()") != 1 or not 0 <= checa < imprime:
-                erros.append(f"{extra}: window.print() só pode ser chamado no #mat-pdf, depois de checar html.mat-ok")
+            baixa = texto.find("baixa()", botao)
+            if botao < 0 or not 0 <= checa < baixa:
+                erros.append(f"{extra}: o #mat-pdf só pode baixar o PDF depois de checar html.mat-ok")
+            if "window.print()" in texto:
+                erros.append(f"{extra}: o \"Baixar PDF\" não chama mais window.print() (a impressão fica só no Ctrl+P)")
             for trecho in ('"material_pdf_bloqueado"', '"../pdf/" + slug + ".pdf"', "mat-libera__pdf", "acesso=wa",
-                           '"material_liberado_link"'):
+                           '"material_liberado_link"', 'a.download = "Livia-Oliveira-"', 'modo: "download"', "EMBUTIDO",
+                           "https://wa.me/5511910607651?text=", '"intent://"', '"x-safari-https://"', "Copiar link do PDF"):
                 if trecho not in texto:
                     erros.append(f"{extra}: sem {trecho}")
         if extra == "terapia/script.js":

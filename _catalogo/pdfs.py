@@ -1,5 +1,5 @@
-"""Gera os PDFs estáticos dos 6 materiais em materiais/pdf/<slug>.pdf (o "Salvar em PDF" no celular e no navegador
-do Instagram/Facebook abre esses arquivos, porque lá o window.print() não funciona).
+"""Gera os PDFs estáticos dos 6 materiais em materiais/pdf/<slug>.pdf (o "Baixar PDF" dos materiais baixa esses
+arquivos; no navegador do Instagram/Facebook, o painel do botão manda para eles).
 
 Cada material abre liberado (localStorage livia_mat_ok=1) num http.server local e sai pela mesma folha de impressão
 do site (@media print de materiais/style.css), em A4. Pixel, GA4, GTM, Clarity e a Lambda de cadastro são
