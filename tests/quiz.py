@@ -266,7 +266,10 @@ with sync_playwright() as p:
         cursos = page.evaluate("[...document.querySelectorAll('#plano-itens .quiz-item__curso')].map(p => p.textContent)")
         ok(cursos == ["No curso: Módulos 2 e 3, gestão e comunicação assertiva.", "No curso: Módulos 6 e 9, Digital como vitrine e Captação offline."],
            f"\"No curso\" só nos cards de O que fazer ({cursos})")
-        ok("12x de R$ 71,67 sem juros ou R$ 860 à vista" in page.inner_text("#plano") and "7 dias de garantia" in page.inner_text("#plano"), "preço e garantia no convite")
+        # preço do convite: o de Black Friday até BF.fim (assets/js/bf.js, hora deste computador) e o normal depois
+        preco = ("de R$ 860 por R$ 499,99 · 12x de R$ 41,67 sem juros (Black Friday até 30/11)"
+                 if page.evaluate("window.bfAtiva()") else "12x de R$ 71,67 sem juros ou R$ 860 à vista")
+        ok(preco in page.inner_text("#plano") and "7 dias de garantia" in page.inner_text("#plano"), "preço e garantia no convite")
 
         estado = page.evaluate(ESTADO)
         lead = {"content_name": "quiz", "content_category": "meio"}

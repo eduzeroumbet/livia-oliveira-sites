@@ -6,7 +6,7 @@
  *   metaPixelId: "1197036460960933"  (Pixel da Meta da conta de anúncios da Lívia: PageView em toda página)
  *   ga4Id:       "G-XH74VZSNZ2"  (GA4 direto, propriedade 559914633: config com page_view em toda página)
  * As páginas do curso dizem qual versão são no atributo data-pagina da tag <script> (pgA = curso/,
- * pgB = curso/b/, pgC = curso/versao-b/); o valor vai no pg do link da pré-página de inscrição (e dali no sck
+ * pgB = curso/b/, pgC = curso/versao-b/, pgBF = black-friday/); o valor vai no pg do link da pré-página de inscrição (e dali no sck
  * da Hotmart) e no content_category dos eventos. Calculadora (pgCalc), quiz (pgQuiz) e materiais gratuitos (pgMat)
  * usam o data-pagina no pagina e no sck do contato enviado à Lambda (window.siteContato).
  * Páginas com data-sem-rastreamento na tag <script> (as de terapia: conteúdo de saúde) não carregam GTM, GA4
@@ -121,6 +121,10 @@ window.dataLayer = window.dataLayer || [];
    */
   var offerParams = { value: 860, currency: "BRL" };
   if (pagina) { offerParams.content_name = "Carreira com Sentido"; offerParams.content_category = pagina; }
+  /* Black Friday (assets/js/bf.js): enquanto bfAtiva(), a oferta vale BF.valor (499.99) */
+  function valorOferta() {
+    return window.bfAtiva && window.BF && window.bfAtiva() ? window.BF.valor : 860;
+  }
 
   document.querySelectorAll("a.checkout").forEach(function (a) {
     if (pagina) {
@@ -144,6 +148,7 @@ window.dataLayer = window.dataLayer || [];
       if (!offerSeen && entries.some(function (e) { return e.isIntersecting; })) {
         offerSeen = true;
         offerIO.disconnect();
+        offerParams.value = valorOferta();
         track("view_offer", offerParams);
       }
     }, { rootMargin: "0px 0px -50% 0px", threshold: 0 });

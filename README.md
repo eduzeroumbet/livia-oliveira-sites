@@ -21,6 +21,51 @@ redireciona automaticamente para o domínio. `robots.txt` aponta para o `sitemap
 | `materiais/index.html` e `materiais/<slug>/index.html` | Psicólogas (anúncios de Lead) | Materiais gratuitos (`pgMat`): hub com 6 cards e as páginas `mensagens`, `faltas`, `etica`, `reajuste`, `posts` e `indicacoes`. Texto estático no HTML; os itens além dos abertos ficam borrados até o cadastro (nome, e-mail, WhatsApp e consentimento, enviado à Lambda `livia-leads`), que libera os 6 materiais (localStorage `livia_mat_ok`). Botões Copiar, Baixar PDF (pede o cadastro antes; liberado, baixa direto o PDF pronto de `materiais/pdf/<slug>.pdf` como `Livia-Oliveira-<slug>.pdf` no computador e no celular, inclusive no navegador do WhatsApp; no navegador do Instagram/Facebook, que não salva arquivos, abre um painel abaixo do botão com receber o PDF no WhatsApp da Lia, abrir no navegador do celular, ver o PDF ali e copiar o link; PDFs gerados por `_catalogo/pdfs.py`), checklist ético, convite para o curso (`curso/b/`) e WhatsApp. Comportamento em `materiais/material.js`, visual e impressão em `materiais/style.css`. No sitemap |
 | `privacidade/index.html` | Todos (app da Meta e anúncios) | Política de Privacidade (LGPD), linkada no rodapé de todas as páginas. Carrega o `site.js` normalmente (com rastreamento) |
 | `termos/index.html` | Todos | Termos de Uso (curso, consultoria, lista da terapia, uso do site), linkados no rodapé de todas as páginas ao lado da Política de privacidade. Carrega o `site.js` normalmente (com rastreamento) |
+| `black-friday/index.html` | Psicólogas (Black Friday 2026) | Página de venda da Black Friday do curso (`pgBF`, https://liviaoliveira.me/black-friday/): de R$ 860 por R$ 499,99, contagem regressiva, 10 módulos, depoimentos, garantia, FAQ, 3 botões de compra e o botão fixo do celular. Depois do prazo mostra "A Black Friday terminou" e os botões levam para `curso/b/`. No sitemap. Veja a seção "Black Friday 2026" |
+| `black/index.html` | Atalho | https://liviaoliveira.me/black/ redireciona para `black-friday/` com a mesma query (`location.replace` + `location.search`, e meta refresh de reserva). `noindex`, fora do sitemap |
+
+## Black Friday 2026
+
+Campanha do Carreira com Sentido decidida pelo Edu em 24/11/2026: oferta da Hotmart `qu4x7j2d` (R$ 499,99 à vista ou
+12x de R$ 41,67 sem juros) até segunda, 30/11/2026, às 23h59 de Brasília. Preço normal: oferta `n2h6k72h`, R$ 860 ou
+12x de R$ 71,67.
+
+- **Configuração única** em `assets/js/bf.js`:
+  `window.BF = { fim: "2026-11-30T23:59:59-03:00", oferta: "qu4x7j2d", preco: "499,99", parcela: "41,67", de: "860" }`
+  (mais `BF.valor` = 499.99, usado nos eventos) e `window.bfAtiva()`, que compara a hora do aparelho com `BF.fim`.
+- **Fim automático, sem deploy**: o `bf.js` é carregado sem `defer` no `<head>` (antes do `site.js`) de todas as páginas
+  com Black Friday: home, `curso/`, `curso/b/`, `curso/versao-b/`, `curso/inscricao/`, `black-friday/`, materiais
+  (hub e as 6), quiz e calculadora. O HTML já vem com o conteúdo da Black Friday; depois de `BF.fim`, o script põe a
+  classe `bf-fim` no `<html>` antes de pintar, e o `assets/css/bf.css` esconde o que tem `data-bf="on"` (preço de BF,
+  faixa, botões da BF) e mostra o que tem `data-bf="off"` (o texto e o preço normais). Não há "piscar" de preço. Se o
+  prazo acabar com a página aberta, a troca acontece na hora (evento `bf:fim`). Na impressão e nos PDFs dos materiais
+  vale sempre o preço normal.
+- **Faixa do topo** (`a.bf-faixa`, fixa no topo; os cabeçalhos descem a altura dela): "Black Friday: de R$ 860 por
+  R$ 499,99, termina em <contagem>" (`data-bf-contagem`), com link para `black-friday/`. No curso e na home o link
+  leva a query da visita (pelo `site.js`); nos materiais, quiz e calculadora vai com
+  `utm_source=site&utm_medium=<página>&utm_campaign=ccs_bf` (`materiais`, `materiais_<slug>`, `quiz`, `calculadora`),
+  e o bloco do curso dessas páginas ganha o preço de BF e o botão "Ver a oferta de Black Friday". Terapia
+  (`terapia/` e `terapia/b/`) fica sem nada de Black Friday.
+- **Páginas do curso**: as linhas de preço (`.preco-linha`, hero, oferta e barra fixa) têm as duas versões; durante a
+  BF, "de R$ 860 por R$ 499,99 · 12x de R$ 41,67 sem juros (Black Friday até 30/11)". O `view_offer`/`ViewContent`
+  sai com value 499.99 durante a BF (860 depois), pela função `valorOferta()` do `site.js`.
+- **Pré-página** (`curso/inscricao/script.js`): enquanto `bfAtiva()`, o link da Hotmart usa `off=qu4x7j2d` (para quem
+  vem de qualquer página do curso, não só da `black-friday/`) e o `begin_checkout`/`InitiateCheckout` sai com value
+  499.99; depois volta para `n2h6k72h` e 860. No topo, durante a BF, a linha "Preço de Black Friday: R$ 499,99 ou 12x
+  de R$ 41,67 sem juros, até 30/11 às 23h59", e as formas de pagamento mostram o preço de BF.
+- **`pgBF`**: a página `black-friday/` carrega o `site.js` com `data-pagina="pgBF"`; os botões (`a.checkout`) vão para
+  `../curso/inscricao/?pg=pgBF` com a query da visita, `CliqueComprar` e `ViewContent` levam `content_category` `pgBF`,
+  e a pré-página aceita `pgBF` (lista `PAGINAS`), então o `sck` da Hotmart termina em `|pgBF`
+  (ex.: `sck=ig|stories|ccs_bf|pgBF`; sem UTM, `direto|pgBF`).
+- **Desligar antes ou estender**: mude `BF.fim` no `assets/js/bf.js` (ex.: `"2026-12-01T23:59:59-03:00"` para
+  estender um dia, ou uma data já passada para encerrar agora) e suba o `?v=` do `bf.js` em todas as páginas que o
+  carregam. Ao estender, ajuste também os textos fixos "até 30/11" (faixa, linhas de preço, FAQ, pré-página e a imagem
+  `og-black-friday.jpg`). Encerrar ou estender a oferta `qu4x7j2d` na própria Hotmart é separado do site.
+- **Testar**: `?bf_agora=<data ISO>` simula a hora do aparelho, só em localhost/127.0.0.1 (no site publicado é
+  ignorado). Ex.: http://localhost:8000/black-friday/?bf_agora=2026-12-01T03:00:01Z mostra a página depois do prazo.
+  `tests/black_friday.py` cobre a página, a contagem, os botões, a pré-página, o atalho `black/`, a faixa e o "depois".
+- **Depois da campanha** (limpeza opcional): tirar os elementos `data-bf="on"`, o atributo `data-bf="off"`, o `bf.js`
+  e o `bf.css` das páginas; até lá, tudo continua funcionando sozinho no preço normal.
 
 ## Como editar
 
@@ -91,6 +136,7 @@ em miniatura. As tags usam URL absoluta (`https://liviaoliveira.me/assets/img/..
 |---|---|---|
 | `index.html` | `og-home.jpg` | 1204 |
 | `curso/`, `curso/b/`, `curso/versao-b/` e `curso/inscricao/` | `og-curso-v2.jpg` | 0688 |
+| `black-friday/` | `og-black-friday.jpg` | 0688 |
 | `materiais/` | `og-materiais.jpg` | 0709 |
 | `materiais/mensagens/` | `og-mat-mensagens.jpg` | 0730 |
 | `materiais/faltas/` | `og-mat-faltas.jpg` | 0760 |
@@ -138,6 +184,7 @@ As 3 versões do curso carregam o `site.js` com `data-pagina` na tag `<script>`,
 | `pgCalc` | `calculadora/` | Calculadora do valor da sessão (sem checkout) |
 | `pgQuiz` | `quiz/` | Quiz "Você está pronta para viver da clínica?" (sem checkout) |
 | `pgMat` | `materiais/` | Materiais gratuitos, hub e as 6 páginas (sem checkout) |
+| `pgBF` | `black-friday/` | Black Friday 2026 (veja a seção "Black Friday 2026") |
 | `pgInsc` | `curso/inscricao/` | Pré-página de inscrição. Só identifica a página: não é sufixo de `sck` |
 
 ### Funil do curso: página do curso, inscrição, Hotmart preenchida
@@ -288,7 +335,8 @@ celular recebe a versão antiga:
 /Users/educloud/orquestra/.venv/bin/python tests/check.py                  # verificações
 /Users/educloud/orquestra/.venv/bin/python tests/lista_terapia.py          # formulário da lista (terapia/) no Chromium, sem enviar ao Google
 /Users/educloud/orquestra/.venv/bin/python tests/rastreamento_curso.py     # Pixel, GA4, links para a pré-página e CliqueComprar nas 3 versões do curso, no Chromium
-/Users/educloud/orquestra/.venv/bin/python tests/inscricao.py              # pré-página: erros, cadastro (Lambda interceptada), link da Hotmart e eventos, no Chromium
+/Users/educloud/orquestra/.venv/bin/python tests/inscricao.py              # pré-página: erros, cadastro (Lambda interceptada), link da Hotmart e eventos (durante e depois da Black Friday), no Chromium
+/Users/educloud/orquestra/.venv/bin/python tests/black_friday.py           # Black Friday: página, contagem, botões pgBF, pré-página com qu4x7j2d, black/, faixa e o depois do prazo, no Chromium
 /Users/educloud/orquestra/.venv/bin/python tests/calculadora.py            # conta, erros, Lead, contato, UTMs e 390px da calculadora, no Chromium
 /Users/educloud/orquestra/.venv/bin/python tests/quiz.py                   # quiz: perguntas, Voltar, faixas, contato (Lambda interceptada), plano, eventos e prints, no Chromium
 /Users/educloud/orquestra/.venv/bin/python tests/materiais.py              # materiais: hub, bloqueio, cadastro (Lambda interceptada), copiar, Baixar PDF (download e painel do Instagram), checklist, eventos e prints, no Chromium

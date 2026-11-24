@@ -32,6 +32,9 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+Display:ital,wdth,wght@0,62.5,400..700;1,62.5,400..700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="../../assets/css/site.css?v=9">
+<link rel="stylesheet" href="../../assets/css/bf.css?v=1">
+<!-- Black Friday: decide no <head>, antes de pintar, se vale o preço de BF ou o normal (assets/js/bf.js) -->
+<script src="../../assets/js/bf.js?v=1"></script>
 </head>
 <body class="page-inscricao no-sticky">
 <a class="skip" href="#inscricao">Pular para o formulário</a>
@@ -48,9 +51,11 @@
 <section class="insc">
   <div class="wrap insc-grid">
     <div class="insc-topo">
+      <p class="insc-bf" data-bf="on"><b>Preço de Black Friday:</b> R$ 499,99 ou 12x de R$ 41,67 sem juros, até 30/11 às 23h59</p>
       <h1>Falta pouco para <em>garantir sua vaga.</em></h1>
       <p class="insc-resumo">Carreira com Sentido, com Lívia Oliveira</p>
-      <p class="insc-preco"><b>12x de R$ 71,67 sem juros</b> ou <b>R$ 860 à vista</b></p>
+      <p class="insc-preco" data-bf="on"><span class="bf-de">de R$ 860</span> <b>12x de R$ 41,67 sem juros</b> ou <b>R$ 499,99 à vista</b></p>
+      <p class="insc-preco" data-bf="off"><b>12x de R$ 71,67 sem juros</b> ou <b>R$ 860 à vista</b></p>
       <p class="insc-pag">Pix, cartão de crédito (até 12x sem juros) ou boleto</p>
     </div>
 
@@ -62,17 +67,17 @@
         <label class="insc-forma">
           <input type="radio" name="forma" value="cartao">
           <span class="insc-forma__marca"><svg class="insc-forma__check" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M6 12.5l4 4 8-9" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
-          <span class="insc-forma__texto"><b>Cartão de crédito</b><span class="insc-forma__preco">12x de R$ 71,67 sem juros</span><span class="insc-forma__sub">Liberação imediata após a aprovação</span></span>
+          <span class="insc-forma__texto"><b>Cartão de crédito</b><span class="insc-forma__preco"><span data-bf="on">12x de R$ 41,67 sem juros</span><span data-bf="off">12x de R$ 71,67 sem juros</span></span><span class="insc-forma__sub">Liberação imediata após a aprovação</span></span>
         </label>
         <label class="insc-forma">
           <input type="radio" name="forma" value="pix">
           <span class="insc-forma__marca"><svg class="insc-forma__check" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M6 12.5l4 4 8-9" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
-          <span class="insc-forma__texto"><b>Pix</b><span class="insc-forma__preco">R$ 860 à vista</span><span class="insc-forma__sub">Liberação imediata após o pagamento</span></span>
+          <span class="insc-forma__texto"><b>Pix</b><span class="insc-forma__preco"><span data-bf="on">R$ 499,99 à vista</span><span data-bf="off">R$ 860 à vista</span></span><span class="insc-forma__sub">Liberação imediata após o pagamento</span></span>
         </label>
         <label class="insc-forma">
           <input type="radio" name="forma" value="boleto">
           <span class="insc-forma__marca"><svg class="insc-forma__check" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M6 12.5l4 4 8-9" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
-          <span class="insc-forma__texto"><b>Boleto</b><span class="insc-forma__preco">R$ 860 à vista</span><span class="insc-forma__sub">Liberação em até 2 dias úteis após o pagamento</span></span>
+          <span class="insc-forma__texto"><b>Boleto</b><span class="insc-forma__preco"><span data-bf="on">R$ 499,99 à vista</span><span data-bf="off">R$ 860 à vista</span></span><span class="insc-forma__sub">Liberação em até 2 dias úteis após o pagamento</span></span>
         </label>
       </div>
       <span class="error" id="formas-erro" data-error-for="forma"></span>
@@ -128,7 +133,7 @@
 </footer>
 
 <!-- pgInsc só identifica esta página; o sck da Hotmart leva o pg da página de origem (pgA, pgB, pgC) -->
-<script src="../../assets/js/site.js?v=8" data-pagina="pgInsc"></script>
-<script src="script.js?v=3"></script>
+<script src="../../assets/js/site.js?v=9" data-pagina="pgInsc"></script>
+<script src="script.js?v=4"></script>
 </body>
 </html>

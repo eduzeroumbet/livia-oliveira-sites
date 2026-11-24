@@ -32,6 +32,9 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+Display:ital,wdth,wght@0,62.5,400..700;1,62.5,400..700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="../../assets/css/site.css?v=6">
+<link rel="stylesheet" href="../../assets/css/bf.css?v=1">
+<!-- Black Friday: decide no <head>, antes de pintar, se vale o preço de BF ou o normal (assets/js/bf.js) -->
+<script src="../../assets/js/bf.js?v=1"></script>
 <link rel="preload" as="image" href="../../assets/img/curso-hero-0688.webp" fetchpriority="high">
 <script type="application/ld+json">
 {"@context":"https://schema.org","@graph":[
@@ -52,6 +55,7 @@
 </head>
 <body class="page-curso">
 <a class="skip" href="#conteudo">Pular para o conteúdo</a>
+<a class="bf-faixa" data-bf="on" href="../../black-friday/"><span><b>Black Friday:</b> de R$ 860 por R$ 499,99,</span> <span>termina em <span class="bf-faixa__tempo" data-bf-contagem></span><span class="bf-faixa__seta" aria-hidden="true">→</span></span></a>
 
 <header class="site-header">
   <div class="wrap">
@@ -71,7 +75,12 @@
       <ul class="chips" aria-label="O que você recebe">
         <li>10 módulos</li><li>60+ aulas</li><li>12 meses de acesso</li><li>Comunidade de alunas</li><li>Certificado</li>
       </ul>
-      <div class="hero-price">
+      <div class="hero-price" data-bf="on">
+        <p class="hero-price__de">Black Friday: <s>de R$ 860</s> por R$ 499,99</p>
+        <p class="hero-price__parcela">12x de R$ 41,67</p>
+        <p class="hero-price__avista">sem juros ou R$ 499,99 à vista, até 30/11</p>
+      </div>
+      <div class="hero-price" data-bf="off">
         <p class="hero-price__parcela">12x de R$ 71,67</p>
         <p class="hero-price__avista">sem juros ou R$ 860 à vista</p>
       </div>
@@ -126,7 +135,8 @@
     </div>
     <p class="lead"><b>A sua agenda ainda não reflete o quanto você vale. Isso tem solução, e começa por organizar a base.</b></p>
     <div class="btn-row"><a class="btn btn-light btn-cta checkout" href="../inscricao/?pg=pgB">Quero me inscrever</a></div>
-    <p class="preco-linha">12x de R$ 71,67 sem juros ou R$ 860 à vista</p>
+    <p class="preco-linha" data-bf="on">de R$ 860 por R$ 499,99 · 12x de R$ 41,67 sem juros (Black Friday até 30/11)</p>
+    <p class="preco-linha" data-bf="off">12x de R$ 71,67 sem juros ou R$ 860 à vista</p>
   </div>
 </section>
 
@@ -208,7 +218,8 @@
       <li class="mod"><span class="n">10</span><div><h3>Conselhos finais</h3><p>O que aprendi em 15 anos para você construir a sua carreira.</p></div></li>
     </ol>
     <a class="btn btn-light btn-cta checkout" href="../inscricao/?pg=pgB">Quero me inscrever</a>
-    <p class="preco-linha">12x de R$ 71,67 sem juros ou R$ 860 à vista</p>
+    <p class="preco-linha" data-bf="on">de R$ 860 por R$ 499,99 · 12x de R$ 41,67 sem juros (Black Friday até 30/11)</p>
+    <p class="preco-linha" data-bf="off">12x de R$ 71,67 sem juros ou R$ 860 à vista</p>
   </div>
 </section>
 
@@ -269,9 +280,12 @@
         </ul>
       </div>
       <div class="r">
-        <span>Investimento</span>
-        <div class="price"><small>12x de</small> R$ 71,67</div>
-        <span>sem juros ou <b>R$ 860 à vista</b> no Pix ou cartão</span>
+        <span data-bf="on">Black Friday, até 30/11: <s>de R$ 860</s></span>
+        <div class="price" data-bf="on"><small>12x de</small> R$ 41,67</div>
+        <span data-bf="on">sem juros ou <b>R$ 499,99 à vista</b> no Pix ou cartão</span>
+        <span data-bf="off">Investimento</span>
+        <div class="price" data-bf="off"><small>12x de</small> R$ 71,67</div>
+        <span data-bf="off">sem juros ou <b>R$ 860 à vista</b> no Pix ou cartão</span>
         <a class="btn btn-light checkout" href="../inscricao/?pg=pgB">Quero me inscrever</a>
         <span class="pay">Pix · Cartão em até 12x · Boleto · Checkout seguro Hotmart<br>Acesso liberado na hora, por e-mail</span>
       </div>
@@ -308,7 +322,7 @@
       <span class="eyebrow">Está na hora</span>
       <h2>A clínica que você quer ter começa com estrutura.</h2>
       <p class="lead">Você já tem a formação e o cuidado com o paciente. O Carreira com Sentido te dá o resto: valor justo, organização e uma presença digital que é a sua cara.</p>
-      <div class="btn-row"><a class="btn btn-light btn-cta checkout" href="../inscricao/?pg=pgB">Quero me inscrever<small>12x de R$ 71,67 sem juros ou R$ 860 à vista</small></a></div>
+      <div class="btn-row"><a class="btn btn-light btn-cta checkout" href="../inscricao/?pg=pgB">Quero me inscrever<small data-bf="on">de R$ 860 por R$ 499,99 · 12x de R$ 41,67 sem juros</small><small data-bf="off">12x de R$ 71,67 sem juros ou R$ 860 à vista</small></a></div>
       <p class="trust">7 dias de garantia · Pix, cartão ou boleto · acesso imediato</p>
     </div>
     <img src="../../assets/img/curso-cta-1102-2.webp" width="800" height="1000" loading="lazy" alt="Lívia Oliveira em pé, de braços cruzados e camisa listrada, diante de uma parede iluminada por luz laranja">
@@ -326,13 +340,14 @@
 </footer>
 
 <div class="sticky-bar" aria-label="Inscrição rápida">
-  <div class="t"><b>12x de R$ 71,67</b>sem juros ou R$ 860 à vista</div>
+  <div class="t" data-bf="on"><b>12x de R$ 41,67</b>Black Friday: R$ 499,99 à vista</div>
+  <div class="t" data-bf="off"><b>12x de R$ 71,67</b>sem juros ou R$ 860 à vista</div>
   <a class="btn checkout" href="../inscricao/?pg=pgB">Quero me inscrever</a>
 </div>
 <a class="wa-float" href="https://wa.me/5511910607651?text=Oi!%20Tenho%20uma%20d%C3%BAvida%20sobre%20o%20Carreira%20com%20Sentido" target="_blank" rel="noopener" aria-label="Tirar dúvidas pelo WhatsApp">
   <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2a10 10 0 0 0-8.6 15.1L2 22l5-1.3A10 10 0 1 0 12 2Zm0 18.2a8.2 8.2 0 0 1-4.2-1.2l-.3-.2-3 .8.8-2.9-.2-.3A8.2 8.2 0 1 1 12 20.2Zm4.5-6.1c-.2-.1-1.5-.7-1.7-.8-.2-.1-.4-.1-.6.1l-.8 1c-.1.2-.3.2-.5.1a6.7 6.7 0 0 1-3.3-2.9c-.3-.4.3-.4.7-1.3.1-.2 0-.3 0-.4l-.8-1.8c-.2-.5-.4-.4-.6-.4h-.5a1 1 0 0 0-.7.3 3 3 0 0 0-.9 2.2 5.1 5.1 0 0 0 1.1 2.7 11.7 11.7 0 0 0 4.5 4c1.7.7 2.3.8 3.2.6a2.7 2.7 0 0 0 1.8-1.2 2.2 2.2 0 0 0 .2-1.3c-.1-.1-.3-.2-.5-.3Z"/></svg>
 </a>
 
-<script src="../../assets/js/site.js?v=8" data-pagina="pgB"></script>
+<script src="../../assets/js/site.js?v=9" data-pagina="pgB"></script>
 </body>
 </html>

@@ -7,12 +7,14 @@ dataLayer, e é isso que o teste confere. Para cada página, com e sem UTMs na U
   pg=pgA/pgB/pgC e a query da visita (UTMs e fbclid, sem duplicar); sem UTM, só pg;
 - clique no botão de compra: CliqueComprar (Pixel, trackCustom) e clique_comprar (GA4) com content_category, e nenhum
   InitiateCheckout / begin_checkout (esse sai só no envio da pré-página, ver tests/inscricao.py);
-- seção #oferta na tela: ViewContent e view_offer uma vez só.
+- seção #oferta na tela: ViewContent e view_offer uma vez só, com value 499.99 durante a Black Friday (até BF.fim do
+  assets/js/bf.js, pela hora deste computador; a página abre como arquivo, sem o ?bf_agora de teste) e 860 depois.
 
 Uso: /Users/educloud/orquestra/.venv/bin/python tests/rastreamento_curso.py
 Requer: playwright + chromium (python -m playwright install chromium).
 """
 import sys
+from datetime import datetime, timezone
 from pathlib import Path
 from urllib.parse import parse_qs, urlsplit
 
@@ -22,6 +24,8 @@ ROOT = Path(__file__).resolve().parent.parent
 PAGINAS = {"pgA": "curso/index.html", "pgB": "curso/b/index.html", "pgC": "curso/versao-b/index.html"}
 PIXEL_ID = "1197036460960933"
 GA4_ID = "G-XH74VZSNZ2"
+# fim da Black Friday (BF.fim em assets/js/bf.js): o value da oferta é 499.99 até lá e 860 depois
+BF_FIM = datetime(2026, 12, 1, 2, 59, 59, tzinfo=timezone.utc)
 UTMS = "utm_source=meta&utm_medium=paid&utm_campaign=ccs_frio_criativos&utm_content=V01&fbclid=abc123"
 falhas = []
 
@@ -108,7 +112,8 @@ with sync_playwright() as p:
             ok(eventos_gtag(estado, "clique_comprar") == [["event", "clique_comprar", clique]], "clique_comprar no GA4")
             ok(not eventos_fbq(estado, "InitiateCheckout") and not eventos_gtag(estado, "begin_checkout"),
                "clique sem InitiateCheckout / begin_checkout")
-            esperado = {"value": 860, "currency": "BRL", "content_name": "Carreira com Sentido", "content_category": pagina}
+            valor = 499.99 if datetime.now(timezone.utc) <= BF_FIM else 860
+            esperado = {"value": valor, "currency": "BRL", "content_name": "Carreira com Sentido", "content_category": pagina}
 
             # oferta na tela (duas vezes): um único ViewContent / view_offer.
             # Rolagem instantânea: as páginas usam scroll-behavior: smooth, e o scrollIntoView() animado era

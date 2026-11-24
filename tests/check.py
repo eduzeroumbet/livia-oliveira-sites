@@ -16,6 +16,20 @@ MATERIAIS = ["mensagens", "faltas", "etica", "reajuste", "posts", "indicacoes"]
 MATERIAIS_HUB = "materiais/index.html"
 MATERIAIS_PAGINAS = [f"materiais/{m}/index.html" for m in MATERIAIS]
 PAGES += [MATERIAIS_HUB, *MATERIAIS_PAGINAS]
+# Black Friday 2026 (assets/js/bf.js + assets/css/bf.css): página de venda black-friday/ (pgBF) e atalho black/
+BLACK_FRIDAY = "black-friday/index.html"
+BLACK_ATALHO = "black/index.html"
+PAGES += [BLACK_FRIDAY]
+BF_CONFIG = 'window.BF = { fim: "2026-11-30T23:59:59-03:00", oferta: "qu4x7j2d", preco: "499,99", parcela: "41,67", de: "860" };'
+# páginas com Black Friday: bf.js no <head> (sem defer) e bf.css; as com faixa no topo levam a black-friday/
+BF_PAGINAS = ["index.html", "curso/index.html", "curso/b/index.html", "curso/versao-b/index.html", "curso/inscricao/index.html",
+              "calculadora/index.html", "quiz/index.html", MATERIAIS_HUB, *MATERIAIS_PAGINAS, BLACK_FRIDAY]
+BF_FAIXA = [p for p in BF_PAGINAS if p not in ("curso/inscricao/index.html", BLACK_FRIDAY)]
+# links de materiais, quiz e calculadora para a página da Black Friday (utm_medium = página de origem)
+BF_UTM = {MATERIAIS_HUB: "materiais", "quiz/index.html": "quiz", "calculadora/index.html": "calculadora",
+          **{f"materiais/{m}/index.html": f"materiais_{m}" for m in MATERIAIS}}
+# terapia: nada de Black Friday
+SEM_BF = ["terapia/index.html", "terapia/b/index.html"]
 # política de privacidade (URL do app da Meta e dos anúncios) e termos de uso: link no rodapé de todas as páginas e no sitemap
 PRIVACIDADE = "privacidade/index.html"
 TERMOS = "termos/index.html"
@@ -53,6 +67,7 @@ CURSO_INSCRICAO = {
     "curso/index.html": "inscricao/?pg=pgA",
     "curso/b/index.html": "../inscricao/?pg=pgB",
     "curso/versao-b/index.html": "../inscricao/?pg=pgC",
+    BLACK_FRIDAY: "../curso/inscricao/?pg=pgBF",
 }
 LAMBDA_CADASTRO = "https://nwmxltflulqvcxu7bdplodmyjm0yweuc.lambda-url.sa-east-1.on.aws/"
 # as 3 versões do curso carregam o site.js (Pixel, GA4, src/sck) com o sufixo da página no data-pagina
@@ -91,6 +106,8 @@ EXTRAS = (
     "quiz/script.js",
     "materiais/style.css",
     "materiais/material.js",
+    "assets/js/bf.js",
+    "assets/css/bf.css",
 )
 # favicons e manifest usam caminho absoluto (site na raiz do domínio)
 REL_ABSOLUTO = {"icon", "apple-touch-icon", "manifest"}
@@ -98,7 +115,7 @@ MANIFEST = "site.webmanifest"
 # WhatsApp: a Lia (assistente da equipe) atende as psicólogas; o da Thaís só em links que dizem "Thaís", na home, na terapia e nas páginas legais
 WHATSAPP_LIA = "5511910607651"
 WHATSAPP_THAIS = "5551992597638"
-WA_LIA = ("curso/", "calculadora/", "quiz/", "materiais/", "consultoria/")
+WA_LIA = ("curso/", "calculadora/", "quiz/", "materiais/", "consultoria/", "black-friday/")
 WA_THAIS = ("terapia/", "termos/", "privacidade/")
 
 erros = []
@@ -455,10 +472,148 @@ def check_page(rel):
             erros.append(f"{rel}: valor do turno da manhã difere do Google Form (\"Manhã (10h e 11h)\")")
 
 
+class PrecoBF(HTMLParser):
+    """Texto com o preço de Black Friday (499,99 ou 41,67) fora de um elemento data-bf="on" no <body>: apareceria
+    depois do fim (o bf.css só esconde [data-bf="on"])."""
+    VAZIOS = {"area", "base", "br", "col", "embed", "hr", "img", "input", "link", "meta", "source", "track", "wbr"}
+
+    def __init__(self):
+        super().__init__()
+        self.pilha = []  # (tag, dentro de data-bf="on")
+        self.no_body = False
+        self.soltos = []
+
+    def handle_starttag(self, tag, attrs):
+        if tag == "body":
+            self.no_body = True
+        if tag in self.VAZIOS:
+            return
+        dentro = (bool(self.pilha) and self.pilha[-1][1]) or dict(attrs).get("data-bf") == "on"
+        self.pilha.append((tag, dentro or tag == "script"))
+
+    def handle_endtag(self, tag):
+        for i in range(len(self.pilha) - 1, -1, -1):
+            if self.pilha[i][0] == tag:
+                del self.pilha[i:]
+                break
+
+    def handle_data(self, data):
+        if self.no_body and re.search(r"499,99|41,67", data) and not (self.pilha and self.pilha[-1][1]):
+            self.soltos.append(" ".join(data.split())[:80])
+
+
+def check_black_friday():
+    bf_js = (ROOT / "assets/js/bf.js").read_text(encoding="utf-8")
+    for trecho in (BF_CONFIG, "window.bfAtiva = function", '"bf-fim"', '"bf:fim"', "data-bf-contagem", "bf_agora",
+                   r"/^(localhost|127\.0\.0\.1)$/.test(location.hostname)"):
+        if trecho not in bf_js:
+            erros.append(f"assets/js/bf.js: sem {trecho}")
+    bf_css = (ROOT / "assets/css/bf.css").read_text(encoding="utf-8")
+    if 'html:not(.bf-fim) [data-bf="off"]' not in bf_css or 'html.bf-fim [data-bf="on"]' not in bf_css:
+        erros.append('assets/css/bf.css: sem as regras que trocam [data-bf="on"] e [data-bf="off"] pela classe bf-fim')
+
+    for rel in BF_PAGINAS:
+        html = (ROOT / rel).read_text(encoding="utf-8")
+        cabeca = html.split("</head>", 1)[0]
+        pre = "../" * rel.count("/")
+        if not re.search(rf'<script src="{re.escape(pre)}assets/js/bf\.js(\?v=\d+)?"></script>', cabeca):
+            erros.append(f"{rel}: sem <script src=\"{pre}assets/js/bf.js\"> no <head> (sem defer: decide o preço antes de pintar)")
+        if not re.search(rf'<link rel="stylesheet" href="{re.escape(pre)}assets/css/bf\.css(\?v=\d+)?">', cabeca):
+            erros.append(f"{rel}: sem {pre}assets/css/bf.css")
+        if "71,67" in html and "data-bf=\"off\"" not in html:
+            erros.append(f"{rel}: preço normal sem a versão data-bf=\"off\"")
+        soltos = PrecoBF()
+        soltos.feed(html)
+        for t in soltos.soltos:
+            erros.append(f"{rel}: preço de Black Friday fora de data-bf=\"on\" (apareceria depois do fim): \"{t}\"")
+        if rel in BF_FAIXA:
+            faixa = re.search(r'<a class="bf-faixa" data-bf="on" href="([^"]+)">(.*?)</a>', html)
+            if not faixa:
+                erros.append(f"{rel}: sem a faixa de Black Friday (a.bf-faixa data-bf=\"on\")")
+            else:
+                destino = f"{pre}black-friday/"
+                if rel in BF_UTM:
+                    destino += f"?utm_source=site&amp;utm_medium={BF_UTM[rel]}&amp;utm_campaign=ccs_bf"
+                if faixa.group(1) != destino:
+                    erros.append(f"{rel}: a faixa de Black Friday deve levar para {destino} ({faixa.group(1)})")
+                if "data-bf-contagem" not in faixa.group(2) or "de R$ 860 por R$ 499,99" not in faixa.group(2):
+                    erros.append(f"{rel}: faixa sem \"de R$ 860 por R$ 499,99\" e a contagem (data-bf-contagem)")
+        if rel in BF_UTM and rel != MATERIAIS_HUB:
+            link = f'data-bf="on" href="{pre}black-friday/?utm_source=site&amp;utm_medium={BF_UTM[rel]}&amp;utm_campaign=ccs_bf"'
+            if link not in html or "de R$ 860 por R$ 499,99 · 12x de R$ 41,67 sem juros (Black Friday até 30/11)" not in html:
+                erros.append(f"{rel}: bloco do curso sem o preço de Black Friday e o link para black-friday/ ({BF_UTM[rel]})")
+    for rel in ("curso/index.html", "curso/b/index.html", "curso/versao-b/index.html"):
+        html = (ROOT / rel).read_text(encoding="utf-8")
+        if html.count("de R$ 860 por R$ 499,99 · 12x de R$ 41,67 sem juros (Black Friday até 30/11)") < 1:
+            erros.append(f"{rel}: sem a linha de preço de Black Friday")
+    for rel in SEM_BF:
+        html = (ROOT / rel).read_text(encoding="utf-8")
+        for proibido in ("bf.js", "bf.css", "bf-faixa", "Black Friday", "data-bf"):
+            if proibido in html:
+                erros.append(f"{rel}: contém {proibido!r} (terapia fica sem Black Friday)")
+
+    rel = BLACK_FRIDAY
+    html = (ROOT / rel).read_text(encoding="utf-8")
+    for trecho in ("<title>Black Friday Carreira com Sentido: de R$ 860 por R$ 499,99</title>", '<meta name="description"',
+                   '<link rel="canonical" href="https://liviaoliveira.me/black-friday/">',
+                   '<meta property="og:image" content="https://liviaoliveira.me/assets/img/og-black-friday.jpg">',
+                   "Black Friday · termina em", "data-bf-dias", "data-bf-seg", "Black Friday Carreira com Sentido",
+                   "De R$ 860 por <em>R$ 499,99.</em>", "Você economiza R$ 360,01", "Quero garantir o preço de Black Friday",
+                   "7 dias de garantia · acesso imediato · Pix, cartão ou boleto", 'id="oferta"', "CRP 07/18713",
+                   "A Black Friday terminou", 'data-bf="off" href="../curso/b/"', "Até quando vale?", "Posso parcelar?",
+                   "Tem Pix e boleto?", "Quanto tempo tenho de acesso?", "E se eu não gostar?",
+                   "Já baixei os materiais gratuitos, o curso é diferente?", "sticky-bar",
+                   "https://wa.me/5511910607651?text=Oi!%20Tenho%20uma%20d%C3%BAvida%20sobre%20a%20Black%20Friday%20do%20Carreira%20com%20Sentido",
+                   "Falar com a equipe no WhatsApp"):
+        if trecho not in html:
+            erros.append(f"{rel}: sem {trecho}")
+    if not re.search(r'<script src="\.\./assets/js/site\.js(\?v=\d+)?" data-pagina="pgBF"></script>', html):
+        erros.append(f"{rel}: sem <script src=\"../assets/js/site.js\" data-pagina=\"pgBF\">")
+    if html.count('class="btn btn-light btn-cta checkout"') + html.count('class="btn btn-cta checkout"') < 3:
+        erros.append(f"{rel}: menos de 3 botões de compra ao longo da página")
+    if html.count("<blockquote class=\"test\">") != 3:
+        erros.append(f"{rel}: deve ter 3 depoimentos")
+    if html.count('<li class="mod">') != 10:
+        erros.append(f"{rel}: deve ter os 10 módulos")
+    if not (ROOT / "assets/img/og-black-friday.jpg").is_file():
+        erros.append(f"{rel}: falta assets/img/og-black-friday.jpg (rode _catalogo/og.py og-black-friday.jpg)")
+    if "https://liviaoliveira.me/black-friday/" not in (ROOT / "sitemap.xml").read_text(encoding="utf-8"):
+        erros.append(f"{rel}: não está no sitemap.xml")
+
+    atalho = (ROOT / BLACK_ATALHO).read_text(encoding="utf-8")
+    for trecho in ('location.replace("../black-friday/"+location.search', '<meta http-equiv="refresh" content="0; url=../black-friday/">',
+                   '<meta name="robots" content="noindex">'):
+        if trecho not in atalho:
+            erros.append(f"{BLACK_ATALHO}: sem {trecho}")
+    if "liviaoliveira.me/black/" in (ROOT / "sitemap.xml").read_text(encoding="utf-8"):
+        erros.append(f"{BLACK_ATALHO}: o atalho não vai no sitemap.xml")
+
+    script = (ROOT / "curso/inscricao/script.js").read_text(encoding="utf-8")
+    for trecho in ('PAGINAS = ["pgA", "pgB", "pgC", "pgBF"]', r"\|(pg(?:[ABC]|BF))$", "window.BF.oferta", "window.BF.valor",
+                   "value: valorCurso()"):
+        if trecho not in script:
+            erros.append(f"curso/inscricao/script.js: sem {trecho} (Black Friday)")
+    if re.search(r"^function bfAtiva\b", script, re.M):
+        erros.append("curso/inscricao/script.js: function bfAtiva global sobrescreve o window.bfAtiva do bf.js")
+    if "valorOferta()" not in (ROOT / "assets/js/site.js").read_text(encoding="utf-8"):
+        erros.append("assets/js/site.js: view_offer sem o valor da Black Friday (valorOferta)")
+
+    # ao mudar o site.js, o ?v= sobe em todas as páginas: todas com a mesma versão
+    versoes = {}
+    for p in ROOT.glob("**/index.html"):
+        if ".git" in p.parts:
+            continue
+        for v in re.findall(r'assets/js/site\.js\?v=(\d+)', p.read_text(encoding="utf-8")):
+            versoes.setdefault(v, []).append(p.relative_to(ROOT).as_posix())
+    if len(versoes) > 1:
+        erros.append(f"site.js com ?v= diferente entre as páginas: { {v: len(ps) for v, ps in versoes.items()} }")
+
+
 def main():
     for rel in PAGES:
         check_page(rel)
     check_whatsapp()
+    check_black_friday()
     for extra in EXTRAS:
         p = ROOT / extra
         if not p.exists():
