@@ -19,12 +19,15 @@ PAGES += [MATERIAIS_HUB, *MATERIAIS_PAGINAS]
 # Black Friday 2026 (assets/js/bf.js + assets/css/bf.css): página de venda black-friday/ (pgBF) e atalho black/
 BLACK_FRIDAY = "black-friday/index.html"
 BLACK_ATALHO = "black/index.html"
-PAGES += [BLACK_FRIDAY]
+# versões novas da página da Black Friday (anúncios): B "conta da clínica" e C "direto ao ponto", com noindex e fora do sitemap;
+# as três usam pgBF e se diferenciam pelo data-versao do site.js (bf_a, bf_b, bf_c)
+BF_VERSOES = {"black-friday/b/index.html": ("bf_b", "bf_quad_valor.jpg"), "black-friday/c/index.html": ("bf_c", "bf_quad_oferta.jpg")}
+PAGES += [BLACK_FRIDAY, *BF_VERSOES]
 BF_CONFIG = 'window.BF = { fim: "2026-11-30T23:59:59-03:00", oferta: "qu4x7j2d", preco: "499,99", parcela: "41,67", de: "860" };'
 # páginas com Black Friday: bf.js no <head> (sem defer) e bf.css; as com faixa no topo levam a black-friday/
 BF_PAGINAS = ["index.html", "curso/index.html", "curso/b/index.html", "curso/versao-b/index.html", "curso/inscricao/index.html",
-              "calculadora/index.html", "quiz/index.html", MATERIAIS_HUB, *MATERIAIS_PAGINAS, BLACK_FRIDAY]
-BF_FAIXA = [p for p in BF_PAGINAS if p not in ("curso/inscricao/index.html", BLACK_FRIDAY)]
+              "calculadora/index.html", "quiz/index.html", MATERIAIS_HUB, *MATERIAIS_PAGINAS, BLACK_FRIDAY, *BF_VERSOES]
+BF_FAIXA = [p for p in BF_PAGINAS if p not in ("curso/inscricao/index.html", BLACK_FRIDAY, *BF_VERSOES)]
 # links de materiais, quiz e calculadora para a página da Black Friday (utm_medium = página de origem)
 BF_UTM = {MATERIAIS_HUB: "materiais", "quiz/index.html": "quiz", "calculadora/index.html": "calculadora",
           **{f"materiais/{m}/index.html": f"materiais_{m}" for m in MATERIAIS}}
@@ -68,6 +71,7 @@ CURSO_INSCRICAO = {
     "curso/b/index.html": "../inscricao/?pg=pgB",
     "curso/versao-b/index.html": "../inscricao/?pg=pgC",
     BLACK_FRIDAY: "../curso/inscricao/?pg=pgBF",
+    **{rel: "../../curso/inscricao/?pg=pgBF" for rel in BF_VERSOES},
 }
 LAMBDA_CADASTRO = "https://nwmxltflulqvcxu7bdplodmyjm0yweuc.lambda-url.sa-east-1.on.aws/"
 # as 3 versões do curso carregam o site.js (Pixel, GA4, src/sck) com o sufixo da página no data-pagina
@@ -567,8 +571,8 @@ def check_black_friday():
                    "Falar com a equipe no WhatsApp"):
         if trecho not in html:
             erros.append(f"{rel}: sem {trecho}")
-    if not re.search(r'<script src="\.\./assets/js/site\.js(\?v=\d+)?" data-pagina="pgBF"></script>', html):
-        erros.append(f"{rel}: sem <script src=\"../assets/js/site.js\" data-pagina=\"pgBF\">")
+    if not re.search(r'<script src="\.\./assets/js/site\.js(\?v=\d+)?" data-pagina="pgBF" data-versao="bf_a"></script>', html):
+        erros.append(f"{rel}: sem <script src=\"../assets/js/site.js\" data-pagina=\"pgBF\" data-versao=\"bf_a\">")
     if html.count('class="btn btn-light btn-cta checkout"') + html.count('class="btn btn-cta checkout"') < 3:
         erros.append(f"{rel}: menos de 3 botões de compra ao longo da página")
     if html.count("<blockquote class=\"test\">") != 3:
@@ -579,6 +583,47 @@ def check_black_friday():
         erros.append(f"{rel}: falta assets/img/og-black-friday.jpg (rode _catalogo/og.py og-black-friday.jpg)")
     if "https://liviaoliveira.me/black-friday/" not in (ROOT / "sitemap.xml").read_text(encoding="utf-8"):
         erros.append(f"{rel}: não está no sitemap.xml")
+
+    sitemap = (ROOT / "sitemap.xml").read_text(encoding="utf-8")
+    for rel, (versao, arte) in BF_VERSOES.items():
+        html = (ROOT / rel).read_text(encoding="utf-8")
+        pasta = rel.rsplit("/", 1)[0] + "/"
+        for trecho in ('<meta name="robots" content="noindex">', '<link rel="canonical" href="https://liviaoliveira.me/black-friday/">',
+                       f'<meta property="og:url" content="https://liviaoliveira.me/{pasta}">',
+                       f'<meta property="og:image" content="https://liviaoliveira.me/assets/img/bf/{arte}">',
+                       "Black Friday · termina em", "data-bf-dias", "data-bf-seg", "A Black Friday terminou",
+                       'data-bf="off" href="../../curso/b/"', "Você economiza R$ 360,01", 'id="oferta"', "sticky-bar",
+                       "https://wa.me/5511910607651?text=Oi!%20Tenho%20uma%20d%C3%BAvida%20sobre%20a%20Black%20Friday%20do%20Carreira%20com%20Sentido"):
+            if trecho not in html:
+                erros.append(f"{rel}: sem {trecho}")
+        if html.count("<title>") != 1 or "<title>Black Friday Carreira com Sentido: de R$ 860 por R$ 499,99</title>" in html:
+            erros.append(f"{rel}: precisa de um <title> próprio (diferente da black-friday/)")
+        if '<meta name="description" content="' not in html or (ROOT / BLACK_FRIDAY).read_text(encoding="utf-8").split('<meta name="description"', 1)[1].split(">", 1)[0] in html:
+            erros.append(f"{rel}: precisa de uma description própria")
+        if not re.search(rf'<script src="\.\./\.\./assets/js/site\.js(\?v=\d+)?" data-pagina="pgBF" data-versao="{versao}"></script>', html):
+            erros.append(f"{rel}: sem <script src=\"../../assets/js/site.js\" data-pagina=\"pgBF\" data-versao=\"{versao}\">")
+        if not (ROOT / "assets/img/bf" / arte).is_file():
+            erros.append(f"{rel}: falta assets/img/bf/{arte}")
+        if f"liviaoliveira.me/{pasta}" in sitemap:
+            erros.append(f"{rel}: página de anúncio não vai no sitemap.xml")
+        if "menor preço" in html.lower():
+            erros.append(f"{rel}: contém \"menor preço\" (sem fonte)")
+        if html.count('class="btn btn-light btn-cta checkout"') + html.count('class="btn btn-cta checkout"') < 2:
+            erros.append(f"{rel}: menos de 2 botões de compra ao longo da página")
+    b = (ROOT / "black-friday/b/index.html").read_text(encoding="utf-8")
+    for trecho in ("Quanto a sua sessão precisa custar para a clínica <em>fechar a conta?</em>", "Módulo 02", "Módulo 03",
+                   "Valor da sessão", "Faltas e agenda", "Contrato e impostos", "CRP 07/18713", "Garantia de 7 dias."):
+        if trecho not in b:
+            erros.append(f"black-friday/b/index.html: sem {trecho}")
+    if b.count('<blockquote class="test">') != 3 or b.count('<div class="bf-dor">') != 3:
+        erros.append("black-friday/b/index.html: deve ter 3 depoimentos e 3 dores")
+    c = (ROOT / "black-friday/c/index.html").read_text(encoding="utf-8")
+    for trecho in ("Black Friday <em>Carreira com Sentido</em>", "de <s>R$ 860</s>", ">Garantir por R$ 499,99</a>",
+                   "ou 12x de R$ 41,67 sem juros", ">Garantir</a>", "Tenho uma dúvida", "Garantia de 7 dias."):
+        if trecho not in c:
+            erros.append(f"black-friday/c/index.html: sem {trecho}")
+    if c.count("<li><svg") != 6 or not 2 <= c.count('<blockquote class="test">') <= 3 or c.count("<details") != 4:
+        erros.append("black-friday/c/index.html: deve ter 6 itens com ícone, 2 ou 3 depoimentos e 4 perguntas")
 
     atalho = (ROOT / BLACK_ATALHO).read_text(encoding="utf-8")
     for trecho in ('location.replace("../black-friday/"+location.search', '<meta http-equiv="refresh" content="0; url=../black-friday/">',
@@ -595,8 +640,15 @@ def check_black_friday():
             erros.append(f"curso/inscricao/script.js: sem {trecho} (Black Friday)")
     if re.search(r"^function bfAtiva\b", script, re.M):
         erros.append("curso/inscricao/script.js: function bfAtiva global sobrescreve o window.bfAtiva do bf.js")
-    if "valorOferta()" not in (ROOT / "assets/js/site.js").read_text(encoding="utf-8"):
+    for trecho in ('visit.get("versao")', "pagina_versao", '"|" + versao'):
+        if trecho not in script:
+            erros.append(f"curso/inscricao/script.js: sem {trecho} (versão da página da Black Friday no sck e nos eventos)")
+    site_js = (ROOT / "assets/js/site.js").read_text(encoding="utf-8")
+    if "valorOferta()" not in site_js:
         erros.append("assets/js/site.js: view_offer sem o valor da Black Friday (valorOferta)")
+    for trecho in ('getAttribute("data-versao")', "p.pagina_versao = params.pagina_versao", 'searchParams.set("versao", versao)'):
+        if trecho not in site_js:
+            erros.append(f"assets/js/site.js: sem {trecho} (versão da página da Black Friday)")
 
     # ao mudar o site.js, o ?v= sobe em todas as páginas: todas com a mesma versão
     versoes = {}

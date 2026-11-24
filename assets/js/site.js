@@ -7,7 +7,9 @@
  *   ga4Id:       "G-XH74VZSNZ2"  (GA4 direto, propriedade 559914633: config com page_view em toda página)
  * As páginas do curso dizem qual versão são no atributo data-pagina da tag <script> (pgA = curso/,
  * pgB = curso/b/, pgC = curso/versao-b/, pgBF = black-friday/); o valor vai no pg do link da pré-página de inscrição (e dali no sck
- * da Hotmart) e no content_category dos eventos. Calculadora (pgCalc), quiz (pgQuiz) e materiais gratuitos (pgMat)
+ * da Hotmart) e no content_category dos eventos. As 3 versões da Black Friday (black-friday/, black-friday/b/ e
+ * black-friday/c/) usam todas pgBF e dizem qual versão são no data-versao (bf_a, bf_b, bf_c): vai no pagina_versao
+ * dos eventos e no versao do link da pré-página (que põe |bf_b ou |bf_c no fim do sck). Calculadora (pgCalc), quiz (pgQuiz) e materiais gratuitos (pgMat)
  * usam o data-pagina no pagina e no sck do contato enviado à Lambda (window.siteContato).
  * Páginas com data-sem-rastreamento na tag <script> (as de terapia: conteúdo de saúde) não carregam GTM, GA4
  * nem Pixel; o resto (UTMs, máscara, validação e envio dos formulários) funciona igual.
@@ -22,6 +24,8 @@ window.dataLayer = window.dataLayer || [];
   /* Versão da página do curso (pgA, pgB, pgC); vazio nas outras páginas */
   var script = document.currentScript;
   var pagina = (script && script.getAttribute("data-pagina")) || "";
+  /* Versão da página da Black Friday (bf_a, bf_b, bf_c); vazio nas outras páginas */
+  var versao = (script && script.getAttribute("data-versao")) || "";
   var rastreia = !(script && script.hasAttribute("data-sem-rastreamento"));
 
   /* ---------- Carregamento condicional de GTM, GA4 e Pixel ---------- */
@@ -82,6 +86,7 @@ window.dataLayer = window.dataLayer || [];
       if (params && params.pontos !== undefined) p.pontos = params.pontos;
       if (params && params.faixa) p.faixa = params.faixa;
       if (params && params.material) p.material = params.material;
+      if (params && params.pagina_versao) p.pagina_versao = params.pagina_versao;
       if (PIXEL_EVENTS[event]) window.fbq("track", PIXEL_EVENTS[event], p);
       else window.fbq("trackCustom", PIXEL_CUSTOM[event], p);
     }
@@ -121,21 +126,23 @@ window.dataLayer = window.dataLayer || [];
    */
   var offerParams = { value: 860, currency: "BRL" };
   if (pagina) { offerParams.content_name = "Carreira com Sentido"; offerParams.content_category = pagina; }
+  if (versao) offerParams.pagina_versao = versao;
+  var cliqueParams = { content_category: pagina };
+  if (versao) cliqueParams.pagina_versao = versao;
   /* Black Friday (assets/js/bf.js): enquanto bfAtiva(), a oferta vale BF.valor (499.99) */
   function valorOferta() {
     return window.bfAtiva && window.BF && window.bfAtiva() ? window.BF.valor : 860;
   }
 
   document.querySelectorAll("a.checkout").forEach(function (a) {
-    if (pagina) {
+    if (pagina || versao) {
       var url = new URL(a.href);
-      if (!url.searchParams.has("pg")) {
-        url.searchParams.set("pg", pagina);
-        a.href = url.toString();
-      }
+      if (pagina && !url.searchParams.has("pg")) url.searchParams.set("pg", pagina);
+      if (versao && !url.searchParams.has("versao")) url.searchParams.set("versao", versao);
+      a.href = url.toString();
     }
     a.addEventListener("click", function () {
-      track("clique_comprar", { content_category: pagina });
+      track("clique_comprar", cliqueParams);
     });
   });
 
