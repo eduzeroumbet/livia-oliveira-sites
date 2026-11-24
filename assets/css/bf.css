@@ -97,3 +97,42 @@ html:not(.bf-fim):has(.bf-faixa) { scroll-padding-top: calc(var(--nav-h, 62px) +
 .bf-cta-final .btn { width: 100%; max-width: 460px; }
 .bf-wa { margin-top: 14px; font-size: 15px; }
 .bf-wa a { color: inherit; font-weight: 600; }
+
+/* ---------- Versões black-friday/b/ e black-friday/c/ (mesma base da black-friday/) ---------- */
+/* contagem grande, numa caixa escura (bloco de preço da B e primeira dobra da C) */
+.bf-contagem { display: flex; flex-direction: column; align-items: center; gap: 8px; max-width: 460px; margin: 0 auto 18px; padding: 14px 12px; border-radius: var(--radius); background: #1E1212; color: #FCFAF6; text-align: center; }
+.bf-contagem__rotulo { font: 700 13px/1.2 var(--sans); letter-spacing: .08em; text-transform: uppercase; color: #DBA8AD; }
+.page-bf .bf-contagem .bf-relogio { gap: 8px; }
+.page-bf .bf-contagem .bf-relogio li { min-width: 64px; padding: 8px 6px; }
+.page-bf .bf-contagem .bf-relogio b { font-size: 32px; }
+.page-bf .bf-contagem .bf-relogio small { font-size: 11px; }
+
+/* B: pergunta no topo, 3 dores ligadas aos módulos, lista curta dos módulos */
+.page-bf h1.bf-pergunta { font-size: clamp(40px, 10vw, 66px); }
+.bf-dores { display: grid; gap: 14px; margin-top: 26px; }
+.bf-dor { padding: 22px; border-radius: var(--radius); background: var(--white); border: 1px solid var(--line); }
+.bf-dor__n { display: block; margin-bottom: 6px; font: 700 12.5px/1.2 var(--sans); letter-spacing: .08em; text-transform: uppercase; color: var(--muted); }
+.bf-dor h3 { margin-bottom: 8px; }
+.bf-dor__mod { margin-top: 14px; padding-top: 14px; border-top: 1px dashed var(--line); font-size: 15.5px; }
+.bf-dor__mod b { display: block; color: var(--wine); }
+@media (min-width: 900px) { .bf-dores { grid-template-columns: repeat(3, 1fr); } }
+.bf-preco-sec { text-align: center; }
+.bf-preco-sec .bf-preco { max-width: 460px; margin-left: auto; margin-right: auto; }
+.bf-mods-curta { display: grid; gap: 8px; margin: 24px 0 28px; padding: 0; list-style: none; }
+.bf-mods-curta li { display: flex; align-items: baseline; gap: 12px; padding: 12px 14px; border-radius: var(--radius); background: rgba(252, 250, 246, .06); border: 1px solid rgba(252, 250, 246, .15); font-weight: 600; }
+.bf-mods-curta .n { min-width: 30px; font-family: var(--serif); font-stretch: 62.5%; font-size: 24px; line-height: 1; color: var(--rose); }
+@media (min-width: 640px) { .bf-mods-curta { grid-template-columns: repeat(2, 1fr); } }
+
+/* C: página curta, mobile first */
+.bf-c-hero { text-align: center; }
+.bf-c-hero .bf-selo { margin-bottom: 10px; }
+.bf-c-hero h1 { font-size: clamp(40px, 10.5vw, 64px); }
+.bf-c-hero .bf-preco { max-width: 460px; margin: 18px auto 0; }
+.bf-preco__grande { margin: 2px 0 0; font-family: var(--serif); font-stretch: 62.5%; font-weight: 600; font-size: 56px; line-height: 1; letter-spacing: -.01em; color: var(--wine); }
+.bf-inclui { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin: 22px 0 0; padding: 0; list-style: none; }
+.bf-inclui li { display: flex; flex-direction: column; align-items: center; gap: 8px; padding: 16px 10px; border-radius: var(--radius); background: var(--white); border: 1px solid var(--line); text-align: center; font-weight: 600; font-size: 15px; line-height: 1.3; }
+.bf-inclui svg { width: 28px; height: 28px; color: var(--wine); }
+@media (min-width: 720px) { .bf-inclui { grid-template-columns: repeat(3, 1fr); } }
+@media (min-width: 900px) { .tests.bf-tests-2 { grid-template-columns: repeat(2, 1fr); } }
+.bf-c-final .btn-row { justify-content: center; }
+.bf-cta-final .btn-wa-outline { display: flex; width: fit-content; max-width: none; margin: 18px auto 0; }

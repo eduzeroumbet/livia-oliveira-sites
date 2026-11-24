@@ -12,6 +12,8 @@
  * Black Friday (assets/js/bf.js, carregado no <head>): enquanto window.bfAtiva(), o link usa a oferta BF.oferta
  * (qu4x7j2d) e o begin_checkout sai com BF.valor (499.99), venha a pessoa de qualquer página do curso; depois de
  * BF.fim volta sozinho para CHECKOUT_URL (n2h6k72h) e 860.
+ * Versões da página da Black Friday (versao na URL, posto pelo site.js com o data-versao): bf_b e bf_c entram no fim
+ * do sck (…|pgBF|bf_b); a bf_a (black-friday/) fica com o sck de antes (…|pgBF). As três vão no pagina_versao dos eventos.
  */
 var CADASTRO_URL = "https://nwmxltflulqvcxu7bdplodmyjm0yweuc.lambda-url.sa-east-1.on.aws/";
 var CHECKOUT_URL = "https://pay.hotmart.com/M100028858P?off=n2h6k72h&checkoutMode=10";
@@ -59,8 +61,9 @@ var FORMAS = {
   var PAGINAS = ["pgA", "pgB", "pgC", "pgBF"];
   var sckPronto = visit.get("sck") || "";
   var pg = visit.get("pg");
+  var versao = /^bf_[abc]$/.test(visit.get("versao") || "") ? visit.get("versao") : "";
   if (PAGINAS.indexOf(pg) < 0) {
-    var doSck = sckPronto.match(/\|(pg(?:[ABC]|BF))$/);
+    var doSck = sckPronto.replace(/\|bf_[abc]$/, "").match(/\|(pg(?:[ABC]|BF))$/);
     pg = doSck ? doSck[1] : "pgB";
   }
   var src = visit.get("src") || ["utm_source", "utm_medium", "utm_campaign", "utm_content"]
@@ -68,6 +71,13 @@ var FORMAS = {
     .filter(Boolean)
     .join("|");
   var sck = sckPronto || (src || "direto") + "|" + pg;
+  if (versao && versao !== "bf_a" && !new RegExp("\\|" + versao + "$").test(sck)) sck += "|" + versao;
+  /* parâmetros comuns dos eventos: content_category e, vindo da Black Friday, a versão da página */
+  function eventoParams(extras) {
+    var p = { content_category: pg };
+    if (versao) p.pagina_versao = versao;
+    return Object.assign(p, extras);
+  }
 
   /* ---------- Forma de pagamento: os campos só abrem depois da escolha ---------- */
   var grupo = form.querySelector(".insc-formas");
@@ -113,7 +123,7 @@ var FORMAS = {
       dadosBloco.scrollIntoView({ behavior: suave ? "smooth" : "auto", block: "nearest" });
     }
     porToque = false;
-    if (window.siteTrack) window.siteTrack("escolha_pagamento", { content_category: pg, payment_type: f });
+    if (window.siteTrack) window.siteTrack("escolha_pagamento", eventoParams({ payment_type: f }));
   });
 
   /* navegador que restaura o formulário ao voltar (opção já marcada): abre os campos sem novo evento */
@@ -202,8 +212,8 @@ var FORMAS = {
      * (Lead é da calculadora, que tem campanha própria otimizando Lead). */
     if (window.siteIdentify) window.siteIdentify({ em: email, ph: "55" + whats, fn: nome.split(" ")[0].toLowerCase() });
     if (window.siteTrack) {
-      window.siteTrack("begin_checkout", { value: valorCurso(), currency: "BRL", content_name: "Carreira com Sentido", content_category: pg, payment_type: f });
-      window.siteTrack("cadastro_checkout", { content_category: pg, payment_type: f });
+      window.siteTrack("begin_checkout", Object.assign({ value: valorCurso(), currency: "BRL", content_name: "Carreira com Sentido" }, eventoParams({ payment_type: f })));
+      window.siteTrack("cadastro_checkout", eventoParams({ payment_type: f }));
     }
 
     var dados = {

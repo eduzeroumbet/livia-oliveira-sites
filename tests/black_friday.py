@@ -12,6 +12,9 @@ no dataLayer); a Lambda de cadastro e a Hotmart são interceptadas.
 - depois do prazo: "A Black Friday terminou", nenhum R$ 499,99 nem 41,67 na tela, botão para curso/b/; o prazo acabando
   com a página aberta troca tudo na hora;
 - black/ redireciona para black-friday/ com a query;
+- versões B (black-friday/b/) e C (black-friday/c/), e a A junto: BF.fim 2026-11-30T23:59:59-03:00, R$ 499,99 e 41,67,
+  sem travessão, noindex só em B e C, botões com pg=pgBF&versao=bf_x, eventos com pagina_versao (bf_a, bf_b, bf_c),
+  Hotmart com off=qu4x7j2d e sck terminando em |pgBF|bf_b ou |pgBF|bf_c (a A fica com |pgBF), e o "terminou" depois do prazo;
 - faixa no curso (A, B, C), materiais, quiz, calculadora e home, com o link certo e sem cobrir o cabeçalho; preço de BF
   durante e o normal depois; terapia sem nada de Black Friday;
 - fora de localhost (domínio liviaoliveira.me simulado) o ?bf_agora é ignorado.
@@ -41,6 +44,8 @@ DEPOIS = "bf_agora=2026-12-01T03:00:01Z"
 UTMS = "utm_source=ig&utm_medium=stories&utm_campaign=ccs_bf&utm_content=S01&fbclid=abc123"
 LINHA_BF = "de R$ 860 por R$ 499,99 · 12x de R$ 41,67 sem juros (Black Friday até 30/11)"
 LINHA = "12x de R$ 71,67 sem juros ou R$ 860 à vista"
+# as 3 versões da página da Black Friday: caminho > (pagina_versao, sufixo do sck na Hotmart)
+VERSOES = {"black-friday/": ("bf_a", "|pgBF"), "black-friday/b/": ("bf_b", "|pgBF|bf_b"), "black-friday/c/": ("bf_c", "|pgBF|bf_c")}
 # páginas com a faixa e o destino do link (sem a query da visita)
 FAIXA = {
     "curso/": "black-friday/", "curso/b/": "black-friday/", "curso/versao-b/": "black-friday/", "": "black-friday/",
@@ -172,7 +177,7 @@ with sync_playwright() as p:
         bons = []
         for h_ in hrefs:
             q = parse_qs(urlsplit(h_).query)
-            if (urlsplit(h_).path == "/curso/inscricao/" and q.get("pg") == ["pgBF"] and q.get("utm_source") == ["ig"]
+            if (urlsplit(h_).path == "/curso/inscricao/" and q.get("pg") == ["pgBF"] and q.get("versao") == ["bf_a"] and q.get("utm_source") == ["ig"]
                     and q.get("utm_campaign") == ["ccs_bf"] and q.get("utm_content") == ["S01"] and q.get("fbclid") == ["abc123"]):
                 bons.append(h_)
         ok(len(bons) >= 3 and len(bons) == len(hrefs), f"{len(bons)} de {len(hrefs)} botões vão para curso/inscricao/?pg=pgBF com as UTMs")
@@ -196,15 +201,16 @@ with sync_playwright() as p:
         page.wait_for_timeout(500)
         estado = page.evaluate(ESTADO)
         vc = [c for c in estado["fbq"] if c[:2] == ["track", "ViewContent"]]
-        esperado = {"value": 499.99, "currency": "BRL", "content_name": "Carreira com Sentido", "content_category": "pgBF"}
-        ok(vc == [["track", "ViewContent", esperado]], f"ViewContent com value 499.99 e pgBF ({vc})")
+        esperado = {"value": 499.99, "currency": "BRL", "content_name": "Carreira com Sentido", "content_category": "pgBF", "pagina_versao": "bf_a"}
+        ok(vc == [["track", "ViewContent", esperado]], f"ViewContent com value 499.99, pgBF e bf_a ({vc})")
         ok(["event", "view_offer", esperado] in estado["dl"], "view_offer no GA4")
-        # clique: CliqueComprar com pgBF (navegação cancelada)
+        # clique: CliqueComprar com pgBF e bf_a (navegação cancelada)
         page.evaluate("document.addEventListener('click', e => e.preventDefault())")
         page.eval_on_selector("a.checkout", "a => a.click()")
         estado = page.evaluate(ESTADO)
-        ok(["trackCustom", "CliqueComprar", {"content_category": "pgBF"}] in estado["fbq"], "CliqueComprar com content_category pgBF")
-        ok(["event", "clique_comprar", {"content_category": "pgBF"}] in estado["dl"], "clique_comprar no GA4")
+        clique = {"content_category": "pgBF", "pagina_versao": "bf_a"}
+        ok(["trackCustom", "CliqueComprar", clique] in estado["fbq"], "CliqueComprar com content_category pgBF e pagina_versao bf_a")
+        ok(["event", "clique_comprar", clique] in estado["dl"], "clique_comprar no GA4")
         ok(not ctx["erros_js"], f"sem erros de JS {ctx['erros_js']}")
         page.close()
 
@@ -228,9 +234,132 @@ with sync_playwright() as p:
     ok(hq.get("off") == ["qu4x7j2d"], f"link da Hotmart com off=qu4x7j2d ({hq.get('off')})")
     ok((hq.get("sck") or [""])[0].endswith("|pgBF") and hq.get("sck") == ["ig|stories|ccs_bf|S01|pgBF"], f"sck terminando em |pgBF ({hq.get('sck')})")
     ok(hq.get("fbclid") == ["abc123"] and "bf_agora" not in hq, "fbclid vai, bf_agora não vai")
-    ok(["track", "InitiateCheckout", {"value": 499.99, "currency": "BRL", "content_name": "Carreira com Sentido", "content_category": "pgBF", "payment_type": "pix"}] in ctx["fbq"],
-       "InitiateCheckout com value 499.99")
+    ok(["track", "InitiateCheckout", {"value": 499.99, "currency": "BRL", "content_name": "Carreira com Sentido", "content_category": "pgBF",
+                                      "pagina_versao": "bf_a", "payment_type": "pix"}] in ctx["fbq"],
+       "InitiateCheckout com value 499.99 e pagina_versao bf_a")
     page.close()
+
+    # ---------- as 3 versões: o que vale para todas ----------
+    for caminho, (versao, sufixo) in VERSOES.items():
+        print(f"--- {caminho} ({versao}): oferta, prazo e origem")
+        page, ctx = abre(b, caminho, DURANTE)
+        cfg = page.evaluate("[window.BF.fim, window.BF.oferta, window.BF.preco, window.BF.parcela, window.BF.de]")
+        ok(cfg == ["2026-11-30T23:59:59-03:00", "qu4x7j2d", "499,99", "41,67", "860"], f"BF.fim 2026-11-30T23:59 -03:00, oferta e preço ({cfg})")
+        html = page.content()
+        texto = page.inner_text("body")
+        ok("R$ 499,99" in texto and "41,67" in texto and "R$ 360,01" in texto and "R$ 860" in texto, "R$ 860, R$ 499,99, 12x de R$ 41,67 e economia de R$ 360,01")
+        ok("—" not in html, "sem travessão (—) no HTML")
+        ok("menor preço" not in html.lower(), "sem \"menor preço\"")
+        robots = page.eval_on_selector_all('meta[name="robots"]', "els => els.map(e => e.content)")
+        if versao == "bf_a":
+            ok(robots == [], f"A indexável, sem noindex ({robots})")
+        else:
+            ok(robots == ["noindex"], f"noindex ({robots})")
+        page.close()
+
+    for caminho in ("black-friday/b/", "black-friday/c/"):
+        versao, sufixo = VERSOES[caminho]
+        for vp in ({"width": 390, "height": 844}, {"width": 1366, "height": 768}):
+            print(f"--- {caminho} {vp['width']}px, durante")
+            page, ctx = abre(b, caminho, UTMS + "&" + DURANTE, vp)
+            largura = page.evaluate(SEM_ROLAGEM)
+            ok(largura[0] <= largura[1], f"sem rolagem horizontal ({largura[0]} <= {largura[1]})")
+            titulo = page.title()
+            ok(titulo and titulo != "Black Friday Carreira com Sentido: de R$ 860 por R$ 499,99" and "499,99" in titulo, f"título próprio ({titulo})")
+            texto = page.inner_text("body")
+            ok("terminou" not in texto.lower(), "não mostra \"terminou\"")
+            topo = page.locator(".bf-topo").first
+            ok(topo.is_visible() and "BLACK FRIDAY · TERMINA EM" in topo.inner_text().upper() and topo.bounding_box()["y"] == 0,
+               "faixa do topo igual à da A")
+            d, h, m, s = contagem(page)
+            ok((d, h, m) == (5, 11, 59) and s >= 55, f"contagem regressiva certa ({d}d {h}h {m}min {s}s)")
+            hrefs = page.eval_on_selector_all("a.checkout", "els => els.map(a => a.href)")
+            bons = [h_ for h_ in hrefs if urlsplit(h_).path == "/curso/inscricao/" and parse_qs(urlsplit(h_).query).get("pg") == ["pgBF"]
+                    and parse_qs(urlsplit(h_).query).get("versao") == [versao] and parse_qs(urlsplit(h_).query).get("utm_source") == ["ig"]
+                    and parse_qs(urlsplit(h_).query).get("fbclid") == ["abc123"]]
+            ok(len(bons) >= 3 and len(bons) == len(hrefs), f"{len(bons)} de {len(hrefs)} botões vão para curso/inscricao/?pg=pgBF&versao={versao} com as UTMs")
+            wa = page.eval_on_selector_all('a[href*="wa.me/"]', "els => els.map(a => a.href)")
+            ok(wa and all(u.startswith("https://wa.me/5511910607651?text=Oi!%20Tenho%20uma%20d%C3%BAvida%20sobre%20a%20Black%20Friday") for u in wa),
+               "WhatsApp da Lia com a mensagem da Black Friday")
+            if caminho == "black-friday/b/":
+                ok(page.locator("h1").inner_text().startswith("Quanto a sua sessão precisa custar para a clínica"), "topo com a pergunta da conta da clínica")
+                ok(page.locator(".hero #oferta a.checkout").is_visible(), "oferta com botão logo abaixo da pergunta")
+                ok(page.locator(".bf-dor").count() == 3 and all(t in texto for t in ("Módulo 02", "Módulo 03")), "3 dores ligadas aos módulos")
+                ok(page.locator(".bf-preco-sec .bf-contagem").is_visible(), "bloco de preço com contagem regressiva")
+            else:
+                cta = page.get_by_role("link", name="Garantir por R$ 499,99").first
+                caixa = cta.bounding_box()
+                ok(cta.is_visible() and caixa["y"] + caixa["height"] <= vp["height"], f"botão \"Garantir por R$ 499,99\" na primeira dobra ({caixa})")
+                rel = page.locator(".hero .bf-contagem").bounding_box()
+                ok(page.locator(".hero .bf-contagem").is_visible() and rel["y"] < vp["height"] / 2, "contagem grande no topo da primeira dobra")
+                ok(page.locator(".bf-inclui li svg").count() == 6, "6 itens incluídos com ícone")
+                ok(page.locator("#faq details").count() == 4, "4 perguntas no FAQ")
+                ok(page.get_by_role("link", name="Tenho uma dúvida").first.is_visible(), "botão \"Tenho uma dúvida\" para a Lia")
+            if vp["width"] == 390:
+                ok(not page.eval_on_selector(".sticky-bar", "e => e.classList.contains('on')"), "botão fixo escondido na primeira dobra")
+                page.eval_on_selector("#alunas", ROLAR_ATE)
+                page.wait_for_timeout(500)
+                barra = page.locator(".sticky-bar")
+                ok(page.eval_on_selector(".sticky-bar", "e => e.classList.contains('on')") and "41,67" in barra.inner_text(),
+                   f"botão fixo do celular com o preço depois da primeira dobra ({' '.join(barra.inner_text().split())})")
+                page.evaluate("window.scrollTo({top: 0, behavior: 'instant'})")
+                page.wait_for_timeout(300)
+            page.eval_on_selector("#oferta", "el => window.scrollTo({top: el.getBoundingClientRect().top + window.scrollY - 100, behavior: 'instant'})")
+            page.wait_for_timeout(500)
+            estado = page.evaluate(ESTADO)
+            vc = [c for c in estado["fbq"] if c[:2] == ["track", "ViewContent"]]
+            esperado = {"value": 499.99, "currency": "BRL", "content_name": "Carreira com Sentido", "content_category": "pgBF", "pagina_versao": versao}
+            ok(vc == [["track", "ViewContent", esperado]], f"ViewContent com value 499.99 e pagina_versao {versao} ({vc})")
+            ok(["event", "view_offer", esperado] in estado["dl"], "view_offer no GA4 com pagina_versao")
+            page.evaluate("document.addEventListener('click', e => e.preventDefault())")
+            page.eval_on_selector("a.checkout", "a => a.click()")
+            estado = page.evaluate(ESTADO)
+            clique = {"content_category": "pgBF", "pagina_versao": versao}
+            ok(["trackCustom", "CliqueComprar", clique] in estado["fbq"], f"CliqueComprar com pagina_versao {versao}")
+            ok(["event", "clique_comprar", clique] in estado["dl"], "clique_comprar no GA4 com pagina_versao")
+            ok(not ctx["erros_js"], f"sem erros de JS {ctx['erros_js']}")
+            page.close()
+
+        print(f"--- {caminho} botão > pré-página > Hotmart")
+        page, ctx = abre(b, caminho, UTMS + "&" + DURANTE)
+        page.click("#oferta a.checkout")
+        page.wait_for_url(lambda u: "/curso/inscricao/" in u, timeout=5000)
+        ok(page.locator(".insc-bf").is_visible(), "pré-página mostra o preço de Black Friday")
+        page.click('label.insc-forma:has(input[value="cartao"])')
+        page.fill("#nome", "Maria Teste")
+        page.fill("#email", "maria.teste@exemplo.com")
+        page.fill("#whatsapp", "(51) 99999-8888")
+        page.evaluate(ESPIAO)
+        with page.expect_request(lambda r: "pay.hotmart.com" in r.url, timeout=5000):
+            page.click("button[type=submit]")
+        page.wait_for_timeout(200)
+        destino = ctx["hotmart"][0] if ctx["hotmart"] else ""
+        hq = parse_qs(urlsplit(destino).query)
+        ok(destino.startswith("https://pay.hotmart.com/M100028858P?") and hq.get("off") == ["qu4x7j2d"], f"link da Hotmart com off=qu4x7j2d ({hq.get('off')})")
+        ok(hq.get("sck") == ["ig|stories|ccs_bf|S01" + sufixo], f"sck com a versão, terminando em {sufixo} ({hq.get('sck')})")
+        ok("versao" not in hq and "pg" not in hq and "bf_agora" not in hq, "nem versao, nem pg, nem bf_agora no link da Hotmart")
+        dados = ctx["lambda"][0].post_data_json if ctx["lambda"] else {}
+        ok(dados.get("pagina") == "pgBF" and dados.get("sck") == "ig|stories|ccs_bf|S01" + sufixo, f"cadastro com pgBF e o sck da versão ({dados.get('sck')})")
+        oferta = {"value": 499.99, "currency": "BRL", "content_name": "Carreira com Sentido", "content_category": "pgBF", "pagina_versao": versao, "payment_type": "cartao"}
+        ok(["track", "InitiateCheckout", oferta] in ctx["fbq"], f"InitiateCheckout com value 499.99 e pagina_versao {versao}")
+        ok(["event", "begin_checkout", oferta] in ctx["dl"], "begin_checkout no GA4 com pagina_versao")
+        ok(not ctx["erros_js"], f"sem erros de JS {ctx['erros_js']}")
+        page.close()
+
+        for vp in ({"width": 390, "height": 844}, {"width": 1366, "height": 768}):
+            print(f"--- {caminho} {vp['width']}px, depois do prazo")
+            page, ctx = abre(b, caminho, DEPOIS, vp)
+            texto = page.inner_text("body")
+            ok("A Black Friday terminou" in texto, "mostra \"A Black Friday terminou\"")
+            ok("499,99" not in texto and "41,67" not in texto and "360,01" not in texto, "nenhum preço de Black Friday na tela")
+            ok("499,99" not in page.title(), f"título sem o preço ({page.title()})")
+            ok(visivel(page, "a.checkout") == 0, "nenhum botão de compra da Black Friday visível")
+            destinos = page.eval_on_selector_all("main a.btn", "els => els.filter(e => e.offsetParent !== null && !e.href.includes('wa.me')).map(a => new URL(a.href).pathname)")
+            ok(destinos and all(d_ == "/curso/b/" for d_ in destinos), f"botões levam para curso/b/ ({destinos})")
+            largura = page.evaluate(SEM_ROLAGEM)
+            ok(largura[0] <= largura[1], f"sem rolagem horizontal ({largura[0]} <= {largura[1]})")
+            ok(not ctx["erros_js"], f"sem erros de JS {ctx['erros_js']}")
+            page.close()
 
     # ---------- depois do prazo ----------
     for vp in ({"width": 390, "height": 844}, {"width": 1366, "height": 768}):
