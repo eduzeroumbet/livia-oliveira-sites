@@ -575,8 +575,8 @@ def check_black_friday():
         erros.append(f"{rel}: sem <script src=\"../assets/js/site.js\" data-pagina=\"pgBF\" data-versao=\"bf_a\">")
     if html.count('class="btn btn-light btn-cta checkout"') + html.count('class="btn btn-cta checkout"') < 3:
         erros.append(f"{rel}: menos de 3 botões de compra ao longo da página")
-    if html.count("<blockquote class=\"test\">") != 3:
-        erros.append(f"{rel}: deve ter 3 depoimentos")
+    if html.count("<blockquote class=\"test\">") != 6:
+        erros.append(f"{rel}: deve ter os 6 depoimentos do curso/b/")
     if html.count('<li class="mod">') != 10:
         erros.append(f"{rel}: deve ter os 10 módulos")
     if not (ROOT / "assets/img/og-black-friday.jpg").is_file():
@@ -615,15 +615,15 @@ def check_black_friday():
                    "Valor da sessão", "Faltas e agenda", "Contrato e impostos", "CRP 07/18713", "Garantia de 7 dias."):
         if trecho not in b:
             erros.append(f"black-friday/b/index.html: sem {trecho}")
-    if b.count('<blockquote class="test">') != 3 or b.count('<div class="bf-dor">') != 3:
-        erros.append("black-friday/b/index.html: deve ter 3 depoimentos e 3 dores")
+    if b.count('<blockquote class="test">') != 6 or b.count('<div class="bf-dor">') != 3:
+        erros.append("black-friday/b/index.html: deve ter 6 depoimentos e 3 dores")
     c = (ROOT / "black-friday/c/index.html").read_text(encoding="utf-8")
     for trecho in ("Black Friday <em>Carreira com Sentido</em>", "de <s>R$ 860</s>", ">Garantir por R$ 499,99</a>",
                    "ou 12x de R$ 41,67 sem juros", ">Garantir</a>", "Tenho uma dúvida", "Garantia de 7 dias."):
         if trecho not in c:
             erros.append(f"black-friday/c/index.html: sem {trecho}")
-    if c.count("<li><svg") != 6 or not 2 <= c.count('<blockquote class="test">') <= 3 or c.count("<details") != 4:
-        erros.append("black-friday/c/index.html: deve ter 6 itens com ícone, 2 ou 3 depoimentos e 4 perguntas")
+    if c.count("<li><svg") != 6 or c.count('<blockquote class="test">') != 6 or c.count("<details") != 4:
+        erros.append("black-friday/c/index.html: deve ter 6 itens com ícone, 6 depoimentos e 4 perguntas")
 
     atalho = (ROOT / BLACK_ATALHO).read_text(encoding="utf-8")
     for trecho in ('location.replace("../black-friday/"+location.search', '<meta http-equiv="refresh" content="0; url=../black-friday/">',

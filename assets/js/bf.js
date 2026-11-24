@@ -12,8 +12,18 @@
  * Contagem regressiva: [data-bf-contagem] recebe o texto curto ("2d 04h 12min 09s"); [data-bf-dias],
  * [data-bf-horas], [data-bf-min] e [data-bf-seg] recebem os números com 2 dígitos.
  *
- * Teste: ?bf_agora=<data ISO> simula a hora do aparelho, só em localhost/127.0.0.1 (no site publicado é ignorado).
+ * Hora do servidor: logo ao carregar, um HEAD (sem cache) na própria página lê o cabeçalho Date. O estado inicial é
+ * decidido pelo relógio do aparelho (sem "piscar" de preço) e só muda se o servidor disser que o aparelho está mais de
+ * 60s adiantado ou atrasado; aí a contagem e o estado (ativa/encerrada) passam a usar a hora do servidor. Se o HEAD
+ * falhar, fica o relógio do aparelho. Se o servidor disser que ainda vale, a classe bf-fim sai e vem o evento "bf:ativa".
+ *
+ * Teste: ?bf_agora=<data ISO> simula a hora do aparelho, só em localhost/127.0.0.1 (no site publicado é ignorado), e
+ * tem prioridade sobre a hora do servidor.
  * Para encerrar antes ou estender, mude BF.fim (e suba o ?v= do bf.js nas páginas).
+ *
+ * Páginas black-friday/ (body.page-bf), no celular: o botão flutuante do WhatsApp (.wa-float) ganha a classe bf-wa-on
+ * quando o hero sai da tela (o assets/css/bf.css esconde o botão enquanto o hero aparece; html.bf-io indica suporte
+ * a IntersectionObserver, sem ele nada muda).
  */
 window.BF = { fim: "2026-11-30T23:59:59-03:00", oferta: "qu4x7j2d", preco: "499,99", parcela: "41,67", de: "860" };
 /* valor numérico para os eventos (499.99) */
@@ -24,10 +34,14 @@ window.BF.valor = Number(window.BF.preco.replace(/\./g, "").replace(",", "."));
 
   var fim = new Date(window.BF.fim).getTime();
   var desvio = 0;
+  var teste = false;
   if (/^(localhost|127\.0\.0\.1)$/.test(location.hostname)) {
-    var teste = new URLSearchParams(location.search).get("bf_agora");
-    var simulado = teste ? new Date(teste).getTime() : NaN;
-    if (!isNaN(simulado)) desvio = simulado - Date.now();
+    var simulacao = new URLSearchParams(location.search).get("bf_agora");
+    var simulado = simulacao ? new Date(simulacao).getTime() : NaN;
+    if (!isNaN(simulado)) {
+      desvio = simulado - Date.now();
+      teste = true;
+    }
   }
   function agora() { return Date.now() + desvio; }
 
@@ -39,9 +53,9 @@ window.BF.valor = Number(window.BF.preco.replace(/\./g, "").replace(",", "."));
     raiz.classList.add("bf-fim");
     try { document.dispatchEvent(new Event("bf:fim")); } catch (e) {}
   }
-  if (!window.bfAtiva()) {
-    raiz.classList.add("bf-fim");
-    return;
+  function quandoPronto(fn) {
+    if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", fn);
+    else fn();
   }
 
   function dois(n) { return (n < 10 ? "0" : "") + n; }
@@ -62,10 +76,55 @@ window.BF.valor = Number(window.BF.preco.replace(/\./g, "").replace(",", "."));
     return true;
   }
 
+  var relogio = null;
   function inicia() {
-    if (!atualiza()) return;
-    var relogio = setInterval(function () { if (!atualiza()) clearInterval(relogio); }, 1000);
+    if (relogio || !atualiza()) return;
+    relogio = setInterval(function () {
+      if (!atualiza()) {
+        clearInterval(relogio);
+        relogio = null;
+      }
+    }, 1000);
   }
-  if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", inicia);
-  else inicia();
+  if (window.bfAtiva()) quandoPronto(inicia);
+  else raiz.classList.add("bf-fim");
+
+  /* hora do servidor (fora do modo de teste): só corrige o relógio se a diferença passar de 60s */
+  if (!teste && window.fetch) {
+    var enviado = Date.now();
+    fetch(location.pathname, { method: "HEAD", cache: "no-store" }).then(function (r) {
+      var data = r.headers.get("Date");
+      var servidor = data ? new Date(data).getTime() : NaN;
+      if (isNaN(servidor)) return;
+      var diferenca = servidor - (enviado + Date.now()) / 2;
+      if (Math.abs(diferenca) <= 60000) return;
+      desvio = diferenca;
+      if (window.bfAtiva()) {
+        if (raiz.classList.contains("bf-fim")) {
+          raiz.classList.remove("bf-fim");
+          try { document.dispatchEvent(new Event("bf:ativa")); } catch (e) {}
+        }
+        quandoPronto(inicia);
+      } else {
+        quandoPronto(atualiza);
+      }
+    }).catch(function () {});
+  }
+
+  /* black-friday/ no celular: WhatsApp flutuante só depois que o hero sai da tela */
+  if ("IntersectionObserver" in window) {
+    raiz.classList.add("bf-io");
+    quandoPronto(function () {
+      var wa = document.querySelector(".page-bf .wa-float");
+      if (!wa) return;
+      var hero = document.querySelector(".page-bf .hero");
+      if (!hero) {
+        wa.classList.add("bf-wa-on");
+        return;
+      }
+      new IntersectionObserver(function (entries) {
+        wa.classList.toggle("bf-wa-on", !entries[entries.length - 1].isIntersecting);
+      }).observe(hero);
+    });
+  }
 })();

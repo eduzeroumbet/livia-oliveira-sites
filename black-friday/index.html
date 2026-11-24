@@ -31,9 +31,9 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+Display:ital,wdth,wght@0,62.5,400..700;1,62.5,400..700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="../assets/css/site.css?v=10">
-<link rel="stylesheet" href="../assets/css/bf.css?v=1">
+<link rel="stylesheet" href="../assets/css/bf.css?v=3">
 <!-- Black Friday: decide no <head>, antes de pintar, se vale o preço de BF ou se a página já mostra "terminou" (assets/js/bf.js) -->
-<script src="../assets/js/bf.js?v=1"></script>
+<script src="../assets/js/bf.js?v=2"></script>
 </head>
 <body class="page-bf">
 <a class="skip" href="#conteudo">Pular para o conteúdo</a>
@@ -154,13 +154,16 @@
       <blockquote class="test"><p>Se eu pudesse investir em apenas uma coisa ao sair da faculdade, sem dúvidas, seria no seu curso.</p><cite>Aluna do Carreira com Sentido</cite></blockquote>
       <blockquote class="test"><p>Saí do CLT para investir full na clínica e, nesse começo com poucos pacientes, está sendo ótimo. Tudo que passa na cabeça de dúvida nesse começo, o curso aborda.</p><cite>Aluna do Carreira com Sentido</cite></blockquote>
       <blockquote class="test"><p>Senti que fui pega pela mão do início ao fim. Recomendei às minhas amigas e colegas da psi.</p><cite>Aluna do Carreira com Sentido</cite></blockquote>
+      <blockquote class="test"><p>Você consegue destrinchar tão bem os assuntos que no final fica fácil de entender e aplicar. O curso é quase uma imersão sobre comunicação. 10/10.</p><cite>Aluna do Carreira com Sentido</cite></blockquote>
+      <blockquote class="test"><p>Estou fazendo uma transição de carreira, antes administradora e agora psicóloga. Sua didática é incrível, simples e clara.</p><cite>Aluna do Carreira com Sentido</cite></blockquote>
+      <blockquote class="test"><p>Estou assistindo com calma e pausando para colocar cada módulo em prática antes de passar para o outro.</p><cite>Aluna do Carreira com Sentido</cite></blockquote>
     </div>
   </div>
 </section>
 
 <section>
   <div class="wrap bf-sobre">
-    <img src="../assets/img/curso-sobre-1204.webp" width="800" height="1000" loading="lazy" alt="Retrato de Lívia Oliveira em close, sorrindo de leve, com fundo em tons quentes">
+    <img src="../assets/img/curso-sobre-1204.webp" width="800" height="1000" loading="lazy" decoding="async" alt="Retrato de Lívia Oliveira em close, sorrindo de leve, com fundo em tons quentes">
     <div>
       <span class="eyebrow">Quem te guia</span>
       <h2>Prazer, sou Lívia Oliveira.</h2>
@@ -229,9 +232,12 @@
 <script>
 /* depois do prazo (ao abrir ou com a página aberta) o título não mostra mais o preço de Black Friday */
 (function () {
+  var titulo = document.title;
   function fim() { document.title = "A Black Friday terminou | Carreira com Sentido, com Lívia Oliveira"; }
   if (document.documentElement.classList.contains("bf-fim")) fim();
-  else document.addEventListener("bf:fim", fim);
+  document.addEventListener("bf:fim", fim);
+  /* o relógio do aparelho estava adiantado e a hora do servidor diz que ainda vale (assets/js/bf.js) */
+  document.addEventListener("bf:ativa", function () { document.title = titulo; });
 })();
 </script>
 </body>

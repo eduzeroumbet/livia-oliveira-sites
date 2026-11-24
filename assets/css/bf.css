@@ -88,7 +88,8 @@ html:not(.bf-fim):has(.bf-faixa) { scroll-padding-top: calc(var(--nav-h, 62px) +
 
 .page-bf .mods .mod p { margin-top: 2px; }
 .bf-sobre { display: grid; gap: 20px; align-items: center; }
-.bf-sobre img { width: 100%; max-width: 360px; height: auto; border-radius: var(--radius); }
+/* enquanto a foto (lazy) carrega: fundo neutro claro na proporção da foto, em vez do rosa do img do site.css */
+.bf-sobre img { width: 100%; max-width: 360px; height: auto; aspect-ratio: 4 / 5; object-fit: cover; border-radius: var(--radius); background: linear-gradient(160deg, #F3F0EC, #E9E4DE); }
 @media (min-width: 820px) { .bf-sobre { grid-template-columns: 320px 1fr; gap: 40px; } }
 
 .bf-terminou { padding: 36px 0; background: var(--rose2); text-align: center; }
@@ -97,6 +98,17 @@ html:not(.bf-fim):has(.bf-faixa) { scroll-padding-top: calc(var(--nav-h, 62px) +
 .bf-cta-final .btn { width: 100%; max-width: 460px; }
 .bf-wa { margin-top: 14px; font-size: 15px; }
 .bf-wa a { color: inherit; font-weight: 600; }
+/* botão flutuante do WhatsApp no celular: some enquanto o hero (com o botão principal) está na tela e aparece
+ * quando ele sai. html.bf-io e .bf-wa-on vêm do assets/js/bf.js (só com IntersectionObserver; sem ele, fica como
+ * antes). Com a barra fixa de compra visível, fica 16px acima dela. */
+@media (max-width: 760px) {
+  .page-bf .wa-float { transition: bottom .25s ease, opacity .25s ease, transform .25s ease; }
+  html.bf-io .page-bf .wa-float:not(.bf-wa-on) {
+    opacity: 0; transform: translateY(12px) scale(.9); visibility: hidden; pointer-events: none;
+    transition: bottom .25s ease, opacity .25s ease, transform .25s ease, visibility 0s linear .25s;
+  }
+  .page-bf.has-sticky .wa-float { bottom: calc(var(--sticky-h, 72px) + 16px); }
+}
 
 /* ---------- Versões black-friday/b/ e black-friday/c/ (mesma base da black-friday/) ---------- */
 /* contagem grande, numa caixa escura (bloco de preço da B e primeira dobra da C) */
