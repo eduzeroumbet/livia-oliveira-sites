@@ -19,7 +19,11 @@ dataLayer, registrados pelo teste antes de a página sair). Em 390px e 1440px:
 - envio sem forma (forçado): erro "Escolha a forma de pagamento." e nada é enviado;
 - prints com os campos abertos em _catalogo/prints/curso-inscricao-escolha-{mobile,desktop}.png;
 - Lambda com erro 500 e Lambda que não responde: vai para a Hotmart mesmo assim, em até ~2 s;
-- sem pg nem UTM na URL: sck=direto|pgB e sem src.
+- sem pg nem UTM na URL: sck=direto|pgB e sem src;
+- Black Friday (assets/js/bf.js; a hora é simulada com ?bf_agora=<ISO>, aceito só em localhost): durante, a linha
+  "Preço de Black Friday" no topo, link da Hotmart com off=qu4x7j2d e InitiateCheckout/begin_checkout com value 499.99
+  (os envios acima são todos durante a BF); vindo da página black-friday/ (pg=pgBF), sck terminando em |pgBF; depois
+  do prazo, sem a linha nem o preço de BF, off=n2h6k72h e value 860.
 
 Uso: /Users/educloud/orquestra/.venv/bin/python tests/inscricao.py
 Requer: playwright + chromium (python -m playwright install chromium).
@@ -38,7 +42,11 @@ from playwright.sync_api import sync_playwright
 ROOT = Path(__file__).resolve().parent.parent
 PIXEL_ID = "1197036460960933"
 LAMBDA_HOST = "nwmxltflulqvcxu7bdplodmyjm0yweuc.lambda-url.sa-east-1.on.aws"
-QUERY = "utm_source=meta&utm_medium=paid&utm_campaign=ccs_teste&utm_content=V01&pg=pgA"
+# hora simulada no navegador de teste (bf.js): durante a Black Friday e depois do fim (30/11 23h59 de Brasília)
+BF_DURANTE = "bf_agora=2026-11-25T12:00:00-03:00"
+BF_DEPOIS = "bf_agora=2026-12-01T03:00:01Z"
+OFERTA_BF, OFERTA_NORMAL = "qu4x7j2d", "n2h6k72h"
+QUERY = "utm_source=meta&utm_medium=paid&utm_campaign=ccs_teste&utm_content=V01&pg=pgA&" + BF_DURANTE
 SRC = "meta|paid|ccs_teste|V01"
 NOME, EMAIL, WHATS = "Maria Teste", "maria.teste@exemplo.com", "(51) 99999-8888"
 # métodos escondidos na Hotmart conforme a forma (ver HOTMART_ESCONDE no script.js)
@@ -253,7 +261,7 @@ with sync_playwright() as p:
             partes = urlsplit(url)
             q = parse_qs(partes.query)
             esperado = {
-                "off": ["n2h6k72h"], "checkoutMode": ["10"], "name": [NOME], "email": [EMAIL], "phoneac": ["51"],
+                "off": [OFERTA_BF], "checkoutMode": ["10"], "name": [NOME], "email": [EMAIL], "phoneac": ["51"],
                 "phonenumber": ["999998888"], "src": [SRC], "sck": [f"{SRC}|pgA"], "utm_source": ["meta"],
                 "utm_medium": ["paid"], "utm_campaign": ["ccs_teste"], "utm_content": ["V01"], **hides("cartao"),
             }
@@ -262,7 +270,7 @@ with sync_playwright() as p:
             ok("+" not in partes.query and "name=Maria%20Teste" in partes.query, "espaço do nome como %20")
 
         fbq = ctx["fbq"]
-        oferta = {"value": 860, "currency": "BRL", "content_name": "Carreira com Sentido", "content_category": "pgA", "payment_type": "cartao"}
+        oferta = {"value": 499.99, "currency": "BRL", "content_name": "Carreira com Sentido", "content_category": "pgA", "payment_type": "cartao"}
         ok(["init", PIXEL_ID, {"em": EMAIL, "ph": "5551999998888", "fn": "maria"}] in fbq, "advanced matching (em, ph, fn) no Pixel")
         ok(["track", "InitiateCheckout", oferta] in fbq, "InitiateCheckout no Pixel")
         ok(["trackCustom", "CadastroCheckout", {"content_category": "pgA", "payment_type": "cartao"}] in fbq, "CadastroCheckout no Pixel")
@@ -325,13 +333,51 @@ with sync_playwright() as p:
 
     # sem pg nem UTM: sck=direto|pgB, sem src
     print("--- curso/inscricao/ sem pg nem UTM")
-    page, ctx = abre(b, {"width": 390, "height": 844}, query="")
+    page, ctx = abre(b, {"width": 390, "height": 844}, query=BF_DURANTE)
     envia(page, ctx)
     q = parse_qs(urlsplit(ctx["hotmart"][0]).query) if ctx["hotmart"] else {}
     ok(q.get("sck") == ["direto|pgB"] and "src" not in q and not any(k.startswith("utm_") for k in q), f"sck=direto|pgB e sem src ({q.get('sck')})")
     dados = ctx["lambda"][0].post_data_json if ctx["lambda"] else {}
     ok(dados.get("pagina") == "pgB" and dados.get("sck") == "direto|pgB" and dados.get("src") == "", f"cadastro com pagina pgB ({dados.get('pagina')})")
     ok(["trackCustom", "CadastroCheckout", {"content_category": "pgB", "payment_type": "cartao"}] in ctx["fbq"], "CadastroCheckout com pgB")
+    page.close()
+
+    # Black Friday vinda da página black-friday/ (pg=pgBF): oferta de BF, sck com |pgBF
+    print("--- curso/inscricao/ Black Friday, pg=pgBF")
+    page, ctx = abre(b, {"width": 390, "height": 844}, query="utm_source=ig&utm_medium=stories&utm_campaign=ccs_bf&pg=pgBF&" + BF_DURANTE)
+    linha = page.locator(".insc-bf")
+    ok(linha.is_visible() and "Preço de Black Friday: R$ 499,99 ou 12x de R$ 41,67 sem juros, até 30/11 às 23h59" in linha.inner_text(),
+       "linha do preço de Black Friday no topo")
+    texto = page.inner_text("body")
+    ok("R$ 499,99 à vista" in texto and "71,67" not in texto and "R$ 860 à vista" not in texto, "formas de pagamento com o preço de BF")
+    envia(page, ctx)
+    q = parse_qs(urlsplit(ctx["hotmart"][0]).query) if ctx["hotmart"] else {}
+    ok(q.get("off") == [OFERTA_BF], f"off={OFERTA_BF} ({q.get('off')})")
+    ok(q.get("sck") == ["ig|stories|ccs_bf|pgBF"] and q.get("src") == ["ig|stories|ccs_bf"], f"sck termina em |pgBF ({q.get('sck')})")
+    ok("bf_agora" not in q and "pg" not in q, "nem bf_agora nem pg no link da Hotmart")
+    dados = ctx["lambda"][0].post_data_json if ctx["lambda"] else {}
+    ok(dados.get("pagina") == "pgBF", f"cadastro com pagina pgBF ({dados.get('pagina')})")
+    oferta = {"value": 499.99, "currency": "BRL", "content_name": "Carreira com Sentido", "content_category": "pgBF", "payment_type": "cartao"}
+    ok(["track", "InitiateCheckout", oferta] in ctx["fbq"], "InitiateCheckout com value 499.99 e pgBF")
+    ok(["event", "begin_checkout", oferta] in ctx["dl"], "begin_checkout com value 499.99 e pgBF")
+    ok(not ctx["erros_js"], f"sem erros de JS {ctx['erros_js']}")
+    page.close()
+
+    # depois do prazo: volta sozinho para a oferta normal
+    print("--- curso/inscricao/ depois da Black Friday")
+    page, ctx = abre(b, {"width": 390, "height": 844}, query="utm_source=meta&utm_medium=paid&utm_campaign=ccs_teste&utm_content=V01&pg=pgB&" + BF_DEPOIS)
+    texto = page.inner_text("body")
+    ok(not page.locator(".insc-bf").is_visible() and "Black Friday" not in texto, "sem a linha de Black Friday")
+    ok("499,99" not in texto and "41,67" not in texto, "sem o preço de BF")
+    ok("12x de R$ 71,67 sem juros" in texto and "R$ 860 à vista" in texto, "preço normal (12x de R$ 71,67 ou R$ 860)")
+    envia(page, ctx)
+    q = parse_qs(urlsplit(ctx["hotmart"][0]).query) if ctx["hotmart"] else {}
+    ok(q.get("off") == [OFERTA_NORMAL], f"off={OFERTA_NORMAL} ({q.get('off')})")
+    ok(q.get("sck") == ["meta|paid|ccs_teste|V01|pgB"], f"sck com |pgB ({q.get('sck')})")
+    oferta = {"value": 860, "currency": "BRL", "content_name": "Carreira com Sentido", "content_category": "pgB", "payment_type": "cartao"}
+    ok(["track", "InitiateCheckout", oferta] in ctx["fbq"], "InitiateCheckout com value 860")
+    ok(["event", "begin_checkout", oferta] in ctx["dl"], "begin_checkout com value 860")
+    ok(not ctx["erros_js"], f"sem erros de JS {ctx['erros_js']}")
     page.close()
 
     b.close()

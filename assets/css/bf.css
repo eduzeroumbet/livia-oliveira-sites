@@ -1,0 +1,99 @@
+/* Black Friday do Carreira com Sentido (2026): faixa do topo, trocas de preço e a página black-friday/.
+ * O estado vem do assets/js/bf.js (no <head>): sem a classe bf-fim no <html>, vale a Black Friday.
+ *   [data-bf="on"]   só durante a Black Friday (some depois de BF.fim)
+ *   [data-bf="off"]  só depois de BF.fim (texto e preço normais) */
+html:not(.bf-fim) [data-bf="off"],
+html.bf-fim [data-bf="on"] { display: none !important; }
+
+/* Impressão e PDFs dos materiais (_catalogo/pdfs.py): sempre o texto normal, sem faixa nem preço de Black Friday */
+@media print {
+  html [data-bf="on"] { display: none !important; }
+  html:not(.bf-fim) [data-bf="off"] { display: revert !important; }
+}
+
+/* ---------- Faixa fina do topo (curso, materiais, quiz, calculadora e home) ---------- */
+html:not(.bf-fim) { --bf-h: 36px; }
+.bf-faixa {
+  position: sticky; top: 0; z-index: 60;
+  display: flex; flex-wrap: wrap; align-items: center; justify-content: center; column-gap: .35em;
+  height: var(--bf-h, 36px); padding: 0 12px;
+  background: #1E1212; color: #FCFAF6;
+  font: 600 13.5px/1.3 "Helvetica Neue", Helvetica, Arial, sans-serif; letter-spacing: -.01em;
+  text-align: center; text-decoration: none;
+}
+.bf-faixa:hover, .bf-faixa:focus-visible { color: #FCFAF6; background: #3A1A22; }
+.bf-faixa b { color: #DBA8AD; font-weight: 700; text-transform: uppercase; letter-spacing: .06em; }
+.bf-faixa__tempo { font-variant-numeric: tabular-nums; color: #DBA8AD; }
+.bf-faixa__seta { margin-left: .2em; }
+/* no celular, a contagem vai para a segunda linha */
+@media (max-width: 640px) {
+  html:not(.bf-fim) { --bf-h: 46px; }
+  .bf-faixa { flex-direction: column; justify-content: center; font-size: 13px; line-height: 1.25; }
+}
+/* cabeçalhos fixos abaixo da faixa (site-header sticky do site.css; .nav fixa do curso A e C) */
+html:not(.bf-fim) .bf-faixa ~ .site-header,
+html:not(.bf-fim) .bf-faixa ~ .nav { top: var(--bf-h); }
+html:not(.bf-fim):has(.bf-faixa) { scroll-padding-top: calc(var(--nav-h, 62px) + var(--bf-h) + 12px); }
+
+/* ---------- Preço de Black Friday dentro dos blocos do curso ---------- */
+.bf-de { text-decoration: line-through; text-decoration-thickness: 1.5px; opacity: .8; font-weight: 500; }
+.hero-price__de { margin: 0; font-size: 14.5px; font-weight: 700; color: var(--wine); }
+.hero-price__de + .hero-price__parcela { margin-top: 2px; }
+
+/* Pré-página de inscrição: linha do preço de Black Friday acima do título */
+.insc-bf { margin: 0 0 14px; padding: 10px 14px; border-radius: var(--radius, .5rem); background: #1E1212; color: #FCFAF6; font-size: 14.5px; line-height: 1.4; }
+.insc-bf b { color: #DBA8AD; }
+
+/* ---------- Página black-friday/ ---------- */
+.page-bf .bf-topo {
+  position: sticky; top: 0; z-index: 60;
+  display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 4px 14px;
+  padding: 8px 12px; background: #1E1212; color: #FCFAF6; text-align: center;
+}
+.page-bf .bf-topo__rotulo { font: 700 13px/1.2 var(--sans); letter-spacing: .08em; text-transform: uppercase; color: #DBA8AD; }
+.page-bf .bf-relogio { display: flex; gap: 6px; margin: 0; padding: 0; list-style: none; }
+.page-bf .bf-relogio li { display: flex; flex-direction: column; align-items: center; min-width: 46px; padding: 3px 4px; border-radius: .375rem; background: rgba(252, 250, 246, .1); }
+.page-bf .bf-relogio b { font: 700 19px/1.1 var(--sans); font-variant-numeric: tabular-nums; color: #FCFAF6; }
+.page-bf .bf-relogio small { font: 500 10.5px/1.2 var(--sans); letter-spacing: .04em; text-transform: uppercase; color: rgba(252, 250, 246, .75); }
+.page-bf .bf-topo--fim { font: 600 14px/1.3 var(--sans); }
+.page-bf .site-header { top: 0; position: relative; }
+
+.page-bf .hero { padding-top: 28px; }
+.bf-selo {
+  display: inline-flex; align-items: center; gap: 8px; margin-bottom: 14px; padding: 6px 12px;
+  border-radius: 999px; background: #1E1212; color: #FCFAF6;
+  font: 700 12.5px/1.2 var(--sans); letter-spacing: .08em; text-transform: uppercase;
+}
+.bf-selo::before { content: ""; width: 8px; height: 8px; border-radius: 50%; background: #DBA8AD; }
+.page-bf h1 .bf-h1-de { white-space: nowrap; }
+
+.bf-preco {
+  margin: 22px 0 18px; padding: 20px 18px; border-radius: var(--radius);
+  background: var(--white); border: 1px solid var(--line); box-shadow: var(--shadow-soft); text-align: center;
+}
+.bf-preco__de { margin: 0; font-size: 16px; color: var(--muted); }
+.bf-preco__de s { text-decoration-thickness: 1.5px; }
+.bf-preco__parcela { margin: 4px 0 0; font-family: var(--serif); font-stretch: 62.5%; font-weight: 600; font-size: 44px; line-height: 1; letter-spacing: -.01em; color: var(--wine); }
+.bf-preco__parcela small { font-size: .5em; font-weight: 500; }
+.bf-preco__avista { margin: 8px 0 0; font-size: 16px; font-weight: 600; color: var(--ink); }
+.bf-preco__economia { display: inline-block; margin: 12px 0 0; padding: 4px 12px; border-radius: 999px; background: var(--rose2); color: var(--wine); font-size: 14.5px; font-weight: 700; }
+.bf-preco .btn { width: 100%; margin-top: 16px; }
+.bf-preco .trust { margin-top: 10px; }
+.dark .bf-preco, .navy .bf-preco { color: var(--ink); }
+
+.bf-leva { display: grid; gap: 10px; margin: 18px 0 0; padding: 0; list-style: none; }
+.bf-leva li { display: flex; align-items: center; gap: 10px; padding: 12px 14px; border-radius: var(--radius); background: var(--white); border: 1px solid var(--line); font-weight: 600; }
+.bf-leva li b { min-width: 56px; font-family: var(--serif); font-stretch: 62.5%; font-size: 26px; line-height: 1; color: var(--wine); }
+@media (min-width: 720px) { .bf-leva { grid-template-columns: repeat(5, 1fr); } .bf-leva li { flex-direction: column; text-align: center; } .bf-leva li b { min-width: 0; } }
+
+.page-bf .mods .mod p { margin-top: 2px; }
+.bf-sobre { display: grid; gap: 20px; align-items: center; }
+.bf-sobre img { width: 100%; max-width: 360px; height: auto; border-radius: var(--radius); }
+@media (min-width: 820px) { .bf-sobre { grid-template-columns: 320px 1fr; gap: 40px; } }
+
+.bf-terminou { padding: 36px 0; background: var(--rose2); text-align: center; }
+.bf-terminou h2 { margin-bottom: 10px; }
+.bf-cta-final { text-align: center; }
+.bf-cta-final .btn { width: 100%; max-width: 460px; }
+.bf-wa { margin-top: 14px; font-size: 15px; }
+.bf-wa a { color: inherit; font-weight: 600; }

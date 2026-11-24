@@ -8,10 +8,23 @@
  * curso) e cadastro_checkout (CadastroCheckout) pelo site.js; e vai para a Hotmart com nome, e-mail e celular
  * já preenchidos. src/sck no mesmo formato das páginas do curso: src = utm_source|utm_medium|utm_campaign|
  * utm_content; sck = o mesmo + |pgX da página de origem (pg na URL; padrão pgB; sem UTM: sck=direto|pgX).
+ *
+ * Black Friday (assets/js/bf.js, carregado no <head>): enquanto window.bfAtiva(), o link usa a oferta BF.oferta
+ * (qu4x7j2d) e o begin_checkout sai com BF.valor (499.99), venha a pessoa de qualquer página do curso; depois de
+ * BF.fim volta sozinho para CHECKOUT_URL (n2h6k72h) e 860.
  */
 var CADASTRO_URL = "https://nwmxltflulqvcxu7bdplodmyjm0yweuc.lambda-url.sa-east-1.on.aws/";
 var CHECKOUT_URL = "https://pay.hotmart.com/M100028858P?off=n2h6k72h&checkoutMode=10";
 var CADASTRO_ESPERA_MS = 1500;
+/* nome diferente de window.bfAtiva: uma function global aqui sobrescreveria a do bf.js */
+function emBlackFriday() { return !!(window.bfAtiva && window.BF && window.bfAtiva()); }
+/* Link do checkout: durante a Black Friday, a mesma URL com off=BF.oferta */
+function checkoutUrl() {
+  var url = new URL(CHECKOUT_URL);
+  if (emBlackFriday()) url.searchParams.set("off", window.BF.oferta);
+  return url.toString();
+}
+function valorCurso() { return emBlackFriday() ? window.BF.valor : 860; }
 /* Métodos escondidos no checkout da Hotmart (hide<Metodo>=1). A Hotmart sempre abre com um método marcado, não
  * aceita pré-selecionar o Pix e bloqueia de propósito o hideCreditCard: o cartão nunca some. Então a escolha é
  * feita aqui e o link esconde todo o resto: cartão = só a aba do cartão (some também o "usar dois cartões");
@@ -43,11 +56,11 @@ var FORMAS = {
 
   /* ---------- Origem da visita: utm_*, fbclid, src, sck e pg vindos da página do curso ---------- */
   var visit = new URLSearchParams(location.search);
-  var PAGINAS = ["pgA", "pgB", "pgC"];
+  var PAGINAS = ["pgA", "pgB", "pgC", "pgBF"];
   var sckPronto = visit.get("sck") || "";
   var pg = visit.get("pg");
   if (PAGINAS.indexOf(pg) < 0) {
-    var doSck = sckPronto.match(/\|(pg[ABC])$/);
+    var doSck = sckPronto.match(/\|(pg(?:[ABC]|BF))$/);
     pg = doSck ? doSck[1] : "pgB";
   }
   var src = visit.get("src") || ["utm_source", "utm_medium", "utm_campaign", "utm_content"]
@@ -149,7 +162,7 @@ var FORMAS = {
 
   /* ---------- Link final da Hotmart ---------- */
   function linkHotmart(nome, email, whats, f) {
-    var url = new URL(CHECKOUT_URL);
+    var url = new URL(checkoutUrl());
     if (src) url.searchParams.set("src", src);
     url.searchParams.set("sck", sck);
     visit.forEach(function (v, k) {
@@ -189,7 +202,7 @@ var FORMAS = {
      * (Lead é da calculadora, que tem campanha própria otimizando Lead). */
     if (window.siteIdentify) window.siteIdentify({ em: email, ph: "55" + whats, fn: nome.split(" ")[0].toLowerCase() });
     if (window.siteTrack) {
-      window.siteTrack("begin_checkout", { value: 860, currency: "BRL", content_name: "Carreira com Sentido", content_category: pg, payment_type: f });
+      window.siteTrack("begin_checkout", { value: valorCurso(), currency: "BRL", content_name: "Carreira com Sentido", content_category: pg, payment_type: f });
       window.siteTrack("cadastro_checkout", { content_category: pg, payment_type: f });
     }
 

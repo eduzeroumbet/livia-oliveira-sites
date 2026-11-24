@@ -38,6 +38,8 @@ OG = [
      "Lívia Oliveira", "", "Psicóloga clínica · CRP 07/18713"),
     ("og-curso-v2.jpg", "vinho", "2L2A0688", (150, 60, 850, 841),
      "Carreira", "com Sentido", "Curso para psicólogas clínicas, com Lívia Oliveira"),
+    ("og-black-friday.jpg", "vinho", "2L2A0688", (150, 60, 850, 841),
+     "Black Friday", "de R$ 860 por R$ 499,99", "Carreira com Sentido, só até 30/11"),
     ("og-materiais.jpg", "vinho", "2L2A0709", (270, 300, 830, 925),
      "Materiais gratuitos", "para a sua clínica", "Para psicólogas, com Lívia Oliveira"),
     ("og-quiz.jpg", "vinho", "2L2A0906", (180, 360, 820, 1074),
