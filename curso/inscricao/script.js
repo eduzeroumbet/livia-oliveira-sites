@@ -1,7 +1,9 @@
 /* Pré-página de inscrição do curso (curso/inscricao/): forma de pagamento, nome, e-mail e WhatsApp antes da Hotmart.
  *
- * A pessoa escolhe primeiro a forma de pagamento (cartão, Pix ou boleto; escolha_pagamento/EscolhaPagamento pelo
- * site.js); só então abrem os campos. Os métodos do checkout da Hotmart dependem da escolha (HOTMART_ESCONDE).
+ * Forma de pagamento (cartão, Pix ou boleto): o cartão já vem marcado no HTML e os campos já abertos (13 de 14 vendas
+ * da Black Friday foram no cartão parcelado); a pessoa pode trocar para Pix ou boleto. escolha_pagamento/
+ * EscolhaPagamento pelo site.js só na troca feita pela pessoa, nunca na pré-seleção. Os métodos do checkout da Hotmart
+ * dependem da forma marcada (HOTMART_ESCONDE).
  *
  * No envio: valida; guarda o contato na Lambda livia-leads (tabela DynamoDB livia-leads, sa-east-1) sem
  * bloquear a compra (espera no máximo 1,5 s); dispara begin_checkout (InitiateCheckout, o único do funil do
@@ -79,7 +81,7 @@ var FORMAS = {
     return Object.assign(p, extras);
   }
 
-  /* ---------- Forma de pagamento: os campos só abrem depois da escolha ---------- */
+  /* ---------- Forma de pagamento: cartão pré-selecionado, a pessoa pode trocar ---------- */
   var grupo = form.querySelector(".insc-formas");
   var dadosBloco = document.getElementById("insc-dados");
   var dica = document.getElementById("insc-dica");
@@ -126,7 +128,8 @@ var FORMAS = {
     if (window.siteTrack) window.siteTrack("escolha_pagamento", eventoParams({ payment_type: f }));
   });
 
-  /* navegador que restaura o formulário ao voltar (opção já marcada): abre os campos sem novo evento */
+  /* ao carregar: a forma marcada no HTML (cartão) ou a que o navegador restaurou ao voltar; botão, dica e campos
+   * conforme ela, sem evento de escolha (só a troca feita pela pessoa dispara escolha_pagamento) */
   if (FORMAS[forma()]) mostraForma(forma());
 
   /* ---------- Validação (mesma marcação e mensagens do site.js) ---------- */
@@ -194,7 +197,7 @@ var FORMAS = {
     if (button.disabled) return;
     var f = forma();
     if (!FORMAS[f]) {
-      /* não deve acontecer (o botão só aparece depois da escolha), mas por segurança */
+      /* não deve acontecer (o cartão já vem marcado e um radio não se desmarca), mas por segurança */
       setErroForma("Escolha a forma de pagamento.");
       form.querySelector('input[name="forma"]').focus();
       return;

@@ -33,7 +33,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+Display:ital,wdth,wght@0,62.5,400..700;1,62.5,400..700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="../../assets/css/site.css?v=10">
-<link rel="stylesheet" href="../../assets/css/bf.css?v=3">
+<link rel="stylesheet" href="../../assets/css/bf.css?v=4">
 <!-- Black Friday: decide no <head>, antes de pintar, se vale o preço de BF ou se a página já mostra "terminou" (assets/js/bf.js) -->
 <script src="../../assets/js/bf.js?v=2"></script>
 </head>
@@ -75,6 +75,9 @@
       <span class="bf-selo">Black Friday Carreira com Sentido</span>
       <h1 class="bf-pergunta">Quanto a sua sessão precisa custar para a clínica <em>fechar a conta?</em></h1>
       <p class="sub">Essa conta tem método, e ela está no Carreira com Sentido junto com agenda, faltas, contrato e financeiro. O curso completo da Lívia Oliveira para psicólogas clínicas, com preço de Black Friday só até segunda, 30/11, às 23h59.</p>
+      <ul class="chips" aria-label="O que você recebe">
+        <li>10 módulos</li><li>60+ aulas</li><li>12 meses de acesso</li><li>Comunidade de alunas</li><li>Certificado</li><li>7 dias de garantia</li>
+      </ul>
       <div class="bf-preco" id="oferta" data-hide-sticky>
         <p class="bf-preco__de">de <s>R$ 860</s></p>
         <p class="bf-preco__parcela"><small>12x de</small> R$ 41,67 <small>sem juros</small></p>
@@ -90,6 +93,15 @@
     </div>
   </div>
 </section>
+
+<!-- faixa de números do curso/b/, só durante a Black Friday -->
+<div class="proofbar" data-bf="on">
+  <ul class="wrap">
+    <li><b>47 mil</b><span>psicólogas acompanham a Lívia no Instagram</span></li>
+    <li><b>15+ anos</b><span>de prática clínica</span></li>
+    <li><b>100+</b><span>alunas no Carreira com Sentido</span></li>
+  </ul>
+</div>
 
 <section>
   <div class="wrap">
@@ -169,13 +181,23 @@
   <div class="wrap">
     <span class="eyebrow">Alunas</span>
     <h2>O que elas estão construindo.</h2>
-    <div class="tests">
-      <blockquote class="test"><p>Se eu pudesse investir em apenas uma coisa ao sair da faculdade, sem dúvidas, seria no seu curso.</p><cite>Aluna do Carreira com Sentido</cite></blockquote>
-      <blockquote class="test"><p>Saí do CLT para investir full na clínica e, nesse começo com poucos pacientes, está sendo ótimo. Tudo que passa na cabeça de dúvida nesse começo, o curso aborda.</p><cite>Aluna do Carreira com Sentido</cite></blockquote>
-      <blockquote class="test"><p>Senti que fui pega pela mão do início ao fim. Recomendei às minhas amigas e colegas da psi.</p><cite>Aluna do Carreira com Sentido</cite></blockquote>
-      <blockquote class="test"><p>Você consegue destrinchar tão bem os assuntos que no final fica fácil de entender e aplicar. O curso é quase uma imersão sobre comunicação. 10/10.</p><cite>Aluna do Carreira com Sentido</cite></blockquote>
-      <blockquote class="test"><p>Estou fazendo uma transição de carreira, antes administradora e agora psicóloga. Sua didática é incrível, simples e clara.</p><cite>Aluna do Carreira com Sentido</cite></blockquote>
-      <blockquote class="test"><p>Estou assistindo com calma e pausando para colocar cada módulo em prática antes de passar para o outro.</p><cite>Aluna do Carreira com Sentido</cite></blockquote>
+    <div class="tests-wrap">
+      <div class="tests">
+        <blockquote class="test"><p>Se eu pudesse investir em apenas uma coisa ao sair da faculdade, sem dúvidas, seria no seu curso.</p><cite>Aluna do Carreira com Sentido</cite></blockquote>
+        <blockquote class="test"><p>Saí do CLT para investir full na clínica e, nesse começo com poucos pacientes, está sendo ótimo. Tudo que passa na cabeça de dúvida nesse começo, o curso aborda.</p><cite>Aluna do Carreira com Sentido</cite></blockquote>
+        <blockquote class="test"><p>Senti que fui pega pela mão do início ao fim. Recomendei às minhas amigas e colegas da psi.</p><cite>Aluna do Carreira com Sentido</cite></blockquote>
+        <blockquote class="test"><p>Você consegue destrinchar tão bem os assuntos que no final fica fácil de entender e aplicar. O curso é quase uma imersão sobre comunicação. 10/10.</p><cite>Aluna do Carreira com Sentido</cite></blockquote>
+        <blockquote class="test"><p>Estou fazendo uma transição de carreira, antes administradora e agora psicóloga. Sua didática é incrível, simples e clara.</p><cite>Aluna do Carreira com Sentido</cite></blockquote>
+        <blockquote class="test"><p>Estou assistindo com calma e pausando para colocar cada módulo em prática antes de passar para o outro.</p><cite>Aluna do Carreira com Sentido</cite></blockquote>
+      </div>
+      <div data-bf="on">
+        <div class="video-frame">
+          <video controls playsinline preload="none" poster="../../assets/video/Trafego_17-poster.jpg" width="360" height="640" aria-label="Vídeo: Lívia lê mensagens de alunas do Carreira com Sentido (com legendas)">
+            <source src="../../assets/video/Trafego_17.mp4" type="video/mp4">
+          </video>
+        </div>
+        <p class="video-caption">Mensagens das alunas, lidas pela Lívia</p>
+      </div>
     </div>
   </div>
 </section>

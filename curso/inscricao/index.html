@@ -60,12 +60,13 @@
     </div>
 
     <!-- Envio: curso/inscricao/script.js (escolha da forma de pagamento, cadastro na Lambda livia-leads e ida à Hotmart
-         com os dados preenchidos e só os métodos da forma escolhida). Os campos só abrem depois da escolha. -->
+         com os dados preenchidos e só os métodos da forma escolhida). O cartão já vem marcado (13 de 14 vendas da Black
+         Friday foram no cartão parcelado) e os campos já abertos; a pessoa pode trocar para Pix ou boleto. -->
     <form class="form-card insc-form" id="inscricao" novalidate>
       <h2 class="insc-form__titulo" id="formas-titulo">Como você prefere pagar?</h2>
       <div class="insc-formas" role="radiogroup" aria-labelledby="formas-titulo" aria-describedby="formas-erro">
         <label class="insc-forma">
-          <input type="radio" name="forma" value="cartao">
+          <input type="radio" name="forma" value="cartao" checked>
           <span class="insc-forma__marca"><svg class="insc-forma__check" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M6 12.5l4 4 8-9" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
           <span class="insc-forma__texto"><b>Cartão de crédito</b><span class="insc-forma__preco"><span data-bf="on">12x de R$ 41,67 sem juros</span><span data-bf="off">12x de R$ 71,67 sem juros</span></span><span class="insc-forma__sub">Liberação imediata após a aprovação</span></span>
         </label>
@@ -82,7 +83,7 @@
       </div>
       <span class="error" id="formas-erro" data-error-for="forma"></span>
 
-      <div class="insc-dados" id="insc-dados" hidden>
+      <div class="insc-dados" id="insc-dados">
         <h2 class="insc-form__titulo">Seus dados para a inscrição</h2>
         <div class="field">
           <label for="nome">Nome</label>
@@ -104,9 +105,9 @@
           <label for="empresa">Empresa</label>
           <input type="text" id="empresa" name="empresa" tabindex="-1" autocomplete="off">
         </div>
-        <button class="btn btn-cta" type="submit">Continuar para o pagamento</button>
+        <button class="btn btn-cta" type="submit">Continuar para o pagamento no cartão</button>
         <!-- texto trocado pelo script.js conforme a forma escolhida -->
-        <p class="insc-dica" id="insc-dica" aria-live="polite"></p>
+        <p class="insc-dica" id="insc-dica" aria-live="polite">Na próxima tela, a Hotmart já mostra só o cartão. Seus dados já vão preenchidos: falta o CPF e os dados do cartão.</p>
         <p class="form-note">Ao continuar, você concorda em receber mensagens da equipe da Lívia por e-mail e WhatsApp sobre o curso. Seus dados ficam protegidos, veja a <a href="../../privacidade/">Política de privacidade</a>.</p>
       </div>
     </form>
@@ -134,6 +135,6 @@
 
 <!-- pgInsc só identifica esta página; o sck da Hotmart leva o pg da página de origem (pgA, pgB, pgC) -->
 <script src="../../assets/js/site.js?v=10" data-pagina="pgInsc"></script>
-<script src="script.js?v=5"></script>
+<script src="script.js?v=6"></script>
 </body>
 </html>
