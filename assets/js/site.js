@@ -172,28 +172,29 @@ window.dataLayer = window.dataLayer || [];
   if (bar && hero && "IntersectionObserver" in window) {
     var heroCta = hero.querySelector(".btn") || hero;
     var hideOn = document.querySelectorAll("[data-hide-sticky]");
-    var pastHero = false;
-    var hidden = 0;
+    /* Estado recalculado pelas posições na tela (e não por contador de entradas e saídas), para não errar
+       quando a pessoa pula direto para uma âncora ou volta ao topo de uma vez. */
+    var visivel = function (el) {
+      if (el.offsetParent === null && getComputedStyle(el).position !== "fixed") return false;
+      var r = el.getBoundingClientRect();
+      return r.bottom > 0 && r.top < window.innerHeight;
+    };
     var update = function () {
-      var show = pastHero && hidden === 0;
+      var pastHero = heroCta.getBoundingClientRect().bottom < 0;
+      var show = pastHero && !Array.prototype.some.call(hideOn, visivel);
       bar.classList.toggle("on", show);
       document.body.classList.toggle("has-sticky", show);
       document.body.style.setProperty("--sticky-h", bar.offsetHeight + "px");
     };
-    new IntersectionObserver(function (entries) {
-      pastHero = !entries[0].isIntersecting && entries[0].boundingClientRect.top < 0;
-      update();
-    }).observe(heroCta);
-    hideOn.forEach(function (el) {
-      var visible = false;
-      new IntersectionObserver(function (entries) {
-        if (entries[0].isIntersecting !== visible) {
-          visible = entries[0].isIntersecting;
-          hidden += visible ? 1 : -1;
-          update();
-        }
-      }).observe(el);
-    });
+    var io = new IntersectionObserver(update);
+    io.observe(heroCta);
+    hideOn.forEach(function (el) { io.observe(el); });
+    var agendado = false;
+    window.addEventListener("scroll", function () {
+      if (agendado) return;
+      agendado = true;
+      requestAnimationFrame(function () { agendado = false; update(); });
+    }, { passive: true });
     window.addEventListener("resize", update);
   }
 
