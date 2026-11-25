@@ -86,6 +86,20 @@ html:not(.bf-fim):has(.bf-faixa) { scroll-padding-top: calc(var(--nav-h, 62px) +
 .bf-leva li b { min-width: 56px; font-family: var(--serif); font-stretch: 62.5%; font-size: 26px; line-height: 1; color: var(--wine); }
 @media (min-width: 720px) { .bf-leva { grid-template-columns: repeat(5, 1fr); } .bf-leva li { flex-direction: column; text-align: center; } .bf-leva li b { min-width: 0; } }
 
+/* chips do hero (.chips do site.css, como no curso/b/): na A e na B logo acima do card de preço */
+.page-bf .hero .chips { margin: 18px 0 0; }
+/* faixa de números (.proofbar do site.css) com 3 itens: no celular 2 + 1 na linha de baixo, depois 3 colunas */
+.page-bf .proofbar li:last-child:nth-child(odd) { grid-column: 1 / -1; }
+@media (min-width: 640px) {
+  .page-bf .proofbar ul { grid-template-columns: repeat(3, 1fr); }
+  .page-bf .proofbar li:last-child:nth-child(odd) { grid-column: auto; }
+}
+/* vídeo dos depoimentos (data-bf="on"): depois do prazo some, e os depoimentos voltam a ocupar a largura toda */
+@media (min-width: 900px) {
+  html.bf-fim .page-bf .tests-wrap { grid-template-columns: 1fr; }
+  html.bf-fim .page-bf .tests-wrap .tests { grid-template-columns: repeat(3, 1fr); }
+}
+
 .page-bf .mods .mod p { margin-top: 2px; }
 .bf-sobre { display: grid; gap: 20px; align-items: center; }
 /* enquanto a foto (lazy) carrega: fundo neutro claro na proporção da foto, em vez do rosa do img do site.css */
@@ -140,6 +154,8 @@ html:not(.bf-fim):has(.bf-faixa) { scroll-padding-top: calc(var(--nav-h, 62px) +
 .bf-c-hero .bf-selo { margin-bottom: 10px; }
 .bf-c-hero h1 { font-size: clamp(40px, 10.5vw, 64px); }
 .bf-c-hero .bf-preco { max-width: 460px; margin: 18px auto 0; }
+.page-bf .bf-c-hero .chips { justify-content: center; max-width: 460px; margin: 16px auto 0; }
+.bf-c-video { margin-top: 32px; }
 .bf-preco__grande { margin: 2px 0 0; font-family: var(--serif); font-stretch: 62.5%; font-weight: 600; font-size: 56px; line-height: 1; letter-spacing: -.01em; color: var(--wine); }
 .bf-inclui { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin: 22px 0 0; padding: 0; list-style: none; }
 .bf-inclui li { display: flex; flex-direction: column; align-items: center; gap: 8px; padding: 16px 10px; border-radius: var(--radius); background: var(--white); border: 1px solid var(--line); text-align: center; font-weight: 600; font-size: 15px; line-height: 1.3; }

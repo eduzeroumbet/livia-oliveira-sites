@@ -15,6 +15,10 @@ no dataLayer); a Lambda de cadastro e a Hotmart são interceptadas.
 - versões B (black-friday/b/) e C (black-friday/c/), e a A junto: BF.fim 2026-11-30T23:59:59-03:00, R$ 499,99 e 41,67,
   sem travessão, noindex só em B e C, botões com pg=pgBF&versao=bf_x, eventos com pagina_versao (bf_a, bf_b, bf_c),
   Hotmart com off=qu4x7j2d e sck terminando em |pgBF|bf_b ou |pgBF|bf_c (a A fica com |pgBF), e o "terminou" depois do prazo;
+- nas 3 versões, só durante a Black Friday: chips do que o curso inclui junto do preço do hero, faixa de números do
+  curso/b/ logo depois do hero e o vídeo de depoimento Trafego_17 (sem autoplay) na seção de alunas; depois do prazo
+  nada disso aparece; o "terminou" (bf-terminou e bf-topo--fim) fica escondido por CSS mesmo sem JS; foto do "Prazer,
+  sou Lívia Oliveira" (A e B) lazy, em 4/5 e com fundo neutro;
 - faixa no curso (A, B, C), materiais, quiz, calculadora e home, com o link certo e sem cobrir o cabeçalho; preço de BF
   durante e o normal depois; terapia sem nada de Black Friday;
 - fora de localhost (domínio liviaoliveira.me simulado) o ?bf_agora é ignorado.
@@ -46,6 +50,8 @@ LINHA_BF = "de R$ 860 por R$ 499,99 · 12x de R$ 41,67 sem juros (Black Friday a
 LINHA = "12x de R$ 71,67 sem juros ou R$ 860 à vista"
 # as 3 versões da página da Black Friday: caminho > (pagina_versao, sufixo do sck na Hotmart)
 VERSOES = {"black-friday/": ("bf_a", "|pgBF"), "black-friday/b/": ("bf_b", "|pgBF|bf_b"), "black-friday/c/": ("bf_c", "|pgBF|bf_c")}
+CHIPS = ["10 módulos", "60+ aulas", "12 meses de acesso", "Comunidade de alunas", "Certificado", "7 dias de garantia"]
+NUMEROS = ["47 mil", "15+ anos", "100+"]
 # páginas com a faixa e o destino do link (sem a query da visita)
 FAIXA = {
     "curso/": "black-friday/", "curso/b/": "black-friday/", "curso/versao-b/": "black-friday/", "": "black-friday/",
@@ -255,7 +261,53 @@ with sync_playwright() as p:
             ok(robots == [], f"A indexável, sem noindex ({robots})")
         else:
             ok(robots == ["noindex"], f"noindex ({robots})")
+
+        # chips no hero, junto do card de preço
+        chips = page.eval_on_selector_all(".hero .chips li", "els => els.filter(e => e.offsetParent !== null).map(e => e.textContent.trim())")
+        ok(chips == CHIPS, f"chips no hero ({chips})")
+        perto = page.evaluate("""() => { const c = document.querySelector('.hero .chips').getBoundingClientRect(), p = document.querySelector('.hero .bf-preco').getBoundingClientRect();
+          return Math.min(Math.abs(p.top - c.bottom), Math.abs(c.top - p.bottom)); }""")
+        ok(perto <= 30, f"chips logo acima ou logo abaixo do card de preço ({perto:.0f}px)")
+        # faixa de números logo depois do hero
+        barra = page.locator(".proofbar")
+        numeros = [" ".join(t.split()) for t in barra.locator("b").all_inner_texts()] if barra.count() == 1 else []
+        ok(barra.count() == 1 and barra.is_visible() and numeros == NUMEROS, f"faixa de números visível ({numeros})")
+        ok("psicólogas acompanham a Lívia no Instagram" in texto and "alunas no Carreira com Sentido" in texto, "textos da faixa de números")
+        ok(page.evaluate("document.querySelector('.proofbar').previousElementSibling.matches('section.hero')"), "faixa de números logo depois do hero")
+        caixas = page.eval_on_selector_all(".proofbar li", "els => els.map(e => e.getBoundingClientRect().right)")
+        ok(all(r <= 390 for r in caixas), f"faixa de números cabe em 390px ({caixas})")
+        # vídeo de depoimento na seção de alunas, sem autoplay e com tamanho reservado
+        video = page.eval_on_selector_all("#alunas video", """els => els.map(v => ({poster: v.getAttribute('poster'), src: v.querySelector('source').getAttribute('src'),
+          controls: v.controls, playsinline: v.hasAttribute('playsinline'), preload: v.getAttribute('preload'), autoplay: v.hasAttribute('autoplay'),
+          w: v.getAttribute('width'), h: v.getAttribute('height'), visivel: v.offsetParent !== null}))""")
+        v = video[0] if len(video) == 1 else {}
+        ok(len(video) == 1 and v["poster"].endswith("assets/video/Trafego_17-poster.jpg") and v["src"].endswith("assets/video/Trafego_17.mp4"),
+           f"vídeo Trafego_17 com o poster na seção de alunas ({video})")
+        ok(v.get("controls") and v.get("playsinline") and v.get("preload") == "none" and not v.get("autoplay") and (v.get("w"), v.get("h")) == ("360", "640") and v.get("visivel"),
+           "vídeo com controls, playsinline, preload=none, sem autoplay, width/height e visível")
+        ok("Mensagens das alunas, lidas pela Lívia" in page.inner_text("#alunas"), "legenda do vídeo")
+        # "Prazer, sou Lívia Oliveira": foto lazy, espaço reservado em 4/5 e fundo neutro enquanto carrega
+        if page.locator(".bf-sobre img").count():
+            foto = page.eval_on_selector(".bf-sobre img", """i => { const c = getComputedStyle(i); const r = i.getBoundingClientRect();
+              return [i.loading, c.aspectRatio, c.backgroundImage !== 'none', Math.abs(r.width / r.height - 0.8) < 0.01]; }""")
+            ok(foto[0] == "lazy" and foto[1].replace(" ", "") == "4/5" and foto[2] and foto[3], f"foto do \"Prazer\" lazy, 4/5 e com fundo ({foto})")
         page.close()
+
+        # depois do prazo: nada disso aparece
+        page, ctx = abre(b, caminho, DEPOIS)
+        vis = {sel: visivel(page, sel) for sel in (".hero .chips", ".proofbar", "#alunas video")}
+        ok(not any(vis.values()), f"depois do prazo: sem chips, faixa de números e vídeo ({vis})")
+        page.close()
+
+        # o "terminou" começa escondido por CSS, antes de qualquer JS (e fora da árvore de acessibilidade)
+        ctx_sem_js = b.new_context(java_script_enabled=False, viewport={"width": 390, "height": 844})
+        page = ctx_sem_js.new_page()
+        page.route("**/*", lambda r: r.continue_() if r.request.url.startswith(BASE) else r.abort())
+        page.goto(f"{BASE}/{caminho}", wait_until="load")
+        disp = page.eval_on_selector_all("section.bf-terminou, .bf-topo--fim", "els => els.map(e => getComputedStyle(e).display)")
+        ok(disp == ["none", "none"], f"sem JS: bf-terminou e bf-topo--fim com display:none ({disp})")
+        ok("terminou" not in page.inner_text("body").lower(), "sem JS: \"terminou\" fora do texto lido")
+        ctx_sem_js.close()
 
     for caminho in ("black-friday/b/", "black-friday/c/"):
         versao, sufixo = VERSOES[caminho]

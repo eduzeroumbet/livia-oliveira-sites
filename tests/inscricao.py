@@ -4,19 +4,21 @@ Nada sai para a internet: a chamada à Lambda de cadastro é interceptada com pa
 Lambda é mapeado para um endereço inexistente no Chromium, então nada é gravado na Lambda real); a navegação para a
 Hotmart é interceptada e respondida com uma página vazia; Pixel e GA4 são bloqueados (os comandos ficam no fbq e no
 dataLayer, registrados pelo teste antes de a página sair). Em 390px e 1440px:
-- ao abrir: nenhuma forma de pagamento marcada, campos ocultos (hidden, sem ocupar espaço), as 3 opções visíveis sem
-  rolar a 390x844 e com área de toque >= 48px; sem rolagem horizontal; sem travessão; honeypot vazio e fora da tela;
-- só o PageView ao carregar (sem ViewContent nem InitiateCheckout);
-- cada opção (cartão, Pix, boleto) abre os campos, foco no nome, muda o texto do botão e a dica; EscolhaPagamento no
-  Pixel e escolha_pagamento no GA4 com payment_type, sem InitiateCheckout; trocar de opção preserva o que foi digitado;
-  setas do teclado trocam a opção;
+- ao abrir: cartão de crédito já marcado, campos abertos, botão "Continuar para o pagamento no cartão" visível e a dica
+  do cartão; as 3 opções visíveis sem rolar a 390x844 e com área de toque >= 48px; sem rolagem horizontal; sem
+  travessão; honeypot vazio e fora da tela;
+- só o PageView ao carregar (sem ViewContent, InitiateCheckout nem EscolhaPagamento: a pré-seleção não conta como escolha);
+- enviar sem tocar em nada vai com a forma cartão;
+- trocar para Pix, boleto e de volta para cartão muda o texto do botão e a dica; EscolhaPagamento no Pixel e
+  escolha_pagamento no GA4 com payment_type só nessas trocas, sem InitiateCheckout; trocar de opção preserva o que foi
+  digitado; setas do teclado trocam a opção;
 - envio vazio: erros nos 3 campos, sem cadastro e sem ir à Hotmart;
 - envio com Maria Teste / maria.teste@exemplo.com / (51) 99999-8888: JSON enviado à Lambda (com forma), link final da
   Hotmart (off, checkoutMode, name, email, phoneac, phonenumber, src, sck, utms e os hide* da forma escolhida),
   advanced matching, InitiateCheckout e CadastroCheckout no Pixel, begin_checkout e cadastro_checkout no GA4 (com
   payment_type), nenhum Lead e nenhum dado pessoal no dataLayer;
 - link da Hotmart para cada forma: cartão com hidePix e hideBillet; Pix sem hidePix; boleto sem hideBillet;
-- envio sem forma (forçado): erro "Escolha a forma de pagamento." e nada é enviado;
+- envio sem forma (forçado, desmarcando o cartão por script): erro "Escolha a forma de pagamento." e nada é enviado;
 - prints com os campos abertos em _catalogo/prints/curso-inscricao-escolha-{mobile,desktop}.png;
 - Lambda com erro 500 e Lambda que não responde: vai para a Hotmart mesmo assim, em até ~2 s;
 - sem pg nem UTM na URL: sck=direto|pgB e sem src;
@@ -141,9 +143,9 @@ def escolhe(page, forma):
 
 
 def envia(page, ctx, nome=NOME, email=EMAIL, whats=WHATS, forma="cartao"):
-    """Escolhe a forma (se ainda não houver), preenche, envia e espera a ida à Hotmart. Devolve o tempo do clique até o pedido da Hotmart e o estado do
+    """Escolhe a forma (se não for a já marcada), preenche, envia e espera a ida à Hotmart. Devolve o tempo do clique até o pedido da Hotmart e o estado do
     botão logo depois do clique (None se a página já tiver saído)."""
-    if not page.evaluate("!!document.querySelector('input[name=forma]:checked')"):
+    if page.evaluate("(document.querySelector('input[name=forma]:checked') || {}).value") != forma:
         escolhe(page, forma)
     page.fill("#nome", nome)
     page.fill("#email", email)
@@ -175,10 +177,12 @@ with sync_playwright() as p:
         ok("—" not in page.inner_text("body"), "sem travessão no texto")
         inicio = page.evaluate("""() => { const d = document.getElementById('insc-dados');
           return {marcadas: document.querySelectorAll('input[name=forma]:checked').length, hidden: d.hidden,
-                  altura: d.getBoundingClientRect().height, botao: document.querySelector('button[type=submit]').offsetParent !== null,
+                  marcada: (document.querySelector('input[name=forma]:checked') || {}).value || null, altura: d.getBoundingClientRect().height > 0,
+                  botao: document.querySelector('button[type=submit]').offsetParent !== null, texto: document.querySelector('button[type=submit]').textContent,
                   grupo: document.querySelector('[role=radiogroup]') !== null, radios: document.querySelectorAll('input[type=radio][name=forma]').length}; }""")
-        ok(inicio == {"marcadas": 0, "hidden": True, "altura": 0, "botao": False, "grupo": True, "radios": 3},
-           f"ao abrir: nenhuma forma marcada, campos ocultos e sem espaço, radiogroup com 3 opções ({inicio})")
+        ok(inicio == {"marcadas": 1, "hidden": False, "marcada": "cartao", "altura": True, "botao": True, "texto": BOTAO["cartao"], "grupo": True, "radios": 3},
+           f"ao abrir: cartão já marcado, campos abertos, botão do cartão visível, radiogroup com 3 opções ({inicio})")
+        ok(DICA["cartao"] in page.inner_text("#insc-dica"), "ao abrir: dica do cartão")
         caixas = page.evaluate("[...document.querySelectorAll('label.insc-forma')].map(l => { const r = l.getBoundingClientRect(); return [r.height, r.bottom]; })")
         ok(all(h >= 48 for h, _ in caixas), f"opções com área de toque >= 48px ({[round(h) for h, _ in caixas]})")
         ok(page.evaluate("window.scrollY") == 0 and caixas[-1][1] <= vp["height"], f"as 3 opções visíveis sem rolar ({caixas[-1][1]:.0f} <= {vp['height']})")
@@ -192,18 +196,18 @@ with sync_playwright() as p:
         estado = page.evaluate(ESTADO)
         ok(["init", PIXEL_ID] in estado["fbq"], "Pixel iniciado")
         tracks = [c[1] for c in estado["fbq"] if c[0] in ("track", "trackCustom")]
-        ok(tracks == ["PageView"], f"ao carregar só o PageView ({tracks})")
+        ok(tracks == ["PageView"], f"ao carregar só o PageView, sem EscolhaPagamento na pré-seleção ({tracks})")
+        ok(not any(isinstance(c, list) and c[:2] == ["event", "escolha_pagamento"] for c in estado["dl"]), "sem escolha_pagamento no GA4 na pré-seleção")
 
-        # escolha da forma: cada opção abre os campos e muda o botão e a dica; trocar preserva o que foi digitado
-        for i, forma in enumerate(("cartao", "pix", "boleto")):
+        # troca da forma: cada opção muda o botão e a dica; trocar preserva o que foi digitado
+        for i, forma in enumerate(("pix", "boleto", "cartao")):
             escolhe(page, forma)
             st = page.evaluate("""() => ({hidden: document.getElementById('insc-dados').hidden,
               botao: document.querySelector('button[type=submit]').textContent, dica: document.getElementById('insc-dica').textContent,
-              marcada: document.querySelector('input[name=forma]:checked').value, foco: document.activeElement.id})""")
+              marcada: document.querySelector('input[name=forma]:checked').value})""")
             ok(not st["hidden"] and st["marcada"] == forma and st["botao"] == BOTAO[forma] and DICA[forma] in st["dica"],
                f"{forma}: campos abertos, botão \"{st['botao']}\" e dica")
             if i == 0:
-                ok(st["foco"] == "nome", f"foco no nome ao abrir os campos ({st['foco']})")
                 page.fill("#nome", "Ana Digitada")
                 page.fill("#email", "ana@exemplo.com")
         ok(page.input_value("#nome") == "Ana Digitada" and page.input_value("#email") == "ana@exemplo.com",
@@ -216,9 +220,9 @@ with sync_playwright() as p:
            and page.evaluate("document.activeElement.value") == "pix", "seta do teclado troca a opção sem tirar o foco do grupo")
         estado = page.evaluate(ESTADO)
         escolhas = [c[2] for c in estado["fbq"] if c[:2] == ["trackCustom", "EscolhaPagamento"]]
-        ok([e.get("payment_type") for e in escolhas] == ["cartao", "pix", "boleto", "pix"] and all(e.get("content_category") == "pgA" for e in escolhas),
-           f"EscolhaPagamento no Pixel com payment_type ({escolhas})")
-        ok(["event", "escolha_pagamento", {"content_category": "pgA", "payment_type": "cartao"}] in estado["dl"], "escolha_pagamento no GA4")
+        ok([e.get("payment_type") for e in escolhas] == ["pix", "boleto", "cartao", "pix"] and all(e.get("content_category") == "pgA" for e in escolhas),
+           f"EscolhaPagamento no Pixel com payment_type, só nas trocas ({escolhas})")
+        ok(["event", "escolha_pagamento", {"content_category": "pgA", "payment_type": "pix"}] in estado["dl"], "escolha_pagamento no GA4")
         ok(not any(c[1] in ("InitiateCheckout", "Lead") for c in estado["fbq"] if len(c) > 1), "escolher não dispara InitiateCheckout nem Lead")
         escolhe(page, "cartao")
         page.fill("#nome", "")
@@ -296,6 +300,7 @@ with sync_playwright() as p:
         ok({k: v for k, v in q.items() if k.startswith("hide")} == hides(forma), f"{forma}: hide* corretos ({sorted(k for k in q if k.startswith('hide'))})")
         if forma == "cartao":
             ok(q.get("hidePix") == ["1"] and q.get("hideBillet") == ["1"], "cartao: hidePix=1 e hideBillet=1")
+            ok(not any(c[:2] == ["trackCustom", "EscolhaPagamento"] for c in ctx["fbq"]), "cartao pré-selecionado: envia sem tocar na forma e sem EscolhaPagamento")
         else:
             ok(MOSTRA[forma] not in q and q.get("hidePixAutomatic") == ["1"], f"{forma}: sem {MOSTRA[forma]} e com hidePixAutomatic=1")
         dados = ctx["lambda"][0].post_data_json if ctx["lambda"] else {}
@@ -307,7 +312,7 @@ with sync_playwright() as p:
     # envio sem forma (não deve acontecer pela interface): erro no grupo
     print("--- curso/inscricao/ envio sem forma")
     page, ctx = abre(b, {"width": 390, "height": 844})
-    page.evaluate("document.getElementById('inscricao').requestSubmit()")
+    page.evaluate("document.querySelector('input[name=forma]:checked').checked = false; document.getElementById('inscricao').requestSubmit()")
     page.wait_for_timeout(200)
     ok(page.inner_text('[data-error-for="forma"]') == "Escolha a forma de pagamento." and not ctx["lambda"] and not ctx["hotmart"],
        "sem forma: \"Escolha a forma de pagamento.\" e não envia")
