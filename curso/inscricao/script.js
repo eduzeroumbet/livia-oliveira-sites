@@ -236,7 +236,9 @@ var FORMAS = {
       consentimento: "sim",
       fbp: cookie("_fbp"),
       fbc: cookie("_fbc"),
-      empresa: form.elements.empresa.value
+      /* honeypot (campo hp_x7, chave "empresa" na Lambda): preenchido, a Lambda ignora o cadastro, mas a pessoa vai
+       * para a Hotmart do mesmo jeito (a compra nunca é bloqueada aqui) */
+      empresa: form.elements.hp_x7.value
     };
 
     /* O cadastro nunca bloqueia a compra: no máximo 1,5 s de espera e vai para a Hotmart mesmo com erro */

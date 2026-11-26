@@ -264,7 +264,7 @@ with sync_playwright() as p:
            "material_pdf_bloqueado no GA4, sem MaterialPDF")
 
         # validação
-        hp = page.evaluate("""() => { const e = document.getElementById('empresa'); const r = e.getBoundingClientRect();
+        hp = page.evaluate("""() => { const e = document.getElementById('hp_x7'); const r = e.getBoundingClientRect();
           return {valor: e.value, tab: e.getAttribute('tabindex'), auto: e.getAttribute('autocomplete'), fora: r.right <= 0 || r.width <= 1}; }""")
         ok(hp == {"valor": "", "tab": "-1", "auto": "off", "fora": True}, f"honeypot vazio, fora da tela ({hp})")
         ok(page.get_attribute('#contato a[href*="privacidade/"]', "href") is not None, "link para a Política de privacidade no consentimento")

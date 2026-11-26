@@ -268,6 +268,16 @@ with sync_playwright() as p:
         perto = page.evaluate("""() => { const c = document.querySelector('.hero .chips').getBoundingClientRect(), p = document.querySelector('.hero .bf-preco').getBoundingClientRect();
           return Math.min(Math.abs(p.top - c.bottom), Math.abs(c.top - p.bottom)); }""")
         ok(perto <= 30, f"chips logo acima ou logo abaixo do card de preço ({perto:.0f}px)")
+        # WhatsApp discreto logo abaixo do "7 dias de garantia · acesso imediato · ..." do card de preço do hero
+        wa_card = page.evaluate("""() => { const t = [...document.querySelectorAll('.hero .bf-preco .trust')].find(p => p.textContent.startsWith('7 dias de garantia'));
+          const p = t && t.nextElementSibling, a = p && p.querySelector('a');
+          return a ? [a.textContent.trim(), a.href.startsWith('https://wa.me/5511910607651?text=Oi!%20Tenho%20uma%20d%C3%BAvida%20sobre%20a%20Black%20Friday'), a.offsetParent !== null] : null; }""")
+        ok(wa_card == ["Ficou com dúvida? Fale com a equipe no WhatsApp", True, True], f"link do WhatsApp logo abaixo do trust do card ({wa_card})")
+        # FAQ ampliado, com as respostas do curso/b/ e o boleto do dia 30/11
+        perguntas = page.eval_on_selector_all("#faq summary", "els => els.map(e => e.textContent.trim())")
+        ok(all(q_ in perguntas for q_ in ("Sou recém-formada. Esse curso serve pra mim?", "O conteúdo respeita o Código de Ética e as orientações do CFP?",
+                                         "Não tenho tempo. Quanto preciso me dedicar por semana?", "Funciona mesmo que eu não tenha muitos seguidores?",
+                                         "Gerei o boleto no dia 30/11. Ainda vale o preço?")), f"FAQ ampliado ({perguntas})")
         # faixa de números logo depois do hero
         barra = page.locator(".proofbar")
         numeros = [" ".join(t.split()) for t in barra.locator("b").all_inner_texts()] if barra.count() == 1 else []
@@ -342,10 +352,12 @@ with sync_playwright() as p:
                 cta = page.get_by_role("link", name="Garantir por R$ 499,99").first
                 caixa = cta.bounding_box()
                 ok(cta.is_visible() and caixa["y"] + caixa["height"] <= vp["height"], f"botão \"Garantir por R$ 499,99\" na primeira dobra ({caixa})")
-                rel = page.locator(".hero .bf-contagem").bounding_box()
-                ok(page.locator(".hero .bf-contagem").is_visible() and rel["y"] < vp["height"] / 2, "contagem grande no topo da primeira dobra")
-                ok(page.locator(".bf-inclui li svg").count() == 6, "6 itens incluídos com ícone")
-                ok(page.locator("#faq details").count() == 4, "4 perguntas no FAQ")
+                ok(page.locator(".bf-contagem").count() == 0, "sem a caixa grande de contagem (a contagem fica na faixa do topo)")
+                selo = page.locator(".hero .bf-selo")
+                ok(selo.is_visible() and selo.inner_text().upper() == "ATÉ 30/11 ÀS 23H59", "pílula \"Até 30/11 às 23h59\" no hero")
+                ok(page.locator(".bf-c-aprende h2").inner_text() == "O que você vai aprender." and page.locator(".bf-c-aprende .mod").count() == 5,
+                   "\"O que você vai aprender.\" com 5 módulos")
+                ok(page.locator("#faq details").count() == 9 and "Quanto custa e posso parcelar?" not in texto, "9 perguntas no FAQ, sem \"Quanto custa e posso parcelar?\"")
                 ok(page.get_by_role("link", name="Tenho uma dúvida").first.is_visible(), "botão \"Tenho uma dúvida\" para a Lia")
             if vp["width"] == 390:
                 ok(not page.eval_on_selector(".sticky-bar", "e => e.classList.contains('on')"), "botão fixo escondido na primeira dobra")
@@ -481,6 +493,46 @@ with sync_playwright() as p:
            "depois do prazo: sem faixa e sem preço de BF")
         if caminho.startswith("curso/"):
             ok(LINHA in texto and "12x de R$ 71,67" in texto, "depois do prazo: preço normal")
+        page.close()
+
+    print("--- home: card do curso durante e depois")
+    for query, durante in ((DURANTE, True), (DEPOIS, False)):
+        page, ctx = abre(b, "", query)
+        card = page.locator("a.link.primary")
+        ok(urlsplit(card.evaluate("a => a.href")).path == "/curso/b/", "card do curso continua indo para curso/b/")
+        titulo, sub = card.locator("b").inner_text(), card.locator("small").inner_text()
+        selo = page.locator(".bf-card__selo")
+        if durante:
+            ok((titulo, sub) == ("Black Friday: Carreira com Sentido", "De R$ 860 por R$ 499,99, só até 30/11"), f"durante: card com a oferta ({titulo} / {sub})")
+            ok(selo.is_visible() and selo.inner_text().upper() == "BLACK FRIDAY", "durante: selo \"Black Friday\" no card")
+            tam = page.eval_on_selector(".bf-faixa", "e => getComputedStyle(e).fontSize")
+            ok(tam == "15px", f"faixa da home com letra de 15px ({tam})")
+            caixa = page.evaluate("""() => { const c = document.querySelector('a.link.primary').getBoundingClientRect(), s = document.querySelector('.bf-card__selo').getBoundingClientRect();
+              return s.right <= c.right && s.left >= c.left && s.right <= window.innerWidth; }""")
+            ok(caixa, "selo dentro da largura do card e da tela em 390px")
+        else:
+            ok((titulo, sub) == ("Curso Carreira com Sentido", "Para psicólogas que querem viver bem da clínica"), f"depois: card com o texto normal ({titulo} / {sub})")
+            ok(not selo.is_visible(), "depois: sem selo")
+        largura = page.evaluate(SEM_ROLAGEM)
+        ok(largura[0] <= largura[1], f"sem rolagem horizontal ({largura[0]} <= {largura[1]})")
+        page.close()
+
+    print("--- curso/b/: etiqueta e botões durante e depois")
+    for query, durante in ((DURANTE, True), (DEPOIS, False)):
+        page, ctx = abre(b, "curso/b/", "utm_source=meta&utm_medium=paid&" + query)
+        etiqueta = page.locator(".hero .eyebrow:visible").inner_text().upper()
+        # texto de cada botão de compra: só os <span> que estão aparecendo (data-bf on/off)
+        botoes = page.eval_on_selector_all("a.checkout", """els => els.map(a => [...a.children]
+          .filter(c => c.tagName === 'SPAN' && getComputedStyle(c).display !== 'none').map(c => c.textContent.trim()).join(''))""")
+        hrefs = page.eval_on_selector_all("a.checkout", "els => els.map(a => a.href)")
+        ok(all(urlsplit(h_).path == "/curso/inscricao/" and parse_qs(urlsplit(h_).query).get("pg") == ["pgB"] for h_ in hrefs), "botões continuam em curso/inscricao/?pg=pgB")
+        if durante:
+            ok(etiqueta == "BLACK FRIDAY · SÓ ATÉ 30/11", f"durante: etiqueta acima do H1 ({etiqueta})")
+            ok(botoes and all(t == "Quero por R$ 499,99" for t in botoes), f"durante: botões \"Quero por R$ 499,99\" ({botoes})")
+        else:
+            ok(etiqueta == "CURSO ONLINE PARA PSICÓLOGAS CLÍNICAS", f"depois: etiqueta normal ({etiqueta})")
+            ok(botoes and all(t == "Quero me inscrever" for t in botoes), f"depois: botões \"Quero me inscrever\" ({botoes})")
+        ok(not ctx["erros_js"], f"sem erros de JS {ctx['erros_js']}")
         page.close()
 
     print("--- curso/ e curso/b/: preços durante e depois")

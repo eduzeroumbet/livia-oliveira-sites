@@ -291,7 +291,9 @@ window.dataLayer = window.dataLayer || [];
         consentimento: "sim",
         fbp: cookie("_fbp"),
         fbc: cookie("_fbc"),
-        empresa: form.elements.empresa ? form.elements.empresa.value : ""
+        /* honeypot: campo hp_x7 (o nome "empresa" era preenchido pelo autopreenchimento do navegador); a chave enviada à
+         * Lambda continua "empresa" */
+        empresa: (form.elements.hp_x7 || form.elements.empresa || { value: "" }).value
       };
       return Object.assign(dados, extras || {});
     },

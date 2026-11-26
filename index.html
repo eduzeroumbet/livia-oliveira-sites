@@ -31,8 +31,8 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+Display:ital,wdth,wght@0,62.5,400..700;1,62.5,400..700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="assets/css/site.css?v=6">
-<link rel="stylesheet" href="assets/css/bf.css?v=1">
+<link rel="stylesheet" href="assets/css/site.css?v=11">
+<link rel="stylesheet" href="assets/css/bf.css?v=5">
 <!-- Black Friday: decide no <head>, antes de pintar, se mostra a faixa e o preço de BF (assets/js/bf.js) -->
 <script src="assets/js/bf.js?v=2"></script>
 </head>
@@ -45,9 +45,11 @@
   <p class="intro">Ajudo psicólogas a construir uma carreira sólida na clínica, e atendo adultos em Porto Alegre e online.</p>
 
   <nav class="links" aria-label="Links principais">
-    <a class="link primary" href="curso/b/">
+    <a class="link primary bf-card" href="curso/b/">
+      <span class="bf-card__selo" data-bf="on" aria-hidden="true">Black Friday</span>
       <span class="ic" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M2 8.5 12 4l10 4.5-10 4.5L2 8.5Z"/><path d="M6 10.5V16c0 1.5 2.7 3 6 3s6-1.5 6-3v-5.5"/></svg></span>
-      <span><b>Curso Carreira com Sentido</b><small>Para psicólogas que querem viver bem da clínica</small></span>
+      <!-- durante a Black Friday (assets/js/bf.js) o card fala da oferta; depois de BF.fim volta sozinho ao texto normal -->
+      <span><b><span data-bf="on">Black Friday: Carreira com Sentido</span><span data-bf="off">Curso Carreira com Sentido</span></b><small><span data-bf="on">De R$ 860 por R$ 499,99, só até 30/11</span><span data-bf="off">Para psicólogas que querem viver bem da clínica</span></small></span>
       <span class="arrow" aria-hidden="true">→</span>
     </a>
     <a class="link" href="quiz/">
@@ -89,6 +91,6 @@
 
   <p class="bio-footer">Lívia Oliveira · Psicóloga · <span style="white-space:nowrap">CRP 07/18713</span> · <span style="white-space:nowrap">Porto Alegre, RS</span><br><a href="privacidade/">Política de privacidade</a> · <a href="termos/">Termos de uso</a></p>
 </main>
-<script src="assets/js/site.js?v=11"></script>
+<script src="assets/js/site.js?v=12"></script>
 </body>
 </html>

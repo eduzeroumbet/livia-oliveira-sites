@@ -31,8 +31,8 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+Display:ital,wdth,wght@0,62.5,400..700;1,62.5,400..700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="../../assets/css/site.css?v=9">
-<link rel="stylesheet" href="../../assets/css/bf.css?v=1">
+<link rel="stylesheet" href="../../assets/css/site.css?v=11">
+<link rel="stylesheet" href="../../assets/css/bf.css?v=5">
 <!-- Black Friday: decide no <head>, antes de pintar, se vale o preço de BF ou o normal (assets/js/bf.js) -->
 <script src="../../assets/js/bf.js?v=2"></script>
 </head>
@@ -54,7 +54,7 @@
       <p class="insc-bf" data-bf="on"><b>Preço de Black Friday:</b> R$ 499,99 ou 12x de R$ 41,67 sem juros, até 30/11 às 23h59</p>
       <h1>Falta pouco para <em>garantir sua vaga.</em></h1>
       <p class="insc-resumo">Carreira com Sentido, com Lívia Oliveira</p>
-      <p class="insc-preco" data-bf="on"><span class="bf-de">de R$ 860</span> <b>12x de R$ 41,67 sem juros</b> ou <b>R$ 499,99 à vista</b></p>
+      <p class="insc-preco" data-bf="on">de <s>R$ 860</s> por <b>R$ 499,99 à vista</b> ou <b>12x de R$ 41,67 sem juros</b></p>
       <p class="insc-preco" data-bf="off"><b>12x de R$ 71,67 sem juros</b> ou <b>R$ 860 à vista</b></p>
       <p class="insc-pag">Pix, cartão de crédito (até 12x sem juros) ou boleto</p>
     </div>
@@ -102,10 +102,11 @@
         </div>
         <!-- honeypot: invisível para pessoas; robôs preenchem e a Lambda ignora o cadastro -->
         <div class="insc-hp" aria-hidden="true">
-          <label for="empresa">Empresa</label>
-          <input type="text" id="empresa" name="empresa" tabindex="-1" autocomplete="off">
+          <label for="hp_x7">Deixe em branco</label>
+          <input type="text" id="hp_x7" name="hp_x7" tabindex="-1" autocomplete="off">
         </div>
         <button class="btn btn-cta" type="submit">Continuar para o pagamento no cartão</button>
+        <p class="insc-garantia"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M12 3 4.5 6v5.5c0 4.6 3.2 8.2 7.5 9.5 4.3-1.3 7.5-4.9 7.5-9.5V6z"/><path d="m8.8 12.2 2.3 2.3 4.2-4.6"/></svg>7 dias de garantia: se não for para você, devolvemos 100% do valor.</p>
         <!-- texto trocado pelo script.js conforme a forma escolhida -->
         <p class="insc-dica" id="insc-dica" aria-live="polite">Na próxima tela, a Hotmart já mostra só o cartão. Seus dados já vão preenchidos: falta o CPF e os dados do cartão.</p>
         <p class="form-note">Ao continuar, você concorda em receber mensagens da equipe da Lívia por e-mail e WhatsApp sobre o curso. Seus dados ficam protegidos, veja a <a href="../../privacidade/">Política de privacidade</a>.</p>
@@ -134,7 +135,7 @@
 </footer>
 
 <!-- pgInsc só identifica esta página; o sck da Hotmart leva o pg da página de origem (pgA, pgB, pgC) -->
-<script src="../../assets/js/site.js?v=11" data-pagina="pgInsc"></script>
-<script src="script.js?v=6"></script>
+<script src="../../assets/js/site.js?v=12" data-pagina="pgInsc"></script>
+<script src="script.js?v=7"></script>
 </body>
 </html>

@@ -188,9 +188,15 @@ with sync_playwright() as p:
         ok(page.evaluate("window.scrollY") == 0 and caixas[-1][1] <= vp["height"], f"as 3 opções visíveis sem rolar ({caixas[-1][1]:.0f} <= {vp['height']})")
         larg = page.evaluate("[document.documentElement.scrollWidth, window.innerWidth]")
         ok(larg[0] <= larg[1], f"sem rolagem horizontal ({larg[0]} <= {larg[1]})")
-        hp = page.evaluate("""() => { const e = document.getElementById('empresa'); const r = e.getBoundingClientRect();
-          return {valor: e.value, tab: e.getAttribute('tabindex'), auto: e.getAttribute('autocomplete'), fora: r.right <= 0 || r.width <= 1}; }""")
-        ok(hp == {"valor": "", "tab": "-1", "auto": "off", "fora": True}, f"honeypot vazio, fora da tela, tabindex -1 e autocomplete off ({hp})")
+        hp = page.evaluate("""() => { const e = document.getElementById('hp_x7'); const r = e.getBoundingClientRect();
+          return {valor: e.value, tab: e.getAttribute('tabindex'), auto: e.getAttribute('autocomplete'), fora: r.right <= 0 || r.width <= 1,
+                  oculto: e.closest('[aria-hidden="true"]') !== null, empresa: document.querySelector('[name=empresa]') === null}; }""")
+        ok(hp == {"valor": "", "tab": "-1", "auto": "off", "fora": True, "oculto": True, "empresa": True},
+           f"honeypot hp_x7 vazio, fora da tela, tabindex -1, autocomplete off e aria-hidden; sem campo empresa ({hp})")
+        garantia = page.evaluate("""() => { const b = document.querySelector('button[type=submit]'), g = b.nextElementSibling;
+          return g && g.classList.contains('insc-garantia') ? [g.textContent.trim(), !!g.querySelector('svg'), g.offsetParent !== null] : null; }""")
+        ok(garantia == ["7 dias de garantia: se não for para você, devolvemos 100% do valor.", True, True],
+           f"linha de garantia com escudo logo abaixo do botão ({garantia})")
         ok(page.get_attribute('a[href*="privacidade/"]', "href") is not None, "link para a Política de privacidade")
 
         estado = page.evaluate(ESTADO)
@@ -309,6 +315,17 @@ with sync_playwright() as p:
         ok(not ctx["erros_js"], f"sem erros de JS {ctx['erros_js']}")
         page.close()
 
+    # honeypot preenchido (robô ou autopreenchimento): o cadastro leva empresa preenchida (a Lambda ignora), mas a
+    # pessoa vai para a Hotmart do mesmo jeito
+    print("--- curso/inscricao/ honeypot preenchido")
+    page, ctx = abre(b, {"width": 390, "height": 844})
+    page.evaluate("document.getElementById('hp_x7').value = 'Empresa X'")
+    envia(page, ctx)
+    dados = ctx["lambda"][0].post_data_json if ctx["lambda"] else {}
+    ok(dados.get("empresa") == "Empresa X" and "hp_x7" not in dados, f"cadastro com empresa lida do hp_x7 ({dados.get('empresa')})")
+    ok(len(ctx["hotmart"]) == 1, "honeypot preenchido: vai para a Hotmart mesmo assim")
+    page.close()
+
     # envio sem forma (não deve acontecer pela interface): erro no grupo
     print("--- curso/inscricao/ envio sem forma")
     page, ctx = abre(b, {"width": 390, "height": 844})
@@ -355,6 +372,9 @@ with sync_playwright() as p:
        "linha do preço de Black Friday no topo")
     texto = page.inner_text("body")
     ok("R$ 499,99 à vista" in texto and "71,67" not in texto and "R$ 860 à vista" not in texto, "formas de pagamento com o preço de BF")
+    preco = page.locator('.insc-preco[data-bf="on"]')
+    ok(preco.is_visible() and preco.inner_text() == "de R$ 860 por R$ 499,99 à vista ou 12x de R$ 41,67 sem juros"
+       and preco.locator("s").inner_text() == "R$ 860", f"linha de preço da BF ({preco.inner_text()})")
     envia(page, ctx)
     q = parse_qs(urlsplit(ctx["hotmart"][0]).query) if ctx["hotmart"] else {}
     ok(q.get("off") == [OFERTA_BF], f"off={OFERTA_BF} ({q.get('off')})")
