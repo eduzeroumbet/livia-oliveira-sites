@@ -696,6 +696,9 @@ body.has-sticky .wa-float { bottom: calc(var(--sticky-h, 72px) + 12px); }
 .insc-dados { margin-top: 22px; padding-top: 20px; border-top: 1px solid var(--line); animation: insc-abre .35s ease-out; }
 @keyframes insc-abre { from { opacity: 0; transform: translateY(-8px); } to { opacity: 1; transform: none; } }
 @media (prefers-reduced-motion: reduce) { .insc-dados { animation: none; } }
+/* garantia logo abaixo do botão (qualquer forma de pagamento) */
+.insc-garantia { display: flex; align-items: center; gap: 8px; margin-top: 10px; font-size: 14.5px; font-weight: 600; color: var(--wine); }
+.insc-garantia svg { flex: 0 0 20px; width: 20px; height: 20px; }
 .insc-dica { margin-top: 10px; font-size: 14.5px; color: var(--ink); }
 .insc-dica:empty { display: none; }
 /* honeypot fora da tela (não usar display:none, que alguns robôs pulam) */

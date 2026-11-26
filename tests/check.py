@@ -292,13 +292,19 @@ def check_page(rel):
             erros.append(f"{rel}: sem <script src=\"script.js\"> (envio do formulário)")
         for trecho in ('autocomplete="name"', 'type="email"', 'autocomplete="email"', 'inputmode="email"', 'type="tel"',
                        'data-mask="phone"', 'autocomplete="tel"', 'inputmode="tel"', 'placeholder="(51) 99999-9999"',
-                       'name="empresa"', 'tabindex="-1"', "Continuar para o pagamento", 'href="../../privacidade/"',
-                       "12x de R$ 71,67 sem juros", "R$ 860 à vista", "https://wa.me/5511910607651?text="):
-            if trecho not in html:
+                       'name="hp_x7"', 'tabindex="-1"', "Continuar para o pagamento", 'href="../../privacidade/"',
+                       "12x de R$ 71,67 sem juros", "R$ 860 à vista", "https://wa.me/5511910607651?text=",
+                       "de <s>R$ 860</s> por R$ 499,99 à vista ou 12x de R$ 41,67 sem juros",
+                       "7 dias de garantia: se não for para você, devolvemos 100% do valor."):
+            if trecho not in re.sub(r"</?b>", "", html):
                 erros.append(f"{rel}: sem {trecho}")
-        for proibido in ("pay.hotmart.com", "sticky-bar", "garantia", "depoimento", "<nav"):
+        # honeypot com nome neutro: "empresa" era preenchido pelo autopreenchimento do Chrome/Safari
+        if 'name="empresa"' in html or 'id="empresa"' in html:
+            erros.append(f"{rel}: honeypot deve ser hp_x7, não empresa (autopreenchimento do navegador)")
+        # a única menção à garantia é a linha logo abaixo do botão (sem selo nem bloco de garantia)
+        for proibido in ("pay.hotmart.com", "sticky-bar", "depoimento", "<nav"):
             if proibido in html.lower():
-                erros.append(f"{rel}: contém {proibido!r} (pré-página sem checkout fixo, barra, menu, garantia ou depoimentos)")
+                erros.append(f"{rel}: contém {proibido!r} (pré-página sem checkout fixo, barra, menu ou depoimentos)")
         script = (ROOT / "curso/inscricao/script.js").read_text(encoding="utf-8")
         for trecho in (f'CADASTRO_URL = "{LAMBDA_CADASTRO}"', f'CHECKOUT_URL = "{CHECKOUT}"', "keepalive: true",
                        '"begin_checkout"', '"cadastro_checkout"', "siteIdentify"):
@@ -339,7 +345,7 @@ def check_page(rel):
             erros.append("calculadora/script.js: não pode disparar begin_checkout (InitiateCheckout)")
         if script.count('"generate_lead"') != 1 or '"contato_calculadora"' not in script:
             erros.append("calculadora/script.js: o contato dispara contato_calculadora; o único generate_lead é o do cálculo")
-        for trecho in ('id="contato"', 'name="consentimento"', 'name="empresa"', 'data-mask="phone"', 'href="../quiz/"'):
+        for trecho in ('id="contato"', 'name="consentimento"', 'name="hp_x7"', 'data-mask="phone"', 'href="../quiz/"'):
             if trecho not in html:
                 erros.append(f"{rel}: sem {trecho} (contato opcional e link do quiz)")
     if rel == QUIZ:
@@ -355,7 +361,7 @@ def check_page(rel):
             erros.append(f"{rel}: não está no sitemap.xml")
         if "pay.hotmart.com" in html or 'id="oferta"' in html or "checkout" in html:
             erros.append(f"{rel}: sem checkout nem #oferta (nada de InitiateCheckout nem view_offer automático)")
-        for trecho in ('name="consentimento"', 'name="empresa"', 'tabindex="-1"', 'data-mask="phone"', 'href="../privacidade/"',
+        for trecho in ('name="consentimento"', 'name="hp_x7"', 'tabindex="-1"', 'data-mask="phone"', 'href="../privacidade/"',
                        "assets/img/og-quiz.jpg", "12x de R$ 71,67 sem juros ou R$ 860 à vista", "7 dias de garantia", 'aria-live="polite"'):
             if trecho not in html:
                 erros.append(f"{rel}: sem {trecho}")
@@ -398,7 +404,7 @@ def check_page(rel):
             erros.append(f"{rel}: sem data-material=\"{slug}\" no <main>")
         if not re.search(r'<script src="\.\./material\.js(\?v=\d+)?"></script>', html):
             erros.append(f"{rel}: sem <script src=\"../material.js\"> (bloqueio, cadastro, copiar e PDF)")
-        for trecho in ('localStorage.getItem("livia_mat_ok")', 'id="mat-trava"', 'id="contato"', 'name="consentimento"', 'name="empresa"',
+        for trecho in ('localStorage.getItem("livia_mat_ok")', 'id="mat-trava"', 'id="contato"', 'name="consentimento"', 'name="hp_x7"',
                        'tabindex="-1"', 'data-mask="phone"', 'href="../../privacidade/"', "Libere o material completo, grátis",
                        ">Baixar PDF</button>", "Cada pílula é um pedaço do", "12x de R$ 71,67 sem juros ou R$ 860 à vista",
                        f"../../curso/b/?utm_source=material&amp;utm_medium=site&amp;utm_campaign=ccs_material&amp;utm_content=mat_{slug}",
@@ -619,11 +625,31 @@ def check_black_friday():
         erros.append("black-friday/b/index.html: deve ter 6 depoimentos e 3 dores")
     c = (ROOT / "black-friday/c/index.html").read_text(encoding="utf-8")
     for trecho in ("Black Friday <em>Carreira com Sentido</em>", "de <s>R$ 860</s>", ">Garantir por R$ 499,99</a>",
-                   "ou 12x de R$ 41,67 sem juros", ">Garantir</a>", "Tenho uma dúvida", "Garantia de 7 dias."):
+                   "ou 12x de R$ 41,67 sem juros", ">Garantir</a>", "Tenho uma dúvida", "Garantia de 7 dias.",
+                   "O que você vai <em>aprender.</em>", "Até 30/11 às 23h59"):
         if trecho not in c:
             erros.append(f"black-friday/c/index.html: sem {trecho}")
-    if c.count("<li><svg") != 6 or c.count('<blockquote class="test">') != 6 or c.count("<details") != 4:
-        erros.append("black-friday/c/index.html: deve ter 6 itens com ícone, 6 depoimentos e 4 perguntas")
+    if c.count('<li class="mod">') != 5 or c.count('<blockquote class="test">') != 6 or c.count("<details") != 9:
+        erros.append("black-friday/c/index.html: deve ter 5 módulos, 6 depoimentos e 9 perguntas")
+    # a contagem da C fica só na faixa do topo (o botão precisa caber na primeira tela do celular)
+    if "bf-contagem" in c or "Quanto custa e posso parcelar?" in c:
+        erros.append("black-friday/c/index.html: sem a caixa grande de contagem e sem \"Quanto custa e posso parcelar?\"")
+    # os 5 módulos da C são os do curso/b/ (nome e descrição iguais)
+    curso_b = (ROOT / "curso/b/index.html").read_text(encoding="utf-8")
+    for mod in re.findall(r'<li class="mod">.*?</li>', c):
+        if mod not in curso_b:
+            erros.append(f"black-friday/c/index.html: módulo diferente do curso/b/ ({mod[:80]})")
+    # as 3 versões: WhatsApp logo abaixo do trust do card de preço e o FAQ ampliado (respostas do curso/b/)
+    for rel in (BLACK_FRIDAY, *BF_VERSOES):
+        html = (ROOT / rel).read_text(encoding="utf-8")
+        trust = "7 dias de garantia · acesso imediato · Pix, cartão ou boleto</p>\n"
+        if not re.search(re.escape(trust) + r'\s*<p class="bf-preco__wa"><a href="https://wa\.me/5511910607651\?text=Oi!%20Tenho%20uma%20d%C3%BAvida%20sobre%20a%20Black%20Friday[^"]*" target="_blank" rel="noopener">Ficou com dúvida\? Fale com a equipe no WhatsApp</a></p>', html):
+            erros.append(f"{rel}: sem \"Ficou com dúvida? Fale com a equipe no WhatsApp\" logo abaixo do trust do card de preço")
+        for pergunta in ("Sou recém-formada. Esse curso serve pra mim?", "O conteúdo respeita o Código de Ética e as orientações do CFP?",
+                         "Não tenho tempo. Quanto preciso me dedicar por semana?", "Funciona mesmo que eu não tenha muitos seguidores?",
+                         "Gerei o boleto no dia 30/11. Ainda vale o preço?"):
+            if f"<summary>{pergunta}</summary>" not in html:
+                erros.append(f"{rel}: FAQ sem \"{pergunta}\"")
 
     atalho = (ROOT / BLACK_ATALHO).read_text(encoding="utf-8")
     for trecho in ('location.replace("../black-friday/"+location.search', '<meta http-equiv="refresh" content="0; url=../black-friday/">',
